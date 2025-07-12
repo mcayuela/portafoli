@@ -1,5 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
 
+* {
+  user-select: none;
+  -webkit-user-select: none; /* Para navegadores WebKit como Chrome y Safari */
+  -moz-user-select: none;    /* Para Firefox */
+  -ms-user-select: none;     /* Para Internet Explorer/Edge */
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+
+footer {
+    text-align: center;
+    margin-left: 50px;
+}
+
 body {
     font-family: 'Fira Code', monospace;
     background-color: #1E1E1E;
@@ -34,6 +59,13 @@ header {
     margin-bottom: 90px;
 }
 
+.titol-recursos {
+    align-items: center;
+    text-align: center;
+    width: 100vw;
+    box-sizing: border-box;
+}
+
 .contingut-principal {
     top: 50%;
 }
@@ -54,7 +86,6 @@ header {
 
 .li-menu-superior::after {
     content: '';
-    position: absolute;
     bottom: 0;
     left: 0;
     width: 0;
@@ -320,4 +351,56 @@ input[type="submit"]:hover {
 .imatge-cv {
     height: 500px;
     width: auto;
+}
+
+.recursos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.recurso-card {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid #C778DD;
+  border-radius: 10px;
+  padding: 20px;
+  background-color: #313131;
+  box-shadow: 2px 2px 10px #C778DD;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.recurso-card:hover {
+  border: 5px solid #C778DD;
+  box-shadow: 2px 2px 20px #C778DD;
+  transform: scale(1.03);
+}
+
+.recurso-card img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+}
+
+.recurso-card h2 {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+.recurso-card p {
+  font-size: 0.9rem;
+  flex-grow: 1;
+}
+
+.recurso-card a {
+  margin-top: 0.5rem;
+  text-decoration: none;
+  color: #007BFF;
+  font-weight: bold;
 }
