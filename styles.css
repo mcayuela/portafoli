@@ -1,27 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
 
 * {
-   user-select: none;
-   -webkit-user-select: none;
-   -moz-user-select: none;
-   -ms-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 html, body {
-   height: 100%;
-   margin: 0;
-   padding: 0;
-   display: flex;
-   flex-direction: column;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
 }
 
-main {
-  flex: 1;
+.main-index {
+    flex: 1;
+    display: flex;
+    align-items: center; 
 }
 
 footer {
     text-align: center;
-    margin-left: 50px;
+    padding: 20px 0;
+    margin-top: auto;
+    width: 100%;
 }
 
 body {
@@ -31,26 +35,26 @@ body {
 }
 
 .titol {
-    font-size: 50px;
+    font-size: 25px;
     color: #ABB2BF;
-    margin: 20px 20px 10px 20px;
+    justify-content: flex-end;
 }
 
 header {
+    position: fixed;
+    width: 100%;
     display: flex;
-    justify-content: flex-end;
-    margin-top: 30px;
-    margin-right: 40px;
+    justify-content: space-between;
+    margin: 15px 25px;
+    align-items: center;
 }
 
 
 .contenidor-titol-logo {
     display: flex;
-    align-items: center;
 }
 
 .contingut-principal-contacte {
-    margin-top: 100px;
     margin-right: 100px;
 }
 
@@ -59,10 +63,8 @@ header {
 }
 
 .titol-recursos {
-    align-items: center;
     text-align: center;
-    width: 100vw;
-    margin-top: 50px;
+    margin-top: 150px;
     font-size: 20px;
 }
 
@@ -72,11 +74,18 @@ header {
     margin-right: 50px;
 }
 
+nav {
+    display: flex;
+    align-items: center;
+}
+
 .menu-superior {
     list-style: none;
     display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding: 0;
 }
-
 
 .li-menu-superior {
     flex: 1;
@@ -112,8 +121,8 @@ a {
 .contingut-principal {
     display: flex;
     flex-direction: column;
-    position: relative;
     margin-left: 100px;
+    margin-right: 100px;
     justify-content: flex-start;
 }
 
@@ -130,10 +139,6 @@ a {
     display: flex;
     justify-content: flex-start;
     margin-bottom: 50px;
-}
-
-.contenidor-inferior {
-    
 }
 
 .contenidor-superior-cv {
@@ -234,6 +239,7 @@ a {
     max-width: 400px;
     margin: auto;
     margin-bottom: 20px;
+    margin-top: 100px;
 }
 
 .titol-formulari2 {
@@ -278,66 +284,72 @@ input[type="submit"]:hover {
     color: #333;
 }
 
+.contenidor-titol-petit {
+    display: none;
+}
+
+@media screen and (max-width: 950px) {
+    .contenidor-titol-logo {
+        display: none;
+    }
+  
+    .contenidor-titol-petit {
+        display: flex;
+    }
+    .avatar {
+        width: 180px;
+    }
+
+
+
+}
+
 @media screen and (max-width: 755px) {
     header {
         flex-direction: column;
+        align-items: center;
+    }
+    .contenidor-titol-petit {
+        margin-left: 0;
     }
     .menu-superior {
         flex-direction: column;
-        align-items: left;
+        align-items: center;
         text-align: center;
-        margin: 10px;
-        padding: 10px;
     }
     .contingut-principal {
         align-items: left;
         text-align: left;
         padding: 20px;
-    }    
+    }
+    li {
+        margin-bottom: 10px;
+    }
     .li-menu-superior {
-        margin: 10px 0;
+        margin-bottom: 20px;
     }
     .contenidor-superior {
         margin-top: 30px;
     }
     .avatar {
-        width: 150px;
+        width: 200px;
         margin-right: 0;
         margin-bottom: 20px;
     }
-
     .fotos-tecnologies {
         display: flex;
         flex-direction: row;
         margin: 0;
         margin-top: 30px;
     }
-
     .contenidor-superior {
         display: flex;
         flex-direction: column;
     }
-
-    .link-projecte {
-        z-index: 1;
-    }
-
-    .projectes {
-        z-index: 2;
-    }
-
 }
 
-@media screen and (min-width: 756px) and (max-width: 900px) {
-    .avatar {
-        width: 150px;
-    }
-}
+@media screen and (max-width: 900px) {
 
-@media screen and (min-width: 901px) and (max-width: 1200px) {
-    .avatar {
-        width: 200px;
-    }
 }
 
 .li-link-cv {
@@ -411,27 +423,27 @@ input[type="submit"]:hover {
 .recurso-content h2,
 .recurso-content p,
 .recurso-content a {
-   margin-top: 0;
-   margin-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .recursos-card:hover {
-   border: 5px solid #C778DD;
-   box-shadow: 2px 2px 20px #C778DD;
-   transform: scale(1.03);
+    border: 5px solid #C778DD;
+    box-shadow: 2px 2px 20px #C778DD;
+    transform: scale(1.03);
 }
 
 .recursos-card img {
-   width: 60px;
-   height: 60px;
+    width: 60px;
+    height: 60px;
 }
 
 .recursos-card h2 {
-   font-size: 1rem;
-   margin: 0.5rem 0;
+    font-size: 1rem;
+    margin: 0.5rem 0;
 }
 
 .recursos-card p {
-   font-size: 0.9rem;
-   flex-grow: 1;
+    font-size: 0.9rem;
+    flex-grow: 1;
 }
