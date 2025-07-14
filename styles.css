@@ -42,11 +42,16 @@ body {
 
 header {
     position: fixed;
-    width: 100%;
     display: flex;
+    width: 100%;
     justify-content: space-between;
-    margin: 15px 25px;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding-bottom: 15px;
+    padding-top: 15px;
     align-items: center;
+    background-color: #1E1E1E;
+    box-sizing: border-box;
 }
 
 
@@ -77,6 +82,7 @@ header {
 nav {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
 }
 
 .menu-superior {
@@ -84,7 +90,6 @@ nav {
     display: flex;
     justify-content: flex-end;
     margin-top: 20px;
-    padding: 0;
 }
 
 .li-menu-superior {
@@ -292,16 +297,23 @@ input[type="submit"]:hover {
     .contenidor-titol-logo {
         display: none;
     }
-  
     .contenidor-titol-petit {
         display: flex;
+        flex-direction: row;
+        width: 100%;
+        align-items: top;
+        justify-content: start;
+    }
+    nav {
+        width: 100%;
+        justify-content: center;
+    }
+    .menu-superior {
+        width: 100%;
     }
     .avatar {
         width: 180px;
     }
-
-
-
 }
 
 @media screen and (max-width: 755px) {
@@ -311,6 +323,7 @@ input[type="submit"]:hover {
     }
     .contenidor-titol-petit {
         margin-left: 0;
+        text-align: left;
     }
     .menu-superior {
         flex-direction: column;
@@ -330,11 +343,18 @@ input[type="submit"]:hover {
     }
     .contenidor-superior {
         margin-top: 30px;
+        display: flex;
+        flex-direction: column;
     }
     .avatar {
         width: 200px;
         margin-right: 0;
         margin-bottom: 20px;
+    }
+    .contenidor-avatar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     .fotos-tecnologies {
         display: flex;
@@ -342,14 +362,37 @@ input[type="submit"]:hover {
         margin: 0;
         margin-top: 30px;
     }
-    .contenidor-superior {
-        display: flex;
-        flex-direction: column;
+    .contingut-principal {
+        margin-left: 20px;
+        margin-right: 20px;
+        padding: 0;
+    }
+    .contenidor-iconos {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+    .icono {
+        margin: 0 5px;
     }
 }
 
-@media screen and (max-width: 900px) {
-
+@media screen and (max-width: 505px) {
+    h1 {
+        font-size: 25px;
+    }
+    h2 {
+        font-size: 20px;
+    }
+    h3 {
+        font-size: 15px;
+    }
+    footer {
+        font-size: 15px;
+    }
+    .avatar {
+        width: 150px;
+    }
 }
 
 .li-link-cv {
