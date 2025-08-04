@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Fitxatge - TMI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<header>
+    <img id="logo1" class="logo" src="logo_TMI_big.jpg" alt="Logo esquerra">
+    <h1>Sistema de fitxatge</h1>
+    <img id="logo2" class="logo" src="logo_TMI_big.jpg" alt="Logo dreta">
+</header>
+<body>
+    <div id="contenidor-principal">
+        <div id="data_actual"></div>
+        <div id="setmana"></div>
+	<div id="clock"></div>
+    <div class="contenidor-missatges">
+        <div id="missatge_mobil">
+            <div class="missatge">Recordeu que les parades de les 10 i les 13h s'han de fitxar com a descans</div>
+        </div>
+        <div id="missatges">
+            <div class="missatge_stop">Descarrega't l'app de factorial al teu telèfon</div>
+        </div>
+    </div>
+    <div class="contenidor-botons">
+        <button class="button1">Calendari Laboral</button>        
+        <a class="button3" target="_self" href="https://tmi.factorialhr.es/employee_code_clock?token=eyJhbGciOiJIUzI1NiJ9.IjI1MTIxMSI.YUaEsSAlP-4ND76rn4kkePZwf9hv7dH-H8knSdTy-I4&setting_id=114770">Fitxar PIN</a>
+        <a class="button2" target="_self" href="https://tmi.factorialhr.es/entrance?token=eyJhbGciOiJIUzI1NiJ9.IjI1MTIxMSI.YUaEsSAlP-4ND76rn4kkePZwf9hv7dH-H8knSdTy-I4" >Fitxar Codi QR</a>
+    </div>
+</body>
+<script src="script.js"></script>
+</html>
+
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Fitxatge - TMI</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<header>
+    <img id="logo1" class="logo" src="logo_TMI_big.jpg" alt="Logo esquerra">
+    <h1>Sistema de fitxatge</h1>
+    <img id="logo2" class="logo" src="logo_TMI_big.jpg" alt="Logo dreta">
+</header>
+<body>
+    <div id="contenidor-principal">
+        <div id="data_actual"></div>
+        <div id="setmana"></div>
+	<div id="clock"></div>
+    <div class="contenidor-missatges">
+        <div id="missatge_mobil">
+            <div class="missatge">Recordeu que les parades de les 10 i les 13h s'han de fitxar com a descans</div>
+        </div>
+        <div id="missatges">
+            <div class="missatge_stop">Descarrega't l'app de factorial al teu telèfon</div>
+        </div>
+    </div>
+    <div class="contenidor-botons">
+        <button class="button1">Calendari Laboral</button>
+	    <a class="button3" target="_self" onclick="obrirFactorial()">Fitxar PIN</a>
+            <a class="button2" target="_self" href="https://tmi.factorialhr.es/entrance?token=eyJhbGciOiJIUzI1NiJ9.IjI1MTIxMSI.YUaEsSAlP-4ND76rn4kkePZwf9hv7dH-H8knSdTy-I4">Fitxar Codi QR</a>
+    </div>
+</body>
+<script src="script.js"></script>
+</html>

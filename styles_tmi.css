@@ -1,0 +1,27 @@
+h1 {
+    color: #2596be;
+    font-weight: 500;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 1.5rem;
+    margin-top: 30px;
+}
+
+h2 {
+    font-weight: 500;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 1.25rem;
+    margin-top: 30px;
+}
+
+a {
+    color: #2596be;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+body {
+    padding-left: 40px;
+}

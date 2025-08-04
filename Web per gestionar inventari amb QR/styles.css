@@ -1,0 +1,378 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #333;
+    background: #f6f8fa;
+    margin: 0;
+    padding-right: 0;
+    min-height: 100vh;           /* Assegura que el contenidor es pugui centrar verticalment */
+    display: flex;
+    flex-direction: column;
+}
+
+background {
+    background: #fff;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    padding-left: 40px;
+    padding-bottom: 20px;
+    margin-top: 30px;
+}
+
+.titol-btn:hover {
+    text-decoration: none;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+    h1 {
+        text-align: center;
+        padding-bottom: 20px; /* Més distància inferior */
+        font-size: 1.3em;    /* Més gran que el text normal */
+        padding-left: 0;
+    }
+    h2, h3 {
+        font-size: 1.1em;
+    }
+    .detall-text, .card, table, th, td, label, input, select, textarea, a, button, .btn {
+        font-size: 90%;
+    }
+    .detall-icona {
+        width: 100px;
+        height: 100px;
+        min-width: 0;
+        min-height: 0;
+    }
+    .detall-icona svg {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .detall-container {
+        padding-top: 20px;
+        padding-bottom: 20px;
+        margin: 0;
+    }
+    /* Marge a l'esquerra pels PCs del llistat */
+    #content > div {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+}
+.detall-container {
+    display: flex;
+    align-items: center;         /* Centrat verticalment */
+    justify-content: center;     /* Centrat horitzontalment */
+    gap: 50px; /* Distància entre el div d'informació i el d'icona */
+    margin: 40px auto;
+    max-width: 700px;
+    background: #fff;
+    border-radius: 12px;
+    padding-left: 50px;
+    padding-right: 50px;
+    box-shadow: 0 2px 12px rgba(37,150,190,0.10);
+    min-height: 80vh;            /* Centrat vertical respecte la pantalla */
+}
+.detall-text {
+    flex: 1;
+    min-width: 0;
+}
+.detall-icona {
+    width: clamp(150px, 22vw, 300px);
+    height: clamp(150px, 22vw, 300px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+@media (max-width: 900px) {
+    .detall-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+        max-width: 98vw;
+        min-height: unset;
+}
+    .detall-icona {
+        align-self: center;
+    }
+}
+
+header {
+    background: #2596be;
+    color: #fff;
+    padding: 24px 0 16px 0;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(37,150,190,0.08);
+    letter-spacing: 1px;
+}
+
+h1, h2, h3 {
+    color: #2596be;
+    margin-bottom: 12px;
+}
+
+main {
+    max-width: 900px;
+    margin: 32px auto;
+    padding: 0 16px;
+}
+
+section {
+    margin-bottom: 32px;
+}
+
+button, .btn {
+    background: linear-gradient(90deg, #2596be 80%, #217aa3 100%);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 7px 15px;
+    font-size: 1.05rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 10px 0;
+    box-shadow: 0 2px 8px rgba(37,150,190,0.10);
+}
+
+button:hover, .btn:hover {
+    background: #217aa3;
+    box-shadow: 0 4px 16px rgba(37,150,190,0.13);
+}
+
+input, select, textarea {
+    border: 1.5px solid #b3d6e6;
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-size: 1rem;
+    margin: 8px 0 18px 0;
+    width: 100%;
+    box-sizing: border-box;
+    background: #fafdff;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #2596be;
+    box-shadow: 0 0 0 2px #b3e0f7;
+    outline: none;
+}
+
+.card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(37,150,190,0.13);
+    padding: 32px 28px;
+    margin: 32px auto;
+    max-width: 700px;
+    transition: box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: 0 8px 32px rgba(37,150,190,0.18);
+}
+
+label {
+    font-weight: 500;
+    color: #217aa3;
+    margin-bottom: 4px;
+    display: block;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 32px 0;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(37,150,190,0.10);
+}
+
+th, td {
+    padding: 14px 18px;
+    text-align: left;
+}
+
+th {
+    background: #2596be;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-bottom: 3px solid #217aa3;
+}
+
+tr {
+    transition: background 0.15s;
+}
+
+tr:nth-child(even) {
+    background: #f0f7fa;
+}
+
+tr:hover {
+    background: #e3f3fa;
+}
+
+a {
+    color: #2596be;
+    text-decoration: none;
+    font-weight: 700;
+    transition: text-decoration 0.2s, color 0.2s;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #217aa3;
+}
+
+/* Per a missatges d'error o èxit */
+.alert {
+    padding: 14px 20px;
+    border-radius: 7px;
+    margin-bottom: 18px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: #e6f7f1;
+    color: #2596be;
+    border: 1px solid #b3e6d6;
+}
+
+.alert-error {
+    background: #ffeaea;
+    color: #c0392b;
+    border: 1px solid #f5b7b1;
+}
+
+/* Pàgina principal: contingut sota el títol */
+#content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Manté el contingut a sota el títol */
+    margin-top: 0;
+    flex: unset;
+}
+
+/* Quan es mostra el detall, centrat vertical i horitzontal */
+#content .detall-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 48px; /* Distància entre el div d'informació i el d'icona */
+    margin: 40px auto;
+    max-width: 700px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(37,150,190,0.10);
+    min-height: 80vh;
+    /* Centrat vertical respecte la pantalla */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 900px) {
+    #content .detall-container {
+        flex-direction: column;
+        max-width: 98vw;
+        min-height: unset;
+        position: static;
+        top: unset;
+        left: unset;
+        transform: unset;
+        margin: 24px auto;
+        gap: 24px; /* Menys distància en columnes a mòbil/tablet */
+    }
+}
+
+/* Afegir a styles.css */
+
+/* Contenidor de grid per als dispositius */
+.llistat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 18px 32px;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 32px auto;
+}
+
+@media (max-width: 1000px) {
+    .llistat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 600px) {
+    .llistat-grid {
+        grid-template-columns: 1fr;
+        gap: 18px 0;
+    }
+    a {
+        font-weight: 750;
+    }
+}
+.paginacio-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 48px; /* Augmenta la distància entre fletxes i text */
+    margin-top: 32px;
+}
+
+.paginacio-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+}
+
+#buscador-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 28px;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+}
+#buscador {
+    width: 100%;
+    padding: 8px 38px 8px 14px;
+    border: 1.5px solid #2596be;
+    border-radius: 7px;
+    font-size: 1em;
+    outline: none;
+    transition: border 0.2s;
+    background: #eaf4fa;
+    color: #217aa3;
+}
+#buscador::placeholder {
+    color: #217aa3;
+    opacity: 1;
+    font-size: 0.95em;
+}
+#buscador:focus {
+    border: 1.5px solid #217aa3;
+    background: #fff;
+}
+.buscador-icona {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-75%);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}

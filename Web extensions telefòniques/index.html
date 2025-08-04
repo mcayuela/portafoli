@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extensions telefòniques - TMI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Llista contactes</h1>
+        <h2>Numero de telèfon, per departament i/o per nom</h2>
+    </header>
+    <main>
+        <div class="cercador_ext">
+            <input type="text" id="buscador" class="buscador" placeholder="Busca per nom o num. curta" autocomplete="off"/>
+            <select class="filtreDepartament">
+                <option value="">Tots els departaments</option>
+            </select>
+
+        </div>
+        <div id="resultats"></div>
+    </main>
+    <footer>
+        <div id="paginacio-footer"></div>
+    </footer>
+</body>
+<script src="script.js"></script>
+</html>

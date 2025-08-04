@@ -1,0 +1,38 @@
+var date = new Date();
+var onejan = new Date(date.getFullYear(), 0, 1);
+var setmana = Math.ceil((((date.getTime() - onejan.getTime()) / 86400000) + onejan.getDay()) / 7);
+var dia_setmana = date.getDay();
+var dia = date.getDate();
+var mes = date.getMonth() +1;
+var any = date.getFullYear();
+let mesos_str = new Array ("Gener", "Febrer", "Març", "Abril", "Maig", "Juny", "Juliol", "Agost", "Setembre", "Octubre", "Novembre", "Desembre");
+    document.write("<span id=\"mesos\">" , mesos_str[mes-1] , "</span>");
+    document.getElementById("setmana").innerHTML = "Setmana: " + setmana + "<span></span>" + "   Data: " + dia + "/" + mes + "/" + any;
+// document.getElementById("data_actual").innerHTML = "Data: " + dia + "/" + mes + "/" + any;
+
+// Obtener la hora actual
+function getTime() {
+    return new Date();
+}
+
+// Mostrar la hora en el reloj
+function showTime() {
+// Obtener la hora actual
+var time = getTime();
+
+// Formatear la hora
+var formattedTime = time.toLocaleString("es-ES", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+});
+
+// Asignar la hora al elemento del reloj
+document.getElementById("clock").innerHTML = formattedTime;
+}
+
+// Actualizar el reloj cada segundo
+setInterval(showTime, 1000);
+
+
