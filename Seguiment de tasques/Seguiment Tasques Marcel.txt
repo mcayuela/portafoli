@@ -1,0 +1,159 @@
+Feina 10/07:
+
+- Llegir per damunt totes les documentacions i manuals
+- Arreglar documentacions (2 i part d'una altra)
+- Preparar l'instal·lació d'un usb amb win11 bootejable
+
+
+Feina 11/07:
+
+- Posada en marxa del portatil LG (canvi nom, domini, apps inici)
+- Documentar part de ninite + arreglar una mica la documentació ja feta (formatar millor)
+- Instalar raspberry py OS i connexió amb la pantalla
+
+
+Feina 15/7:
+
+- Instal·lació amb rufus d'un win11 bootejable en un usb
+- Fer instal·lació raspberry (configuració inicial + arxiu kiosk + crear servei)
+- Treure ssd del lenovo vell, provar que amb un altre el pc arranca
+- Formatejar l'ssd desde l'altre pc, tornar-lo a posar al lenovo i arrancar
+- Canviar RAM de 4 a 8. 
+
+Feina 16/7:
+
+- Verificar tots els discs SSD i etiquetar-los 
+- Canviar disc SSD lenovo vell ja que el vell formatejat FALLA
+- Canviar nom raspberry i carregar pagina amb tot
+- Desmuntar thinkpad, detectar problema i solucionar-lo (soroll al ventilador (solucionat netejant i posant cinta de doble cara entre el ventilador i el chasis))
+- Reinstalar windows al lenovo vell
+
+Feina 17/7:
+
+- Mirar mobil (instalació inicial + posar sim) (Credencials: Pin 7922, Puk 2834600)
+- Mirar dissipadors de raspberry a amazon (link al teams itpractice)
+- Fomatejar tots els ssd's
+- Acabar d'instalar windows 10 al lenovo vell + instal·lació de software bàsic
+- Començar base pàgina extensions telefòniques (sense bd i sense estils)
+- Començar base pàgina inventari pc's (amb una bd json facil i sense estils)
+
+Feina 21/7: (1r dia 4h i dilluns)
+
+- Mirar si podem importar contactes desde un arxiu al mobil Hammer Rock (Possible sol·lució: importar desde un fitxer VCF o directament desde la sim)
+- Acabar pàgina extensions (nomes falta estils, pero perque no se quins son els utilitzats a la intranet)
+- Formatejar tablet, instalar apps bàsiques i mirar que podiem fer amb el tema d'intentar utilitzar outlook en comptes de google (no es pot, almenys per la PlayStore)
+- Mirar el pc que donava pantallazo blau i formatejar el SSD que portava ja que el HDD no estava ni formatat. Després, he canviat el disc per un de reserva i he hagut de canviar el ordre de boot, i finalment he pogut instalar win10.
+- Muntar el soport de monitor (he deixat tot montat i una bosseta amb els cargols i eines necesaries pel que falta que es posar el soport com a tal, al monitor).
+- Fer actualització a windows 10 PRO + instal·lació de software bàsic al PC Mort (acer)
+- Identificar tots els pc's posant un post-it a cada un amb informació com: que li pasa, que s'ha de fer, si esta acabat o no i credencials en cas de que fagin falta.
+
+Feina 22/7:
+
+- Mirar l'importació de contactes al hammer, crec que ho podrem fer per sd, pero de moment no ho he probat ja que no en tinc cap. (m'hi he esbarallat un bon rato i no ho he aconseguit amb usb ni res)
+- Fer que la pagina de les extensions, llegeixi l'informació des d'un arxiu .json. (per tant deixar-la quasi acabada ja)
+- Pàgina inventari --> Acabar UX i UI de la pàgina de l'informació dels dispositius dins de l'inventari.
+- Pàgina inventari --> Acabar la pagina inicial, fent columnes, separant en diverses pagines, i fent-ho tot display responsive. (Nomes falta posar tota la base de dades REAL .json)
+- Pàgina inventari --> Fer arxiu .py que genera un qr per cada pc del json, i fent que quan s'escaneji porti a aquell pc amb aquell ID.
+- Crear repositori de github per tenir un control de versions de les pàgines creades, ja que aixi evitem perdre res i podem controlar tot (de moment l'he posat en privat al meu github personal)
+
+Feina 23/7:
+
+- Arreglar tema usuaris pc acer mort (ja no mort :) ) i crear usuari admin tmipal.
+- Anar a cambiar cable impresora + ordenar unamica el cablejat que hi havia amb brides
+- Instal·lar dissipador a la Raspberry
+- Fer una plantilla de documentació
+- Fer de nou la documentació de Configuració inicial pc’s + Inst. Software bàsic utilitzant la plantilla nova amb índex i tot
+- Ordenar totes les carpetes del pc meu i començar a escructurar-ho tot amb un bon ordre per evitar errors
+- Afegir l'apartat de Configuració de TeamViewer en la documentació de Configuració inicial
+- Començar a fer de nou la dodumentació de Instal·lació de sofware dedicat
+
+Feina 24/7:
+
+- Muntar soport pantalla
+- Acabar la configuració de l'arxiu python que crea QR's
+- Desplegar les pàgines al meu domini, per a poder fer proves de funcionament
+- Web contactes telefònics --> Acabarla fent un filtre per departament, a part de posar l'opcio de que desde el propi buscador també es puguin buscar departaments concrets
+- Web contactes telefònics --> Arreglar les media querty's per millorar la "versió de mobil"
+- Web inventari amb QR --> Arreglar les media querty's per millorar la "versió de mobil"
+- Arreglar errors de les dues webs, ara el seu funcionament es correcte i tinc codis d'error per bastantes coses, d'aquesta manera si alguna cosa falla, podem saber rapidament quin es el culpable.
+
+Feina 25/07:
+
+- Mirar estructura de web de captació de dades
+- Crear plantilla excels
+- Crear excel organitzat de credencials i codis de teamviewer
+- Afegir part kaspersky a la documentació de Configuració inicial pc’s + Inst. Software bàsic
+- Buscar cursos unamica fullstack (centrats en mongodb)
+- Preparar/Posar en marxa pc quadrat 
+- Instal·lació del pc quadrat al magatzem
+- Clonació androids
+
+Feina 28/7:
+
+- Comparativa cursos
+- Fer revisió + neteja switch vell (estava molt brut, pero no vec res danyat aixi que igual despres de la neteja funciona)
+- Cambiar algunes documentacions al nou format ja (bastanta estona)
+- Instal·lació de programa weidmüller + drivers impresora al pc de taller electronica
+- Instal·lació del mòdul de xarxa de l'impresora al pc
+- Arreglar problema actualitzacions del pc de taller electronica (tenia una actualització mitg corrupta suposo que de tancar mentre actualitzava o algo, i he refet la versió i l'he instal·lat correctament)
+
+Feina 29/7
+
+- Probar llapis per la tablet lenovo (no es gaire bo, funciona d'una manera molt concreta (inclinant el llapis lleugerament))
+- Fer que la weidmüller funcioni correctament un altre cop i en comptes de fer que funcioni 1 pc per usb i 1 pc per xarxa, he aconseguit que els dos vagin per xarxa. (A través de la ip 172.26.0.19/8181)
+- Tornar a iniciar usuari taller i treure tmipal i donarli admin a taller (que no se perque no en tenia)
+- Conectar pad numèric a la raspberry
+- Configurar un codi amb python que li diu a la raspberry quins caràcters ha d'escriure depenent del input que li posi
+- Configurar que en comptes de ser una app que puguis escriure, llegeixi el numpad com un teclat i aixi poder-lo utilitzar per el que sigui
+- Començar implementació de l'arxiu .py que fa tot això al servei kiosk que ja teniem perque s'inicialitzi amb ell i puguem utilitzarlo nomes obrir la raspberry
+
+Feina 30/7:
+
+- Fer que funcioni el servei de kiosk de la raspberry per al sistema de fixatge
+- Sistema de fitxatge --> Fer que no surti l'opció de traduir la pagina que fa que es posa unamica al mitg de la pantalla (establint un translate="no" i que el servei obri per defecte el chromium amb català)
+- Sistema de fitxatge --> Fer uns petits canvis per a la millor comprensió de l'usuari, afegir logos als links trencats, centrar divs, no per pixels sino per flexos i tal (fer codi una mica mes decent)
+- Sistema de fitxatge --> Separar scrips de js i css als seus respectius arxius i no dins de l'html
+- Sistema de fitxatge --> Crear un servei pel pad numèric, per a que el detecti com a teclat i ens permeti fitxar via codi
+- Instal·lació windows al lgram i començar a posar drivers (no en tenia cap)
+
+Feina 31/7:
+
+- Lg gram --> Posarlo al domini, i fer l'instal·lació de tots els drivers i programes bàsics (falta usuari, canviar el nom de pc i posar les icones al escriptori (pero primer hem d'activar win))
+- Aconseguir posar en marxa servei del pad numeric
+- Crear un .sh que ens obri la pagina de factorial amb zoom i tal (falta acabar ja que m'agradaria que no fos local i que fos per un mini servidor fet amb python)
+- Instal·lar PDM al Lgg gram i deixar-lo preparat per quan fagi falta
+- Dodumentació de sofware dedicat --> Acabar part de PDM afegint coses extra i millorant la comprensió.
+
+Feina 1/8:
+
+- Intentar acabar lo de la raspberry
+- Portar portatil a magatzem de dalt
+- Mirarme lo de orange
+- Cambiar disc entre els dos mini pc's
+- Montar doble soport de monitor
+- Treure disc minipc garantia
+- Documentar instal·lació weidmüller m-print PRO i afegir impresora
+
+Feina 4/8:
+
+- Descarregar Webex i configurar telefonia al meu pc, per probar que tal
+- Millorar pàgina extensions --> Separar columna numero, nom, etc del departament
+- Millorar pàgina extensions --> Millorar buscador (abans si aplicava un filtre, i despres buscava, no em buscava sobre el filtre aplicat, sino sobre tot, i ara ja funciona perfecte)
+- Millorar pàgina extensions --> Millorar considerablement els estils de la pàgina, ressaltat, separacions, botons paginació, etc
+- Ultimar pàgina extensions --> Arrelar alguns errors i fer display responsive completament
+- Ultimar pàgina extensions --> Crear un convertidor de .xslx a .json i que ens guardi nomes els camps que necesitem per la pagina
+- Ultimar pàgina extensions --> Implementar json real amb dades reals (menys el departament)
+- Treure pagines TMI del meu domini ja que ara ja hem començat a posar dades reals de gent i no han de ser públiques
+- Crear un subdomini privat no accessible directament desde el meu portafoli
+- 
+
+Feina pendent:
+
+- Revisar instalacions de cial: draftsiht i wpn forticlient
+- Millorar pàgina extensions --> Ressaltar mes nom i extensió, i que el departament sigui una altra columna
+- Pagina amb mapa per al roaming i tot (seria una subpagina de la de extensions)
+- Ordenar capses del costat del escriptori
+- Web de captació de dades amb mongodb
+- Cambiar TOTES les documentacions al nou format i estructurarles per carpetes (la primera ha de ser si o si la de software dedicat)
+- Web inventari amb QR --> Implementar amb el .json BO.
+- Mirar pc gran de baix per saber que li falla
