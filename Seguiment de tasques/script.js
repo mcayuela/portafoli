@@ -3,7 +3,7 @@ let paginaActual = 1;
 let dies = [];
 
 // Carrega automàticament el fitxer de tasques
-fetch('Seguiment tasques marcel.txt')
+fetch('Seguiment Tasques Marcel.txt')
     .then(res => res.text())
     .then(text => {
         dies = parsejarDies(text);
