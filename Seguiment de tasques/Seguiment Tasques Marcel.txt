@@ -145,7 +145,7 @@ Feina 4/8:
 - Ultimar pàgina extensions --> Implementar json real amb dades reals (menys el departament)
 - Treure pagines TMI del meu domini ja que ara ja hem començat a posar dades reals de gent i no han de ser públiques
 - Crear un subdomini privat no accessible directament desde el meu portafoli
-- 
+- Fer pagina per guardar arxiu Seguiment de tasques i que desde https://mcayuela.com/tmi puguis accedir a tota la feina separada per dies, i actualitzada automaticament.
 
 Feina pendent:
 
