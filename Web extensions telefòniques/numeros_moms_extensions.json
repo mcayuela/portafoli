@@ -1,247 +1,217 @@
 [
     {
         "nom": "Ricard Benajas",
-        "extensio": "3552",
+        "extensio": "-",
         "numero": "606602322",
         "departament": "IT"
     },
     {
         "nom": "Albert Font",
-        "extensio": "3554",
+        "extensio": "-",
         "numero": "606639015",
         "departament": "IT"
     },
     {
-        "nom": "TIPO_PUESTO_GRUPO_CERRADO Telefon OTS Programadors Guard",
-        "extensio": "2438",
-        "numero": "607092438",
-        "departament": "IT"
-    },
-    {
         "nom": "Mohammed Jadiri",
-        "extensio": "3425",
+        "extensio": "-",
         "numero": "608696295",
         "departament": "IT"
     },
     {
         "nom": "Gerard Martinez",
-        "extensio": "3201",
+        "extensio": "-",
         "numero": "609620025",
         "departament": "RH"
     },
     {
         "nom": "Alex Alvarez",
-        "extensio": "3105",
+        "extensio": "-",
         "numero": "610514647",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Jose M. Cahelles",
-        "extensio": "3350",
+        "extensio": "-",
         "numero": "610514834",
         "departament": "Proves"
     },
     {
-        "nom": "TIPO_PUESTO_GRUPO_CERRADO ROUTER MK",
-        "extensio": "2251",
-        "numero": "616322251",
-        "departament": "Documentacions"
-    },
-    {
         "nom": "Arana Monir",
-        "extensio": "3227",
+        "extensio": "-",
         "numero": "616670891",
         "departament": "Post Venta"
     },
     {
         "nom": "Tecnic PV Flotant",
-        "extensio": "3433",
+        "extensio": "-",
         "numero": "618490576",
         "departament": "Post Venta"
     },
     {
         "nom": "Marc Molet",
-        "extensio": "3225",
+        "extensio": "-",
         "numero": "618490689",
         "departament": "Post Venta"
     },
     {
         "nom": "Oscar Aguila",
-        "extensio": "3300",
+        "extensio": "-",
         "numero": "618628752",
         "departament": "Post Venta"
     },
     {
         "nom": "Jordi Charles",
-        "extensio": "3602",
+        "extensio": "-",
         "numero": "618628753",
         "departament": "Post Venta"
     },
     {
         "nom": "Iryna Siutsova",
-        "extensio": "3203",
+        "extensio": "-",
         "numero": "618628754",
         "departament": "Post Venta"
     },
     {
         "nom": "Joan Garcia",
-        "extensio": "3404",
+        "extensio": "-",
         "numero": "618832795",
         "departament": "Post Venta"
     },
     {
         "nom": "Elvira Syubaeva",
-        "extensio": "3403",
+        "extensio": "-",
         "numero": "619126908",
         "departament": "Post Venta"
     },
     {
         "nom": "Juanjo Gonzalez",
-        "extensio": "3500",
+        "extensio": "-",
         "numero": "619464822",
         "departament": "Post Venta"
     },
     {
         "nom": "ommar Ezzakkari",
-        "extensio": "3430",
+        "extensio": "-",
         "numero": "620678539",
         "departament": "Post Venta"
     },
     {
         "nom": "Taller4 Alfred Perez",
-        "extensio": "3621",
+        "extensio": "-",
         "numero": "626154325",
         "departament": "Post Venta"
     },
     {
         "nom": "Jaume Gabarrella",
-        "extensio": "3502",
+        "extensio": "-",
         "numero": "626998027",
         "departament": "Post Venta"
     },
     {
         "nom": "Joan Labraa",
-        "extensio": "3503",
+        "extensio": "-",
         "numero": "627360187",
         "departament": "Post Venta"
     },
     {
         "nom": "Nacho Sanchez",
-        "extensio": "3252",
+        "extensio": "-",
         "numero": "627360198",
         "departament": "Post Venta"
     },
     {
         "nom": "Yanita Plamenova",
-        "extensio": "3250",
+        "extensio": "-",
         "numero": "627360654",
         "departament": "Post Venta"
     },
     {
         "nom": "Xavier Arderiu",
-        "extensio": "3501",
+        "extensio": "-",
         "numero": "629384212",
         "departament": "Post Venta"
     },
     {
         "nom": "David Padulles",
-        "extensio": "3200",
+        "extensio": "-",
         "numero": "629388401",
         "departament": "Post Venta"
     },
     {
         "nom": "Aleix Berga",
-        "extensio": "3007",
+        "extensio": "-",
         "numero": "630007007",
         "departament": "Post Venta"
     },
     {
         "nom": "Coli Padulles",
-        "extensio": "3505",
+        "extensio": "-",
         "numero": "630832702",
         "departament": "Post Venta"
     },
     {
         "nom": "Jacky Fricker",
-        "extensio": "3206",
+        "extensio": "-",
         "numero": "634870810",
         "departament": "Post Venta"
     },
     {
         "nom": "Paula Cozma",
-        "extensio": "3402",
+        "extensio": "-",
         "numero": "636256577",
         "departament": "RH"
     },
     {
         "nom": "Christian Ugaz",
-        "extensio": "3432",
+        "extensio": "-",
         "numero": "636312255",
         "departament": "RH"
     },
     {
         "nom": "Oriol Miarnau",
-        "extensio": "3551",
+        "extensio": "-",
         "numero": "637273944",
         "departament": "RH"
     },
     {
         "nom": "Ruben Ferrer",
-        "extensio": "3205",
+        "extensio": "-",
         "numero": "637274927",
         "departament": "RH"
     },
     {
-        "nom": "TIPO_PUESTO_GRUPO_CERRADO PV GUARDIA DesvioCentraleta 6",
-        "extensio": "3648",
-        "numero": "639103648",
-        "departament": "RH"
-    },
-    {
-        "nom": "TIPO_PUESTO_GRUPO_CERRADO Finances",
-        "extensio": "3100",
-        "numero": "646510295",
-        "departament": "RH"
-    },
-    {
         "nom": "Kristiana Girne",
-        "extensio": "3251",
+        "extensio": "-",
         "numero": "647719435",
         "departament": "RH"
     },
     {
-        "nom": "TIPO_PUESTO_GRUPO_CERRADO 05447 REPSOL 2",
-        "extensio": "985",
-        "numero": "647860985",
-        "departament": "Proves"
-    },
-    {
         "nom": "Jordi Martin",
-        "extensio": "3202",
+        "extensio": "-",
         "numero": "649927764",
         "departament": "IT"
     },
     {
         "nom": "Sebastia Obis",
-        "extensio": "3301",
+        "extensio": "-",
         "numero": "661102053",
         "departament": "Proves"
     },
     {
         "nom": "Enric Llubes",
-        "extensio": "3553",
+        "extensio": "-",
         "numero": "662113939",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Jordi Vilella",
-        "extensio": "3504",
+        "extensio": "-",
         "numero": "662610331",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Zakkaria Berrichi",
-        "extensio": "3429",
+        "extensio": "-",
         "numero": "663173315",
         "departament": "Desenvolupament"
     },
@@ -253,110 +223,98 @@
     },
     {
         "nom": "Amanda Navarro",
-        "extensio": "3228",
+        "extensio": "-",
         "numero": "663873506",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Jaime Cabezuelo",
-        "extensio": "3401",
+        "extensio": "-",
         "numero": "669905367",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Hector Sallen",
-        "extensio": "3207",
+        "extensio": "-",
         "numero": "671132264",
         "departament": "Desenvolupament"
     },
     {
-        "nom": "TIPO_PUESTO_GRUPO_CERRADO ROUTER HS",
-        "extensio": "2274",
-        "numero": "671132274",
-        "departament": "Desenvolupament"
-    },
-    {
         "nom": "Christian Fernandez",
-        "extensio": "3204",
+        "extensio": "-",
         "numero": "671132372",
         "departament": "IT"
     },
     {
         "nom": "Ricard Galiana",
-        "extensio": "3555",
+        "extensio": "-",
         "numero": "671904733",
         "departament": "Proves"
     },
     {
         "nom": "Marc Sales",
-        "extensio": "3556",
+        "extensio": "-",
         "numero": "672299581",
         "departament": "Proves"
     },
     {
         "nom": "ric Oro",
-        "extensio": "3226",
+        "extensio": "-",
         "numero": "673050164",
         "departament": "Proves"
     },
     {
         "nom": "Jordi Llovera",
-        "extensio": "3605",
+        "extensio": "-",
         "numero": "673072714",
         "departament": "Proves"
     },
     {
         "nom": "Carlos Tortosa",
-        "extensio": "3405",
+        "extensio": "-",
         "numero": "673843597",
         "departament": "IT"
     },
     {
         "nom": "Eusebio Rojo",
-        "extensio": "3431",
+        "extensio": "-",
         "numero": "673843600",
         "departament": "IT"
     },
     {
         "nom": "MiquelAngel Diaz",
-        "extensio": "3427",
+        "extensio": "-",
         "numero": "673843609",
         "departament": "IT"
     },
     {
         "nom": "Taller3 Albert Roure",
-        "extensio": "3620",
+        "extensio": "-",
         "numero": "673904703",
         "departament": "IT"
     },
     {
         "nom": "Raquel Garces",
-        "extensio": "3000",
+        "extensio": "-",
         "numero": "674009571",
         "departament": "IT"
     },
     {
         "nom": "Marcel Torra",
-        "extensio": "3426",
+        "extensio": "-",
         "numero": "674445100",
         "departament": "IT"
     },
     {
         "nom": "Angel Pauls",
-        "extensio": "3603",
+        "extensio": "-",
         "numero": "679530032",
         "departament": "IT"
     },
     {
         "nom": "Albert Leon",
-        "extensio": "3601",
+        "extensio": "-",
         "numero": "687239920",
-        "departament": "IT"
-    },
-    {
-        "nom": "TIPO_PUESTO_GRUPO_CERRADO 05447 REPSOL 1",
-        "extensio": "9921",
-        "numero": "687239921",
         "departament": "IT"
     },
     {
@@ -366,76 +324,52 @@
         "departament": "IT"
     },
     {
-        "nom": "TIPO_PUESTO_GRUPO_CERRADO 692845902",
-        "extensio": "5902",
-        "numero": "692845902",
-        "departament": "IT"
-    },
-    {
         "nom": "Ramon Martin",
-        "extensio": "3352",
+        "extensio": "-",
         "numero": "692845920",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Eric Ros",
-        "extensio": "3353",
+        "extensio": "-",
         "numero": "692845922",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Mamadu Youssef",
-        "extensio": "3354",
+        "extensio": "-",
         "numero": "692845941",
         "departament": "Desenvolupament"
     },
     {
         "nom": "TallerLogistic Jaisson",
-        "extensio": "3610",
+        "extensio": "-",
         "numero": "692845983",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Taller5 JoseLuis Poyatos",
-        "extensio": "3650",
+        "extensio": "-",
         "numero": "692845987",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Taller6 Kiko Lopez",
-        "extensio": "3622",
+        "extensio": "-",
         "numero": "692846014",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Taller1 Alex Estrella",
-        "extensio": "3651",
+        "extensio": "-",
         "numero": "692846068",
         "departament": "Desenvolupament"
     },
     {
         "nom": "Santiago Tobajas",
-        "extensio": "3428",
+        "extensio": "-",
         "numero": "697413883",
         "departament": "Desenvolupament"
-    },
-    {
-        "nom": "DDI 873495006",
-        "extensio": "nan",
-        "numero": "nan",
-        "departament": "Desenvolupament"
-    },
-    {
-        "nom": "DDI 873495007",
-        "extensio": "nan",
-        "numero": "nan",
-        "departament": "Post Venta"
-    },
-    {
-        "nom": "DDI 873495008",
-        "extensio": "nan",
-        "numero": "nan",
-        "departament": "Post Venta"
     },
     {
         "nom": "Anita Ejemete",
@@ -630,7 +564,7 @@
         "departament": "Proves"
     },
     {
-        "nom": "Anael Riera Anael Riera",
+        "nom": "Anael Riera",
         "extensio": "1572",
         "numero": "nan",
         "departament": "Documentacions"
@@ -652,29 +586,5 @@
         "extensio": "1368",
         "numero": "nan",
         "departament": "RH"
-    },
-    {
-        "nom": "DDI 973981375",
-        "extensio": "nan",
-        "numero": "nan",
-        "departament": "Desenvolupament"
-    },
-    {
-        "nom": "DDI 973981376",
-        "extensio": "nan",
-        "numero": "nan",
-        "departament": "Proves"
-    },
-    {
-        "nom": "DDI 973981377",
-        "extensio": "nan",
-        "numero": "nan",
-        "departament": "Documentacions"
-    },
-    {
-        "nom": "DDI 973981378",
-        "extensio": "nan",
-        "numero": "nan",
-        "departament": "Post Venta"
     }
 ]

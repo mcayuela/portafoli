@@ -17,25 +17,79 @@ function mostrarResultats(filtrats, pagina = 1) {
     const inici = (pagina - 1) * RESULTATS_PER_PAGINA;
     const fi = inici + RESULTATS_PER_PAGINA;
     const itemsPagina = filtrats.slice(inici, fi);
-    const ul = document.createElement('ul');
+    const taula = document.createElement('table');
+    taula.classList.add('taula-resultats');
 
-    itemsPagina.forEach(item => {
-        const li = document.createElement('li');
-        li.classList.add('resultat-item');
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+        <tr>
+            <th>Nom</th>
+            <th>Telèfon</th>
+            <th>Extensió</th>
+            <th class="departament-columna">Departament</th>
+        </tr>
+    `;
+    taula.appendChild(thead);
 
-        const divPrincipal = document.createElement('div');
-        divPrincipal.innerHTML = `<strong>Ext. Curta:</strong> ${item.extensio} &nbsp;&nbsp;-&nbsp;&nbsp; <strong>Numero TLF:</strong>  ${item.numero} &nbsp;&nbsp;-&nbsp;&nbsp; <strong>Nom:</strong> ${item.nom}`;
+    const tbody = document.createElement('tbody');
 
-        const divDepartament = document.createElement('div');
-        divDepartament.textContent = item.departament || 'No especificat';
-        divDepartament.classList.add('departament-columna');
+const contenidor = document.createElement('div');
+contenidor.classList.add('llista-resultats');
 
-        li.appendChild(divPrincipal);
-        li.appendChild(divDepartament);
-        ul.appendChild(li);
-    });
+const capcalera = document.createElement('div');
+capcalera.classList.add('resultat-item', 'capcalera');
 
-    resultats.appendChild(ul);
+const titolNom = document.createElement('div');
+titolNom.innerHTML = `<strong>Nom</strong>`;
+
+const titolExt = document.createElement('div');
+titolExt.innerHTML = `<strong>Ext. curta</strong>`;
+
+const titolTlf = document.createElement('div');
+titolTlf.innerHTML = `<strong>Telèfon</strong>`;
+
+const titolDep = document.createElement('div');
+titolDep.innerHTML = `<strong>Departament</strong>`;
+titolDep.classList.add('col-departament');
+
+capcalera.appendChild(titolNom);
+capcalera.appendChild(titolExt);
+capcalera.appendChild(titolTlf);
+capcalera.appendChild(titolDep);
+
+contenidor.appendChild(capcalera);
+
+itemsPagina.forEach(item => {
+    const fila = document.createElement('div');
+    fila.classList.add('resultat-item');
+
+    const colNom = document.createElement('div');
+    colNom.innerHTML = item.nom;
+    colNom.classList.add('col-nom');
+
+    const colExtensio = document.createElement('div');
+    colExtensio.innerHTML = item.extensio;
+    colExtensio.classList.add('col-extensio');
+
+    const colTelefon = document.createElement('div');
+    colTelefon.innerHTML = item.numero;
+    colTelefon.classList.add('col-telefon');
+
+    const colDepartament = document.createElement('div');
+    colDepartament.textContent = item.departament || 'No especificat';
+    colDepartament.classList.add('col-departament');
+
+    fila.appendChild(colNom);
+    fila.appendChild(colExtensio);
+    fila.appendChild(colTelefon);
+    fila.appendChild(colDepartament);
+
+    contenidor.appendChild(fila);
+});
+
+resultats.appendChild(contenidor);
+
+
 
     // Paginació
     const totalPagines = Math.ceil(filtrats.length / RESULTATS_PER_PAGINA);

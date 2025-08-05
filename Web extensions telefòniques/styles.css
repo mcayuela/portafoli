@@ -1,3 +1,27 @@
+body {
+    margin: 0;
+    margin-right: 50px;
+    padding: 0;
+    background-color: #f0f0f0;
+    font-family: 'Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif;
+}
+
+h1 {
+    font-weight: 500;
+    font-size: 1.5rem;
+    margin-top: 30px;
+    font-family: 'Source Sans Pro',sans-serif;
+}
+
+h2 {
+    font-weight: 500;
+    font-size: 1rem;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    font-family: 'Source Sans Pro',sans-serif;
+}
+
+
 /* Paginació */
 .paginacio {
     display: flex;
@@ -23,9 +47,10 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .paginacio-btn:hover {
-    background: #2596be;
+    background: #222d32;
     opacity: 0.7;
-    border-color: #7a7979;
+    border-color: #eee;
+    color: #eee;
 }
 .paginacio-btn:disabled {
     background: #f5f5f5;
@@ -58,7 +83,7 @@
 }
 .buscador:focus {
     outline: none;
-    border-color: #2596be;
+    border-color: #222d32;
 }
 body {
     font-family: Arial, sans-serif;
@@ -113,23 +138,7 @@ main {
 }
 
 header {
-    margin-left: 50px
-}
-
-h1 {
-    color: #2596be;
-    font-weight: 500;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 1.5rem;
-    margin-top: 30px;
-}
-
-h2 {
-    font-weight: 500;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 1rem;
-    margin-top: 15px;
-    margin-bottom: 20px;
+    margin-left: 50px;
 }
 
 .filtreDepartament {
@@ -145,17 +154,91 @@ h2 {
 }
 
 .filtreDepartament:hover {
-    border: 2px solid #2596be;
+    border: 2px solid #222d32;
 }
 
 /* Estil per a les opcions del select */
 select option:checked {
-    background-color: #2596be;
+    background-color: #222d32;
     color: white;
 }
 select option:hover {
-    background-color: #2596be;
+    background-color: #222d32;
 }
+
+.llista-resultats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 1rem;
+}
+
+.resultat-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    border-bottom: 1px solid #ccc;
+    padding: 8px 0;
+    font-size: 14px;
+    align-items: center;
+}
+
+.resultat-item > div {
+    padding: 0 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.resultat-item strong {
+    font-weight: bold;
+}
+
+.capcalera {
+    background-color: #222d32;
+    color: white;
+    font-weight: bold;
+    border-bottom: 2px solid #444;
+}
+
+.boto-retorn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #222d32;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.boto-retorn:hover {
+    background-color: #444;
+}
+
+.boto-retorn-container {
+    position: absolute;
+    top: 30px;
+    right: 50px;
+}
+
+.boto-retorn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #222d32;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.boto-retorn:hover {
+    background-color: #444;
+}
+
 
 @media (max-width: 750px) {
     .filtreDepartament {
