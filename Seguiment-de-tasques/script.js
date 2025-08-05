@@ -19,6 +19,7 @@ let currentDate = new Date();
 let selectedDate = null;
 let selectedTaskIndex = null;
 let taskBeingAssigned = null;
+let showAllPendingTasks = false;
 
 document.getElementById('prev-month').onclick = () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
@@ -72,7 +73,6 @@ function renderCalendar() {
     const firstDay = new Date(year, month, 1);
     const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const lastDay = new Date(year, month, daysInMonth);
     const nomMes = firstDay.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' });
     monthYear.textContent = nomMes.charAt(0).toUpperCase() + nomMes.slice(1);
 
@@ -105,6 +105,8 @@ function renderCalendar() {
                     assignarTascaADia(taskBeingAssigned, iso);
                     taskBeingAssigned = null;
                     alert("Tasca assignada correctament!");
+                    renderCalendar();
+                    mostrarTasquesDelDia(date);
                 } else {
                     mostrarTasquesDelDia(date);
                 }
@@ -115,7 +117,7 @@ function renderCalendar() {
                 const taskData = JSON.parse(e.dataTransfer.getData("text/plain"));
                 assignarTascaADia(taskData, iso);
                 renderCalendar();
-                if (selectedDate) renderitzarTasques();
+                if (selectedDate === iso) renderitzarTasques();
             };
         }
 
@@ -153,8 +155,10 @@ function mostrarTasquesPendentsSenseDia() {
 function renderitzarTasques() {
     const tasques = getTasques(selectedDate);
     taskList.innerHTML = '';
+    
+    let tasquesMostrades = showAllPendingTasks ? tasques : tasques.slice(0, 5);
 
-    tasques.forEach((tasca, index) => {
+    tasquesMostrades.forEach((tasca, index) => {
         const li = document.createElement('li');
         li.draggable = true;
         li.ondragstart = (e) => {
@@ -219,6 +223,16 @@ function renderitzarTasques() {
         li.appendChild(actions);
         taskList.appendChild(li);
     });
+
+    if (tasques.length > 5 && !showAllPendingTasks && selectedDate === 'pendent') {
+        const veureMesBtn = document.createElement('button');
+        veureMesBtn.textContent = 'Mostrar més';
+        veureMesBtn.onclick = () => {
+            showAllPendingTasks = true;
+            renderitzarTasques();
+        };
+        taskList.appendChild(veureMesBtn);
+    }
 }
 
 addTaskButton.onclick = () => {
