@@ -147,14 +147,19 @@ Feina 4/8:
 - Crear un subdomini privat no accessible directament desde el meu portafoli
 - Fer pagina per guardar arxiu Seguiment de tasques i que desde https://mcayuela.com/Seguiment-de-tasques/ puguis accedir a tota la feina separada per dies, i actualitzada automaticament.
 
-Feina pendent:
+Feina 5/8:
 
-- Instalar telefonia a Jordi i Marc
+- Intentar arreglar lo de la raspberry
 - Pàgina d'extensions --> Fer que no surtin els que el nom comneça per TIPO_PUESTO o per DDI
 - Pàgina d'extensions --> Separar els camps per columnes
-- 
+- Configurar usuari postventa al pc chino + desinstalar DraftSight i instalar Trueview
+- Instalar telefonia als primers
+- Pàgina d'extensions --> Millorar estils i adaptar als de l'intranet + fer botó per tornar a l'intranet
 
+Feina pendent:
 
+- Buscar impresores per a codis qr
+- Fer codi en py que converteixi arxius excel a json, i posteriorment, veure com podriem treballar amb aquestos json i mongodb per emmagatzemar-los i poder-hi accedir, tenint un log i tot sobre els canvis de cada camp
 - Com configurar postman per a TLS
 - Pagina amb mapa per al roaming i tot (seria una subpagina de la de extensions)
 - Ordenar capses del costat del escriptori
