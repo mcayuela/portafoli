@@ -149,8 +149,13 @@ Feina 4/8:
 
 Feina pendent:
 
-- Revisar instalacions de cial: draftsiht i wpn forticlient
-- Millorar pàgina extensions --> Ressaltar mes nom i extensió, i que el departament sigui una altra columna
+- Instalar telefonia a Jordi i Marc
+- Pàgina d'extensions --> Fer que no surtin els que el nom comneça per TIPO_PUESTO o per DDI
+- Pàgina d'extensions --> Separar els camps per columnes
+- 
+
+
+- Com configurar postman per a TLS
 - Pagina amb mapa per al roaming i tot (seria una subpagina de la de extensions)
 - Ordenar capses del costat del escriptori
 - Web de captació de dades amb mongodb
