@@ -2,13 +2,44 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
-    <title>Llistat de Feines</title>
+    <title>Calendari de tasques - Marcel</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Llistat de Feines</h1>
-    <div id="resultats"></div>
-    <div id="paginacio-footer"></div>
-</body>
+    <h1>Calendari de tasques - Marcel</h1>
+
+    <div id="calendar-container">
+        <!-- Requadre 1: Calendari -->
+        <div class="calendar-box">
+            <div id="calendar-controls">
+                <button id="prev-month">Anterior</button>
+                <span id="month-year"></span>
+                <button id="next-month">Següent</button>
+            </div>
+            <div id="calendar"></div>
+        </div>
+
+        <!-- Requadre 2: Tasques -->
+        <div id="task-panel" class="task-box">
+            <span id="close-day" class="close-btn hidden">✕</span>
+            <h2 id="day-title">Tasques pendents (sense dia)</h2>
+            <ul id="task-list"></ul>
+            <div class="task-input-container">
+                <input type="text" id="new-task" placeholder="Afegeix una tasca...">
+                <button id="add-task">Afegir</button>
+            </div>
+        </div>
+
+        <!-- Requadre 3: Detalls de la tasca -->
+        <div id="task-details" class="task-box hidden">
+            <span id="close-details" class="close-btn">✕</span>
+            <h2 id="task-title">Detalls de la tasca</h2>
+            <p id="task-description"></p>
+            <button id="edit-task">Editar</button>
+            <button id="delete-task">Eliminar</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+</body>
 </html>
