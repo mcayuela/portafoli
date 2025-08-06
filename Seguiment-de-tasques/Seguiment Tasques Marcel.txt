@@ -156,6 +156,13 @@ Feina 5/8:
 - Instalar telefonia als primers
 - Pàgina d'extensions --> Millorar estils i adaptar als de l'intranet + fer botó per tornar a l'intranet
 
+Feina 6/8:
+
+- 
+- 
+- 
+- 
+
 Feina pendent:
 
 - Buscar impresores per a codis qr

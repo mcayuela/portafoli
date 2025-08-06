@@ -118,9 +118,11 @@ h1 {
 }
 
 .calendar-day.weekend {
-    background-color: #eee;
-    color: #888;
-    cursor: not-allowed;
+    background-color: #e0e0e0 !important;
+    color: #888 !important;
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.6;
 }
 
 .dia-num {
@@ -232,12 +234,14 @@ button#add-task:hover {
 }
 
 .calendar-day.selected {
+    background-color: #d0e8f3;
     border: 2px solid #2596be;
     box-shadow: 0 0 5px rgba(37, 150, 190, 0.4);
 }
 
 .calendar-day.today {
-    border: 2px dashed #aaa;
+    font-weight: bold;
+    color: #2596be;
 }
 
 .calendar-day.empty {
@@ -251,3 +255,44 @@ button#add-task:hover {
     border: 2px solid #2596be;
     box-shadow: 0 0 5px rgba(37, 150, 190, 0.4);
 }
+
+.disabled-past {
+    background-color: #e0e0e0 !important;
+    color: #888 !important;
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.6;
+}
+
+.past-day {
+    background-color: rgba(0, 255, 0, 0.4);
+    border-color: rgba(0, 255, 0, 0.6);
+}
+
+@media (max-width: 768px) {
+    .tasques span::after {
+        content: '';
+    }
+
+    .tasques {
+        font-size: 0.9em;
+        line-height: 1.2;
+    }
+
+    .tasques span {
+        display: block;
+    }
+}
+
+@media (min-width: 769px) {
+    .tasques span[data-type="pendents"]::after {
+        content: " pendents";
+        color: orange;
+    }
+
+    .tasques span[data-type="acabades"]::after {
+        content: " acabades";
+        color: green;
+    }
+}
+
