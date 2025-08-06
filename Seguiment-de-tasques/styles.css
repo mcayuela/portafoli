@@ -1,31 +1,40 @@
-body {
+/* GENERAL */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100%;
+    overflow-x: hidden;
     font-family: Arial, sans-serif;
-    padding: 20px 40px;
-    margin: auto;
     background-color: #f4f7f9;
     color: #333;
     box-sizing: border-box;
-    transform: scale(0.8);
+    transform: scale(0.9);
     transform-origin: top left;
 }
 
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #2596be;
-}
-
+/* CONTENIDOR PRINCIPAL */
 #calendar-container {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 40px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #2596be;
 }
 
 .calendar-box, .task-box {
     box-sizing: border-box;
 }
 
+/* QUADRE CALENDARI */
 .calendar-box {
     flex: 2;
     min-width: 600px;
@@ -35,6 +44,7 @@ h1 {
     padding: 15px;
 }
 
+/* QUADRE TASQUES */
 .task-box {
     flex: 1;
     min-width: 320px;
@@ -46,7 +56,7 @@ h1 {
     height: fit-content;
 }
 
-/* Responsive grid-style */
+/* RESPONSIVE */
 @media (max-width: 900px) {
     #calendar-container {
         flex-direction: column;
@@ -58,6 +68,7 @@ h1 {
     }
 }
 
+/* CONTROLS */
 #calendar-controls {
     display: flex;
     justify-content: space-between;
@@ -87,6 +98,7 @@ h1 {
     color: #2596be;
 }
 
+/* CALENDARI GRID */
 #calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -96,7 +108,6 @@ h1 {
     background-color: #e9f6fb;
     min-height: 400px;
 }
-
 
 .calendar-day {
     border: 2px solid #2596be;
@@ -117,14 +128,28 @@ h1 {
 .calendar-day.today {
     border: 2px solid #1c7ea5;
     background-color: #e0f3fa;
+    font-weight: bold;
+    color: #2596be;
 }
 
-.calendar-day.weekend {
+.calendar-day.weekend,
+.disabled-past {
     background-color: #e0e0e0 !important;
     color: #888 !important;
     pointer-events: none;
     cursor: default;
     opacity: 0.6;
+}
+
+.past-day {
+    background-color: rgba(0, 255, 0, 0.4);
+    border-color: rgba(0, 255, 0, 0.6);
+}
+
+.calendar-day.selected {
+    background-color: #d0e8f3;
+    border: 2px solid #2596be;
+    box-shadow: 0 0 5px rgba(37, 150, 190, 0.4);
 }
 
 .dia-num {
@@ -136,7 +161,14 @@ h1 {
     color: #2596be;
 }
 
-/* Tasques */
+.calendar-day.empty {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    cursor: default;
+}
+
+/* TASQUES */
 #task-list {
     list-style: none;
     padding: 0;
@@ -190,6 +222,7 @@ button.icon-button:hover {
     color: #2596be;
 }
 
+/* INPUT TASQUES */
 .task-input-container {
     display: flex;
     margin-top: 10px;
@@ -218,6 +251,7 @@ button#add-task:hover {
     background-color: #1e7fa1;
 }
 
+/* BOTONS TANCAR */
 .close-btn {
     position: absolute;
     top: 10px;
@@ -235,42 +269,7 @@ button#add-task:hover {
     display: none;
 }
 
-.calendar-day.selected {
-    background-color: #d0e8f3;
-    border: 2px solid #2596be;
-    box-shadow: 0 0 5px rgba(37, 150, 190, 0.4);
-}
-
-.calendar-day.today {
-    font-weight: bold;
-    color: #2596be;
-}
-
-.calendar-day.empty {
-    border: none;
-    background: transparent;
-    box-shadow: none;
-    cursor: default;
-}
-
-.calendar-day.selected {
-    border: 2px solid #2596be;
-    box-shadow: 0 0 5px rgba(37, 150, 190, 0.4);
-}
-
-.disabled-past {
-    background-color: #e0e0e0 !important;
-    color: #888 !important;
-    pointer-events: none;
-    cursor: default;
-    opacity: 0.6;
-}
-
-.past-day {
-    background-color: rgba(0, 255, 0, 0.4);
-    border-color: rgba(0, 255, 0, 0.6);
-}
-
+/* PAPERERA */
 #deleted-tasks-wrapper {
     position: fixed;
     bottom: 20px;
@@ -320,31 +319,21 @@ button#add-task:hover {
     font-size: 1rem;
 }
 
-
-@media (max-width: 768px) {
-    .tasques span::after {
-        content: '';
-    }
-
-    .tasques {
-        font-size: 0.9em;
-        line-height: 1.2;
-    }
-
-    .tasques span {
-        display: block;
-    }
+/* TEXT ACABADES / PENDENTS */
+.tasques span[data-type="pendents"] {
+    color: orange;
 }
 
-@media (min-width: 769px) {
-    .tasques span[data-type="pendents"]::after {
-        content: " pendents";
-        color: orange;
-    }
-
-    .tasques span[data-type="acabades"]::after {
-        content: " acabades";
-        color: green;
-    }
+.tasques span[data-type="acabades"] {
+    color: green;
 }
 
+.tasques span {
+    display: inline-block;
+    font-weight: bold;
+}
+
+.tasques {
+    font-size: 0.9em;
+    margin-top: 5px;
+}

@@ -98,7 +98,6 @@ function renderitzarTasquesAmbLlista(tasques) {
             assignBtn.title = "Assignar a un altre dia";
             assignBtn.onclick = () => {
                 taskBeingAssigned = { text: tasca.text, done: tasca.done, from: selectedDate, index };
-                alert("Selecciona un dia al calendari per assignar la tasca.");
             };
 
             const deleteBtn = document.createElement('button');
