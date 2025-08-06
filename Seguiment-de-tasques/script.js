@@ -3,15 +3,15 @@ const firebaseConfig = {
     apiKey: "AIzaSyCam7ES3CavgOsdEwv2Dznwesds72FyJnY",
     authDomain: "calendarimarcel.firebaseapp.com",
     projectId: "calendarimarcel",
-    storageBucket: "calendarimarcel.firebasestorage.app",
+    storageBucket: "calendarimarcel.appspot.com",
     messagingSenderId: "63306452640",
     appId: "1:63306452640:web:4aded0ffccbfc8d09c83c5",
     measurementId: "G-4SFP070VFS"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Elements del DOM
 const calendar = document.getElementById('calendar');
 const monthYear = document.getElementById('month-year');
 const taskPanel = document.getElementById('task-panel');
@@ -26,17 +26,16 @@ const taskDescription = document.getElementById('task-description');
 const closeDetails = document.getElementById('close-details');
 const editTaskBtn = document.getElementById('edit-task');
 const deleteTaskBtn = document.getElementById('delete-task');
+const trashListDiv = document.getElementById('deleted-tasks-list');
+const showTrashBtn = document.getElementById('show-trash');
+const emptyTrashBtn = document.getElementById('empty-trash');
 
 let currentDate = new Date();
 let selectedDate = null;
 let selectedTaskIndex = null;
 let taskBeingAssigned = null;
 let unsubscribeTasques = null;
-
-async function guardarTasques(dateStr, tasques) {
-    if (!dateStr) return;
-    await db.collection("tasques").doc(dateStr).set({ tasques });
-}
+let tasquesEliminades = [];
 
 function obtenirDataISO(date) {
     const any = date.getFullYear();
@@ -48,35 +47,6 @@ function obtenirDataISO(date) {
 function isToday(date) {
     const avui = new Date();
     return date.toDateString() === avui.toDateString();
-}
-
-function mostrarTasquesPendentsSenseDia() {
-    selectedDate = 'Tasques pendents';
-    dayTitle.textContent = 'Tasques sense dia assignat';
-    closeDayBtn.classList.add('hidden');
-    escoltarTasques('Tasques pendents');
-    marcarDiaSeleccionat(null);
-}
-
-function mostrarTasquesDelDia(data) {
-    data.setHours(0, 0, 0, 0); // Elimina hores per evitar errors de zona horària
-    selectedDate = obtenirDataISO(data);
-    const options = { weekday: 'long', day: 'numeric', month: 'long' };
-    const titol = data.toLocaleDateString('ca-ES', options);
-    dayTitle.textContent = titol.charAt(0).toUpperCase() + titol.slice(1);
-    closeDayBtn.classList.remove('hidden');
-    escoltarTasques(selectedDate);
-    marcarDiaSeleccionat(selectedDate);
-}
-
-function escoltarTasques(dateStr) {
-    if (unsubscribeTasques) unsubscribeTasques();
-    const docRef = db.collection("tasques").doc(dateStr);
-    unsubscribeTasques = docRef.onSnapshot((docSnap) => {
-        const tasques = docSnap.exists ? docSnap.data().tasques : [];
-        renderitzarTasquesAmbLlista(tasques);
-        renderCalendar();
-    });
 }
 
 function marcarDiaSeleccionat(dataIso) {
@@ -118,51 +88,34 @@ function renderitzarTasquesAmbLlista(tasques) {
                 const tasquesActualitzades = docSnap.exists ? docSnap.data().tasques : [];
                 tasquesActualitzades[index].done = tasca.done;
                 await guardarTasques(selectedDate, tasquesActualitzades);
-                renderitzarTasquesAmbLlista(tasquesActualitzades);
-                renderCalendar();
             };
 
             const actions = document.createElement('div');
             actions.className = 'task-actions';
 
             const assignBtn = document.createElement('button');
-            assignBtn.className = 'icon-button';
             assignBtn.textContent = '📅';
             assignBtn.title = "Assignar a un altre dia";
-            assignBtn.onclick = (e) => {
-                e.stopPropagation();
+            assignBtn.onclick = () => {
                 taskBeingAssigned = { text: tasca.text, done: tasca.done, from: selectedDate, index };
                 alert("Selecciona un dia al calendari per assignar la tasca.");
             };
 
-            const detailsBtn = document.createElement('button');
-            detailsBtn.className = 'icon-button';
-            detailsBtn.textContent = 'ℹ️';
-            detailsBtn.title = "Detalls";
-            detailsBtn.onclick = (e) => {
-                e.stopPropagation();
-                selectedTaskIndex = index;
-                taskTitle.textContent = "Tasca";
-                taskDescription.textContent = tasca.text;
-                taskDetails.classList.remove('hidden');
-            };
-
             const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'icon-button';
             deleteBtn.textContent = '🗑️';
             deleteBtn.title = "Eliminar";
-            deleteBtn.onclick = async (e) => {
-                e.stopPropagation();
+            deleteBtn.onclick = async () => {
                 const docSnap = await db.collection("tasques").doc(selectedDate).get();
                 const tasquesActualitzades = docSnap.exists ? docSnap.data().tasques : [];
-                tasquesActualitzades.splice(index, 1);
+                const eliminada = tasquesActualitzades.splice(index, 1)[0];
+                tasquesEliminades.push({ ...eliminada, from: selectedDate });
                 await guardarTasques(selectedDate, tasquesActualitzades);
+                renderitzarTasquesAmbLlista(tasquesActualitzades);
+                renderitzarTasquesEliminades();
             };
 
             actions.appendChild(assignBtn);
-            actions.appendChild(detailsBtn);
             actions.appendChild(deleteBtn);
-
             li.appendChild(textSpan);
             li.appendChild(actions);
             taskList.appendChild(li);
@@ -173,62 +126,84 @@ function renderitzarTasquesAmbLlista(tasques) {
     afegirSeccio("Tasques completades", fetes, 'green');
 }
 
+function renderitzarTasquesEliminades() {
+    trashListDiv.innerHTML = '';
+    if (tasquesEliminades.length === 0) {
+        trashListDiv.innerHTML = '<p>No hi ha tasques eliminades.</p>';
+        return;
+    }
+
+    tasquesEliminades.forEach((tasca, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${tasca.text} (${tasca.from})`;
+
+        const btnRestaurar = document.createElement('button');
+        btnRestaurar.textContent = '♻️';
+        btnRestaurar.onclick = async () => {
+            const docSnap = await db.collection("tasques").doc(tasca.from).get();
+            const tasques = docSnap.exists ? docSnap.data().tasques : [];
+            tasques.push({ text: tasca.text, done: tasca.done });
+            await guardarTasques(tasca.from, tasques);
+            tasquesEliminades.splice(i, 1);
+            renderitzarTasquesEliminades();
+        };
+
+        li.appendChild(btnRestaurar);
+        trashListDiv.appendChild(li);
+    });
+}
+
+let comptadorTasques = [];
+
+async function getTasques() {
+    const snapshot = await db.collection("tasques").get();
+    let tasquesTotals = [];
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        const dia = doc.id;
+        if (Array.isArray(data.tasques)) {
+            data.tasques.forEach(tasca => {
+                tasquesTotals.push({
+                    ...tasca,
+                    data: dia
+                });
+            });
+        }
+    });
+    comptadorTasques = tasquesTotals;
+    return tasquesTotals;
+}
+
 async function renderCalendar() {
+    const dadesTasques = await getTasques();
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     const firstDay = new Date(year, month, 1);
     const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const nomMes = firstDay.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' });
-    monthYear.textContent = nomMes.charAt(0).toUpperCase() + nomMes.slice(1);
 
-    // Guardem el contingut actual per fer actualització suau
-    const existingDays = {};
-    document.querySelectorAll('.calendar-day[data-date]').forEach(day => {
-        existingDays[day.dataset.date] = day;
-    });
+    calendar.innerHTML = '';
+    monthYear.textContent = firstDay.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase());
 
-    const fetchPromises = [];
-    const dates = [];
-    const dataIniciTreball = new Date('2025-07-09');
+    for (let i = 0; i < startDay; i++) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'calendar-day empty';
+        calendar.appendChild(emptyDiv);
+    }
 
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
         const iso = obtenirDataISO(date);
-        dates.push({ date, iso });
-        fetchPromises.push(db.collection("tasques").doc(iso).get());
-    }
 
-    const snapshots = await Promise.all(fetchPromises);
-
-    calendar.innerHTML = '';
-
-    for (let i = 0; i < startDay; i++) {
-        const emptyDiv = document.createElement('div');
-        emptyDiv.classList.add('calendar-day', 'empty');
-        calendar.appendChild(emptyDiv);
-    }
-
-    for (let i = 0; i < dates.length; i++) {
-        const { date, iso } = dates[i];
-        const diaSetmana = date.getDay();
-        const tasques = snapshots[i].exists ? snapshots[i].data().tasques : [];
-        const pendents = tasques.filter(t => !t.done).length;
-        const fetes = tasques.filter(t => t.done).length;
-
-        let div = existingDays[iso];
-        if (!div) {
-            div = document.createElement('div');
-            div.className = 'calendar-day';
-            div.dataset.date = iso;
-        }
-
-        div.classList.remove('today', 'selected', 'disabled-past', 'weekend');
+        const div = document.createElement('div');
+        div.className = 'calendar-day';
+        div.dataset.date = iso;
 
         if (isToday(date)) div.classList.add('today');
         if (selectedDate === iso) div.classList.add('selected');
-        if (date < dataIniciTreball) div.classList.add('disabled-past');
+        if (date < new Date('2025-07-09')) div.classList.add('disabled-past');
 
+        const diaSetmana = date.getDay();
         if (diaSetmana === 0 || diaSetmana === 6) {
             div.classList.add('weekend');
         } else {
@@ -236,88 +211,65 @@ async function renderCalendar() {
                 if (taskBeingAssigned) {
                     assignarTascaADia(taskBeingAssigned, iso);
                     taskBeingAssigned = null;
-                    alert("Tasca assignada correctament!");
                 } else {
                     mostrarTasquesDelDia(date);
                 }
             };
-
-            div.ondragover = (e) => e.preventDefault();
-            div.ondrop = async (e) => {
-                const taskData = JSON.parse(e.dataTransfer.getData("text/plain"));
-                await assignarTascaADia(taskData, iso);
-            };
         }
+
+        const pendents = comptadorTasques.filter(t => t.data === iso && !t.done).length;
+        const fetes = comptadorTasques.filter(t => t.data === iso && t.done).length;
 
         let tasquesHtml = '';
         if (pendents === 0 && fetes === 0) {
-            tasquesHtml = '<div class="tasques">0 pendents<br>0 acabades</div>';
+            tasquesHtml = ''; // si no hi ha cap tasca, no mostrem res
         } else {
             tasquesHtml = `
-            <div class="tasques">
-                ${pendents > 0 ? `<span style="color: orange">${pendents} pendents</span>` : '0 pendents'}<br>
-                ${fetes > 0 ? `<span style="color: green">${fetes} acabades</span>` : '0 acabades'}
-            </div>`;
+                <div class="tasques">
+                ${pendents > 0 ? `<span style="color: orange;">${pendents} Pendents</span>` : ''}
+                ${fetes > 0 ? `<br><span style="color: green;">${fetes} Acabades</span>` : ''}
+                </div>
+                `;
         }
 
         div.innerHTML = `
             <div class="dia-num">${date.getDate()}</div>
             ${tasquesHtml}
         `;
-
         calendar.appendChild(div);
     }
 }
 
+function mostrarTasquesDelDia(data) {
+    selectedDate = obtenirDataISO(data);
+    dayTitle.textContent = data.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+    closeDayBtn.classList.remove('hidden');
+    escoltarTasques(selectedDate);
+    marcarDiaSeleccionat(selectedDate);
+}
 
-document.getElementById('prev-month').onclick = () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar();
-};
+function mostrarTasquesPendentsSenseDia() {
+    selectedDate = 'Tasques pendents';
+    dayTitle.textContent = 'Tasques sense dia assignat';
+    closeDayBtn.classList.add('hidden');
+    escoltarTasques('Tasques pendents');
+    marcarDiaSeleccionat(null);
+}
 
-document.getElementById('next-month').onclick = () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar();
-};
-
-closeDayBtn.onclick = () => mostrarTasquesPendentsSenseDia();
-closeDetails.onclick = () => taskDetails.classList.add('hidden');
-
-editTaskBtn.onclick = async () => {
-    const docRef = db.collection("tasques").doc(selectedDate);
-    const docSnap = await docRef.get();
-    const tasques = docSnap.exists ? docSnap.data().tasques : [];
-    const text = prompt("Edita la tasca:", tasques[selectedTaskIndex].text);
-    if (text) {
-        tasques[selectedTaskIndex].text = text;
-        await guardarTasques(selectedDate, tasques);
-        taskDetails.classList.add('hidden');
-    }
-};
-
-deleteTaskBtn.onclick = async () => {
-    const docRef = db.collection("tasques").doc(selectedDate);
-    const docSnap = await docRef.get();
-    const tasques = docSnap.exists ? docSnap.data().tasques : [];
-    tasques.splice(selectedTaskIndex, 1);
-    await guardarTasques(selectedDate, tasques);
-    taskDetails.classList.add('hidden');
-};
-
-newTaskInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') addTaskButton.click();
-});
-
-addTaskButton.onclick = async () => {
-    const text = newTaskInput.value.trim();
-    if (text && selectedDate) {
-        const docSnap = await db.collection("tasques").doc(selectedDate).get();
+function escoltarTasques(dateStr) {
+    if (unsubscribeTasques) unsubscribeTasques();
+    const docRef = db.collection("tasques").doc(dateStr);
+    unsubscribeTasques = docRef.onSnapshot((docSnap) => {
         const tasques = docSnap.exists ? docSnap.data().tasques : [];
-        tasques.push({ text, done: false });
-        await guardarTasques(selectedDate, tasques);
-        newTaskInput.value = '';
-    }
-};
+        renderitzarTasquesAmbLlista(tasques);
+        renderCalendar();
+    });
+}
+
+async function guardarTasques(dateStr, tasques) {
+    if (!dateStr) return;
+    await db.collection("tasques").doc(dateStr).set({ tasques });
+}
 
 async function assignarTascaADia(taskData, nouDia) {
     const fromSnap = await db.collection("tasques").doc(taskData.from).get();
@@ -331,6 +283,40 @@ async function assignarTascaADia(taskData, nouDia) {
     toTasks.push(task);
     await guardarTasques(nouDia, toTasks);
 }
+
+addTaskButton.onclick = async () => {
+    const text = newTaskInput.value.trim();
+    if (text && selectedDate) {
+        const docSnap = await db.collection("tasques").doc(selectedDate).get();
+        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        tasques.push({ text, done: false });
+        await guardarTasques(selectedDate, tasques);
+        newTaskInput.value = '';
+    }
+};
+
+newTaskInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addTaskButton.click();
+});
+
+closeDayBtn.onclick = () => mostrarTasquesPendentsSenseDia();
+showTrashBtn.onclick = () => document.getElementById("deleted-tasks-panel").classList.toggle("hidden");
+emptyTrashBtn.onclick = () => {
+    if (confirm("Segur que vols buidar la paperera?")) {
+        tasquesEliminades = [];
+        renderitzarTasquesEliminades();
+    }
+};
+
+document.getElementById('prev-month').onclick = () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+};
+
+document.getElementById('next-month').onclick = () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+};
 
 window.addEventListener("DOMContentLoaded", () => {
     renderCalendar();
