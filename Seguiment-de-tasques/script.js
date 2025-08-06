@@ -220,16 +220,17 @@ async function renderCalendar() {
         const fetes = comptadorTasques.filter(t => t.data === iso && t.done).length;
 
         let tasquesHtml = '';
-        if (pendents === 0 && fetes === 0) {
-            tasquesHtml = ''; // si no hi ha cap tasca, no mostrem res
-        } else {
-            tasquesHtml = `
-                <div class="tasques">
-                ${pendents > 0 ? `<span style="color: orange;">${pendents} Pendents</span>` : ''}
-                ${fetes > 0 ? `<br><span style="color: green;">${fetes} Acabades</span>` : ''}
-                </div>
-                `;
+            if (pendents > 0 || fetes > 0) {
+                tasquesHtml = '<div class="tasques">';
+            if (pendents > 0) {
+                tasquesHtml += `<span data-type="pendents">${pendents} pendents</span><br>`;
+            }
+            if (fetes > 0) {
+                tasquesHtml += `<span data-type="acabades">${fetes} acabades</span>`;
+            }
+        tasquesHtml += '</div>';
         }
+
 
         div.innerHTML = `
             <div class="dia-num">${date.getDate()}</div>

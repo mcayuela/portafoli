@@ -2,15 +2,13 @@
 html, body {
     margin: 0;
     padding: 0;
-    width: 100vw;
-    height: 100%;
-    overflow-x: hidden;
+    overflow-y: hidden;
     font-family: Arial, sans-serif;
     background-color: #f4f7f9;
     color: #333;
     box-sizing: border-box;
     transform: scale(0.9);
-    transform-origin: top left;
+    transform-origin: top;
 }
 
 /* CONTENIDOR PRINCIPAL */
@@ -26,7 +24,7 @@ html, body {
 
 h1 {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     color: #2596be;
 }
 
@@ -250,6 +248,22 @@ button#add-task {
 button#add-task:hover {
     background-color: #1e7fa1;
 }
+
+.tasques span[data-type="pendents"] {
+    color: orange;
+}
+
+.tasques span[data-type="acabades"] {
+    color: green;
+}
+
+.tasques {
+    font-size: 0.9em;
+    margin-top: 5px;
+    text-align: left;
+    line-height: 1.2em;
+}
+
 
 /* BOTONS TANCAR */
 .close-btn {
