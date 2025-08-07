@@ -61,8 +61,14 @@ function marcarDiaSeleccionat(dataIso) {
 function renderitzarTasquesAmbLlista(tasques) {
     taskList.innerHTML = '';
 
-    const pendents = tasques.filter(t => !t.done);
-    const fetes = tasques.filter(t => t.done);
+    const ordenarPerPrioritat = (a, b) => {
+        const prioA = a.priority || 3;
+        const prioB = b.priority || 3;
+        return prioB - prioA;
+    };
+
+    const pendents = tasques.filter(t => !t.done).sort(ordenarPerPrioritat);
+    const fetes = tasques.filter(t => t.done).sort(ordenarPerPrioritat);
 
     const afegirSeccio = (titol, llista, color) => {
         if (llista.length === 0) return;
@@ -74,14 +80,32 @@ function renderitzarTasquesAmbLlista(tasques) {
         llista.forEach((tasca, index) => {
             const li = document.createElement('li');
             li.draggable = true;
+            
             li.ondragstart = (e) => {
-                e.dataTransfer.setData("text/plain", JSON.stringify({ text: tasca.text, done: tasca.done, from: selectedDate, index }));
+                e.dataTransfer.setData("application/json", JSON.stringify({
+                    text: tasca.text,
+                    done: tasca.done,
+                    description: tasca.description,
+                    priority: tasca.priority,
+                    from: selectedDate,
+                    index: index
+                }));
+                e.dataTransfer.effectAllowed = "move";
             };
 
+            const priorityClass = `priority-${tasca.priority || 3}`;
+            li.classList.add(priorityClass);
+
+            const priorityIndicator = document.createElement('span');
+            priorityIndicator.className = 'priority-indicator';
+            priorityIndicator.textContent = '★'.repeat(tasca.priority || 3);
+            priorityIndicator.title = `Prioritat: ${tasca.priority || 3}`;
+            
             const textSpan = document.createElement('span');
             textSpan.className = 'task-text';
             textSpan.textContent = tasca.text;
             if (tasca.done) textSpan.classList.add('done');
+
             textSpan.onclick = async () => {
                 tasca.done = !tasca.done;
                 const docSnap = await db.collection("tasques").doc(selectedDate).get();
@@ -89,6 +113,12 @@ function renderitzarTasquesAmbLlista(tasques) {
                 tasquesActualitzades[index].done = tasca.done;
                 await guardarTasques(selectedDate, tasquesActualitzades);
             };
+
+            const descSpan = document.createElement('div');
+            descSpan.className = 'task-description';
+            if (tasca.description) {
+                descSpan.textContent = tasca.description;
+            }
 
             const actions = document.createElement('div');
             actions.className = 'task-actions';
@@ -100,6 +130,64 @@ function renderitzarTasquesAmbLlista(tasques) {
                 taskBeingAssigned = { text: tasca.text, done: tasca.done, from: selectedDate, index };
             };
 
+            const editBtn = document.createElement('button');
+            editBtn.textContent = '✏️';
+            editBtn.title = "Editar";
+            editBtn.onclick = async () => {
+                const modal = document.createElement('div');
+                modal.className = 'edit-modal';
+                
+                const form = document.createElement('div');
+                form.className = 'edit-form';
+                form.innerHTML = `
+                    <h3>Editar Tasca</h3>
+                    <div class="form-group">
+                        <label>Títol:</label>
+                        <input type="text" id="edit-task-title" value="${tasca.text}">
+                    </div>
+                    <div class="form-group">
+                        <label>Descripció:</label>
+                        <textarea id="edit-task-desc">${tasca.description || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Prioritat (1-5):</label>
+                        <select id="edit-task-priority">
+                            <option value="1" ${tasca.priority === 1 ? 'selected' : ''}>1 - Molt baixa</option>
+                            <option value="2" ${tasca.priority === 2 ? 'selected' : ''}>2 - Baixa</option>
+                            <option value="3" ${(!tasca.priority || tasca.priority === 3) ? 'selected' : ''}>3 - Mitjana</option>
+                            <option value="4" ${tasca.priority === 4 ? 'selected' : ''}>4 - Alta</option>
+                            <option value="5" ${tasca.priority === 5 ? 'selected' : ''}>5 - Molt alta</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button id="cancel-edit">Cancel·lar</button>
+                        <button id="save-edit">Guardar</button>
+                    </div>
+                `;
+                
+                modal.appendChild(form);
+                document.body.appendChild(modal);
+                
+                document.getElementById('cancel-edit').onclick = () => {
+                    document.body.removeChild(modal);
+                };
+                
+                document.getElementById('save-edit').onclick = async () => {
+                    const docSnap = await db.collection("tasques").doc(selectedDate).get();
+                    const tasquesActualitzades = docSnap.exists ? docSnap.data().tasques : [];
+                    
+                    tasquesActualitzades[index] = {
+                        ...tasquesActualitzades[index],
+                        text: document.getElementById('edit-task-title').value,
+                        description: document.getElementById('edit-task-desc').value,
+                        priority: parseInt(document.getElementById('edit-task-priority').value)
+                    };
+                    
+                    await guardarTasques(selectedDate, tasquesActualitzades);
+                    document.body.removeChild(modal);
+                };
+            };
+                
             const deleteBtn = document.createElement('button');
             deleteBtn.textContent = '🗑️';
             deleteBtn.title = "Eliminar";
@@ -114,8 +202,11 @@ function renderitzarTasquesAmbLlista(tasques) {
             };
 
             actions.appendChild(assignBtn);
+            actions.appendChild(editBtn);
             actions.appendChild(deleteBtn);
+            li.appendChild(priorityIndicator);
             li.appendChild(textSpan);
+            li.appendChild(descSpan);
             li.appendChild(actions);
             taskList.appendChild(li);
         });
@@ -202,6 +293,26 @@ async function renderCalendar() {
         if (selectedDate === iso) div.classList.add('selected');
         if (date < new Date('2025-07-09')) div.classList.add('disabled-past');
 
+        div.ondragover = (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            div.classList.add('drag-over');
+        };
+
+        div.ondragleave = () => {
+            div.classList.remove('drag-over');
+        };
+
+        div.ondrop = async (e) => {
+            e.preventDefault();
+            div.classList.remove('drag-over');
+            
+            if (!e.dataTransfer.getData("application/json")) return;
+            
+            const taskData = JSON.parse(e.dataTransfer.getData("application/json"));
+            await assignarTascaADia(taskData, iso);
+        };
+
         const diaSetmana = date.getDay();
         if (diaSetmana === 0 || diaSetmana === 6) {
             div.classList.add('weekend');
@@ -231,7 +342,6 @@ async function renderCalendar() {
         tasquesHtml += '</div>';
         }
 
-
         div.innerHTML = `
             <div class="dia-num">${date.getDate()}</div>
             ${tasquesHtml}
@@ -249,10 +359,10 @@ function mostrarTasquesDelDia(data) {
 }
 
 function mostrarTasquesPendentsSenseDia() {
-    selectedDate = 'Tasques pendents';
+    selectedDate = null;
     dayTitle.textContent = 'Tasques sense dia assignat';
     closeDayBtn.classList.add('hidden');
-    escoltarTasques('Tasques pendents');
+    taskList.innerHTML = '<p>No hi ha tasques sense dia assignat.</p>';
     marcarDiaSeleccionat(null);
 }
 
@@ -272,15 +382,21 @@ async function guardarTasques(dateStr, tasques) {
 }
 
 async function assignarTascaADia(taskData, nouDia) {
-    const fromSnap = await db.collection("tasques").doc(taskData.from).get();
-    const fromTasks = fromSnap.exists ? fromSnap.data().tasques : [];
-    const task = fromTasks[taskData.index];
-    fromTasks.splice(taskData.index, 1);
-    await guardarTasques(taskData.from, fromTasks);
-
+    if (taskData.from) {
+        const fromSnap = await db.collection("tasques").doc(taskData.from).get();
+        const fromTasks = fromSnap.exists ? fromSnap.data().tasques : [];
+        fromTasks.splice(taskData.index, 1);
+        await guardarTasques(taskData.from, fromTasks);
+    }
+    
     const toSnap = await db.collection("tasques").doc(nouDia).get();
     const toTasks = toSnap.exists ? toSnap.data().tasques : [];
-    toTasks.push(task);
+    toTasks.push({
+        text: taskData.text,
+        done: taskData.done,
+        description: taskData.description,
+        priority: taskData.priority
+    });
     await guardarTasques(nouDia, toTasks);
 }
 
