@@ -42,8 +42,9 @@ body {
 }
 
 #site-header img {
-  height: 40px; /* alçada petita */
-  width: auto;  /* conserva proporció */
+  height: 60px;
+  width: 60px;
+  object-fit: cover;
   display: block;
 }
 

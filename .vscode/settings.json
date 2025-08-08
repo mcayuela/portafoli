@@ -1,4 +1,5 @@
 {
     "liveServer.settings.port": 5501,
-    "CodeGPT.apiKey": "CodeGPT Plus"
+    "CodeGPT.apiKey": "CodeGPT Plus",
+    "dotnet.defaultSolution": "BlazorApp1.sln"
 }
