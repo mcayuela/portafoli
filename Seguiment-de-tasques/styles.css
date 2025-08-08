@@ -17,7 +17,8 @@
 }
 
 /* =================== Base =================== */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   font-family: system-ui, -apple-system, Arial, sans-serif;
@@ -28,7 +29,7 @@ html, body {
 /* =================== Header sticky amb blur =================== */
 #site-header {
   height: var(--header-h);
-  padding: 16px;
+  padding: 0 16px;
   position: sticky;
   top: 0;
   z-index: 20;
@@ -36,8 +37,14 @@ html, body {
   backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between; /* separa logos i títol */
   border-bottom: 1px solid rgba(37, 150, 190, 0.15);
+}
+
+#site-header img {
+  height: 40px; /* alçada petita */
+  width: auto;  /* conserva proporció */
+  display: block;
 }
 
 .titol-principal {
@@ -46,6 +53,8 @@ html, body {
   font-weight: 800;
   text-decoration: none;
   letter-spacing: 0.4px;
+  text-align: center;
+  flex: 1; /* ocupa espai central */
 }
 
 /* =================== Layout principal =================== */
@@ -87,7 +96,9 @@ html, body {
   #calendar-container {
     flex-direction: column;
   }
-  #right-col { min-width: 0; }
+  #right-col {
+    min-width: 0;
+  }
 }
 
 /* =================== Targeta d'accions (separada, no sticky) =================== */
@@ -112,8 +123,15 @@ html, body {
   cursor: pointer;
   transition: 0.2s;
 }
-#actions-card .pill:hover:not(:disabled) { background: #eaf6fa; }
-#actions-card .pill:disabled { color: #a7c6d4; cursor: not-allowed; }
+
+#actions-card .pill:hover:not(:disabled) {
+  background: #eaf6fa;
+}
+
+#actions-card .pill:disabled {
+  color: #a7c6d4;
+  cursor: not-allowed;
+}
 
 /* =================== Panell del dia =================== */
 #task-panel-header {
@@ -137,21 +155,21 @@ html, body {
 }
 
 .panel-close {
-    align-items: center;
+  align-items: center;
   border: 1px solid #7bb2d1;
   background: #fff;
   color: var(--brand);
   height: 36px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding: 5px 10px;
   border-radius: var(--radius-sm);
   font-weight: 800;
   cursor: pointer;
   display: none;
 }
-.panel-close:hover { background: #eaf6fa; }
+
+.panel-close:hover {
+  background: #eaf6fa;
+}
 
 /* =================== Controls calendari =================== */
 #calendar-controls {
@@ -161,6 +179,7 @@ html, body {
   margin-bottom: 12px;
   gap: 10px;
 }
+
 #calendar-controls button {
   border: 2px solid var(--brand);
   background: #fff;
@@ -171,10 +190,12 @@ html, body {
   border-radius: var(--radius-sm);
   transition: 0.2s;
 }
+
 #calendar-controls button:hover {
   background: var(--brand);
   color: #fff;
 }
+
 #month-year {
   font-weight: 800;
   font-size: 18px;
@@ -192,6 +213,7 @@ html, body {
   min-height: 400px;
   border-radius: var(--radius);
 }
+
 .calendar-day {
   border: 2px solid var(--brand);
   background: #fff;
@@ -203,17 +225,20 @@ html, body {
   font-size: 14px;
   transition: transform 0.12s, background 0.12s, box-shadow 0.12s;
 }
+
 .calendar-day:hover {
   background: #eef9ff;
   box-shadow: 0 4px 10px rgba(37, 150, 190, 0.15);
   transform: translateY(-1px);
 }
+
 .calendar-day.today {
   border: 2px solid #1c7ea5;
   background: #e0f3fa;
   font-weight: 700;
   color: var(--brand);
 }
+
 .calendar-day.weekend,
 .disabled-past {
   background: #e0e0e0 !important;
@@ -221,15 +246,18 @@ html, body {
   pointer-events: none;
   opacity: 0.6;
 }
+
 .calendar-day.selected {
   background: #d6edf7;
   border-color: var(--brand);
   box-shadow: 0 0 0 3px rgba(37, 150, 190, 0.15) inset;
 }
+
 .calendar-day.drag-over {
   background: #e0f7fa !important;
   border: 2px dashed var(--brand) !important;
 }
+
 .dia-num {
   position: absolute;
   top: 6px;
@@ -238,6 +266,7 @@ html, body {
   font-size: 14px;
   color: var(--brand);
 }
+
 .calendar-day.empty {
   border: none;
   background: transparent;
@@ -246,7 +275,12 @@ html, body {
 }
 
 /* =================== Llista de tasques =================== */
-#task-list { list-style: none; padding: 0; margin: 0; }
+#task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 #task-list li {
   margin-bottom: 12px;
   padding: 12px 14px;
@@ -259,15 +293,29 @@ html, body {
   background: #ffffff;
   box-shadow: 0 2px 8px rgba(38, 163, 200, 0.06);
 }
+
 #task-list li:hover {
   background: #f7fcff;
   transform: translateX(2px);
   box-shadow: 0 4px 14px rgba(38, 163, 200, 0.12);
 }
-#task-list li:active { cursor: grabbing; opacity: 0.85; }
 
-.task-text { font-size: 1.05rem; margin-bottom: 6px; display: block; font-weight: 600; }
-.task-text.done { text-decoration: line-through; color: #3ea05b; }
+#task-list li:active {
+  cursor: grabbing;
+  opacity: 0.85;
+}
+
+.task-text {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+  display: block;
+  font-weight: 600;
+}
+
+.task-text.done {
+  text-decoration: line-through;
+  color: #3ea05b;
+}
 
 .task-description {
   font-size: 0.92rem;
@@ -277,7 +325,12 @@ html, body {
   white-space: pre-wrap;
 }
 
-.task-actions { display: flex; gap: 8px; margin-top: 8px; }
+.task-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .task-actions button {
   border: 1px solid #cfe7f1;
   background: #fff;
@@ -288,18 +341,45 @@ html, body {
   font-size: 14px;
   transition: 0.15s;
 }
-.task-actions button:hover { background: #eaf6fa; }
 
-.priority-indicator { color: #f1b314; margin-right: 8px; font-size: 0.95em; }
+.task-actions button:hover {
+  background: #eaf6fa;
+}
+
+.priority-indicator {
+  color: #f1b314;
+  margin-right: 8px;
+  font-size: 0.95em;
+}
+
 /* Franges per prioritat */
-#task-list li.priority-1 { border-left: 5px solid #9be59b; }
-#task-list li.priority-2 { border-left: 5px solid #a6d5ff; }
-#task-list li.priority-3 { border-left: 5px solid #ffe06e; }
-#task-list li.priority-4 { border-left: 5px solid #ffb366; }
-#task-list li.priority-5 { border-left: 5px solid #ff7a6b; }
+#task-list li.priority-1 {
+  border-left: 5px solid #9be59b;
+}
+
+#task-list li.priority-2 {
+  border-left: 5px solid #a6d5ff;
+}
+
+#task-list li.priority-3 {
+  border-left: 5px solid #ffe06e;
+}
+
+#task-list li.priority-4 {
+  border-left: 5px solid #ffb366;
+}
+
+#task-list li.priority-5 {
+  border-left: 5px solid #ff7a6b;
+}
 
 /* =================== Input afegir =================== */
-.task-input-container { display: flex; gap: 8px; margin-top: 12px; }
+.task-input-container {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 input#new-task {
   flex: 1;
   padding: 10px 12px;
@@ -308,6 +388,7 @@ input#new-task {
   outline: none;
   background: #ffffff;
 }
+
 button#add-task {
   background: var(--brand);
   color: white;
@@ -318,13 +399,30 @@ button#add-task {
   cursor: pointer;
   transition: 0.2s;
 }
-button#add-task:hover { background: var(--brand-dark); }
+
+button#add-task:hover {
+  background: var(--brand-dark);
+}
 
 /* =================== Etiquetes en dies =================== */
-.tasques { font-size: 0.9em; margin-top: 5px; line-height: 1.2em; }
-.tasques span { display: inline-block; font-weight: 800; }
-.tasques span[data-type="pendents"] { color: #ff9800; }
-.tasques span[data-type="acabades"] { color: #2e7d32; }
+.tasques {
+  font-size: 0.9em;
+  margin-top: 5px;
+  line-height: 1.2em;
+}
+
+.tasques span {
+  display: inline-block;
+  font-weight: 800;
+}
+
+.tasques span[data-type="pendents"] {
+  color: #ff9800;
+}
+
+.tasques span[data-type="acabades"] {
+  color: #2e7d32;
+}
 
 /* =================== Modals (popup) =================== */
 .modal-backdrop {
@@ -336,6 +434,7 @@ button#add-task:hover { background: var(--brand-dark); }
   justify-content: center;
   z-index: 10000;
 }
+
 .modal-card {
   width: min(92vw, 560px);
   background: #ffffff;
@@ -345,10 +444,18 @@ button#add-task:hover { background: var(--brand-dark); }
   overflow: hidden;
   animation: pop 0.12s ease-out;
 }
+
 @keyframes pop {
-  from { transform: translateY(4px) scale(0.98); opacity: 0.95; }
-  to   { transform: translateY(0)  scale(1);     opacity: 1; }
+  from {
+    transform: translateY(4px) scale(0.98);
+    opacity: 0.95;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
+
 .modal-header {
   padding: 14px 16px;
   background: #eaf6fa;
@@ -359,7 +466,11 @@ button#add-task:hover { background: var(--brand-dark); }
   justify-content: space-between;
   align-items: center;
 }
-.modal-body { padding: 16px; }
+
+.modal-body {
+  padding: 16px;
+}
+
 .modal-actions {
   display: flex;
   gap: 10px;
@@ -368,6 +479,7 @@ button#add-task:hover { background: var(--brand-dark); }
   border-top: var(--line);
   background: #fbfdfe;
 }
+
 .modal-actions .btn {
   padding: 10px 14px;
   border-radius: var(--radius-sm);
@@ -377,8 +489,17 @@ button#add-task:hover { background: var(--brand-dark); }
   font-weight: 700;
   cursor: pointer;
 }
-.modal-actions .btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
-.modal-actions .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.modal-actions .btn.primary {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+
+.modal-actions .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .btn-icon {
   border: 1px solid #cfe0ea;
@@ -388,13 +509,35 @@ button#add-task:hover { background: var(--brand-dark); }
   padding: 4px 10px;
   cursor: pointer;
 }
-.btn-icon:hover { background: #eaf6fa; }
+
+.btn-icon:hover {
+  background: #eaf6fa;
+}
 
 /* Formulari modal d’edició */
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (max-width: 560px) { .form-row { grid-template-columns: 1fr; } }
-.form-group { margin-bottom: 12px; }
-.form-group label { display: block; font-weight: 700; color: #385; margin-bottom: 6px; }
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 700;
+  color: #385;
+  margin-bottom: 6px;
+}
+
 .form-group input,
 .form-group textarea,
 .form-group select {
@@ -405,11 +548,48 @@ button#add-task:hover { background: var(--brand-dark); }
   outline: none;
   background: #fff;
 }
-.form-group textarea { min-height: 110px; resize: vertical; }
+
+.form-group textarea {
+  min-height: 110px;
+  resize: vertical;
+}
 
 /* Paperera */
-.trash-list       { list-style: none; margin: 0; padding: 0; }
-.trash-list li    { padding: 10px 8px; border-bottom: var(--line); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.trash-item-main  { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 0; }
-.trash-item-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.badge-date       { background: #eaf6fa; color: var(--brand); border: 1px solid #cfe0ea; padding: 2px 6px; border-radius: 999px; font-size: 12px; }
+.trash-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.trash-list li {
+  padding: 10px 8px;
+  border-bottom: var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trash-item-main {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.trash-item-title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge-date {
+  background: #eaf6fa;
+  color: var(--brand);
+  border: 1px solid #cfe0ea;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 12px;
+}
