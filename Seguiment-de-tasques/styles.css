@@ -1,475 +1,415 @@
+/* =================== Reset & variables =================== */
 * {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
+:root {
+  --brand: #2596be;
+  --brand-dark: #1f82a5;
+  --panel-shadow: 0 8px 24px rgba(37, 150, 190, 0.08);
+  --header-h: 72px;
+  --radius: 12px;
+  --radius-sm: 10px;
+  --line: 1px solid #e3eef3;
+}
+
+/* =================== Base =================== */
 html, body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f4f7f9;
-    color: #333;
-    box-sizing: border-box;
-    transform: scale(0.9);
-    transform-origin: top;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  background: #f4f7f9;
+  color: #223;
 }
 
-/* CONTENIDOR PRINCIPAL */
-#calendar-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    width: 100vw;
-    margin-left: -20px;
-    padding: 0 20px;
-    box-sizing: border-box;
+/* =================== Header sticky amb blur =================== */
+#site-header {
+  height: var(--header-h);
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(244, 247, 249, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(37, 150, 190, 0.15);
 }
 
 .titol-principal {
-    text-align: center;
-    color: #2596be;
-    font-size: 2rem;
-    font-weight: bold;
-    text-decoration: none;
+  color: var(--brand);
+  font-size: 2.1rem;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: 0.4px;
 }
 
-header {
-    padding: 20px;
-    top: 0;
-    z-index: 1000;
-    text-align: center;
+/* =================== Layout principal =================== */
+#calendar-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  width: 100%;
+  max-width: 1280px;
+  margin: 12px auto 80px;
+  padding: 0 16px;
 }
 
-.calendar-box, .task-box {
-    box-sizing: border-box;
+.calendar-box,
+.task-box,
+.card {
+  background: #fff;
+  border: 2px solid var(--brand);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--panel-shadow);
 }
 
-/* QUADRE CALENDARI */
 .calendar-box {
-    flex: 2;
-    min-width: 0;
-    width: 100%;
-    margin-right: 20px;
-    background-color: #eaf6fa;
-    border: 2px solid #2596be;
-    border-radius: 10px;
-    padding: 15px;
+  flex: 2;
+  min-width: 0;
+  background: #eaf6fa;
 }
 
-/* QUADRE TASQUES */
-.task-box {
-    flex: 1;
-    min-width: 320px;
-    background-color: #fff;
-    padding: 15px;
-    border: 2px solid #2596be;
-    border-radius: 10px;
-    position: relative;
-    height: fit-content;
+#right-col {
+  flex: 1;
+  min-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-    #calendar-container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .calendar-box, .task-box {
-        width: 100%;
-    }
+@media (max-width: 980px) {
+  #calendar-container {
+    flex-direction: column;
+  }
+  #right-col { min-width: 0; }
 }
 
-/* CONTROLS */
-#calendar-controls {
-    display: flex;
-    justify-content: space-between;
+/* =================== Targeta d'accions (separada, no sticky) =================== */
+#actions-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: linear-gradient(#fff, #fbfeff);
+  border-radius: var(--radius);
+  border: 2px solid var(--brand);
+}
+
+#actions-card .pill {
+  border: 1px solid #cfe0ea;
+  background: #fff;
+  color: var(--brand);
+  font-weight: 800;
+  padding: 6px 10px;
+  height: 34px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+#actions-card .pill:hover:not(:disabled) { background: #eaf6fa; }
+#actions-card .pill:disabled { color: #a7c6d4; cursor: not-allowed; }
+
+/* =================== Panell del dia =================== */
+#task-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: -16px -16px 12px;
+  border-bottom: var(--line);
+  background: #fff;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+}
+
+#day-title {
+  margin: 0;
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: var(--brand);
+  flex: 1;
+}
+
+.panel-close {
     align-items: center;
-    margin-bottom: 15px;
+  border: 1px solid #7bb2d1;
+  background: #fff;
+  color: var(--brand);
+  height: 36px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-radius: var(--radius-sm);
+  font-weight: 800;
+  cursor: pointer;
+  display: none;
 }
+.panel-close:hover { background: #eaf6fa; }
 
+/* =================== Controls calendari =================== */
+#calendar-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 10px;
+}
 #calendar-controls button {
-    border: 2px solid #2596be;
-    background-color: white;
-    color: #2596be;
-    font-weight: bold;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: 0.2s;
+  border: 2px solid var(--brand);
+  background: #fff;
+  color: var(--brand);
+  font-weight: 700;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: 0.2s;
 }
-
 #calendar-controls button:hover {
-    background-color: #2596be;
-    color: white;
+  background: var(--brand);
+  color: #fff;
 }
-
 #month-year {
-    font-weight: bold;
-    font-size: 18px;
-    color: #2596be;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--brand);
+  letter-spacing: 0.3px;
 }
 
-/* CALENDARI GRID */
+/* =================== Calendari =================== */
 #calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-    max-width: 100%;
-    padding: 10px;
-    background-color: #e9f6fb;
-    min-height: 400px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  padding: 10px;
+  background: #e9f6fb;
+  min-height: 400px;
+  border-radius: var(--radius);
 }
-
 .calendar-day {
-    border: 2px solid #2596be;
-    background-color: white;
-    padding: 10px;
-    min-height: 80px;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    font-size: 14px;
-    transition: all 0.2s;
+  border: 2px solid var(--brand);
+  background: #fff;
+  padding: 10px;
+  min-height: 84px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  position: relative;
+  font-size: 14px;
+  transition: transform 0.12s, background 0.12s, box-shadow 0.12s;
 }
-
 .calendar-day:hover {
-    background-color: #e6f4f9;
+  background: #eef9ff;
+  box-shadow: 0 4px 10px rgba(37, 150, 190, 0.15);
+  transform: translateY(-1px);
 }
-
 .calendar-day.today {
-    border: 2px solid #1c7ea5;
-    background-color: #e0f3fa;
-    font-weight: bold;
-    color: #2596be;
+  border: 2px solid #1c7ea5;
+  background: #e0f3fa;
+  font-weight: 700;
+  color: var(--brand);
 }
-
 .calendar-day.weekend,
 .disabled-past {
-    background-color: #e0e0e0 !important;
-    color: #888 !important;
-    pointer-events: none;
-    cursor: default;
-    opacity: 0.6;
+  background: #e0e0e0 !important;
+  color: #888 !important;
+  pointer-events: none;
+  opacity: 0.6;
 }
-
-.past-day {
-    background-color: rgba(0, 255, 0, 0.4);
-    border-color: rgba(0, 255, 0, 0.6);
-}
-
 .calendar-day.selected {
-    background-color: #d0e8f3;
-    border: 2px solid #2596be;
-    box-shadow: 0 0 5px rgba(37, 150, 190, 0.4);
+  background: #d6edf7;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(37, 150, 190, 0.15) inset;
 }
-
 .calendar-day.drag-over {
-    background-color: #e0f7fa !important;
-    border: 2px dashed #2596be !important;
+  background: #e0f7fa !important;
+  border: 2px dashed var(--brand) !important;
 }
-
 .dia-num {
-    position: absolute;
-    top: 6px;
-    right: 8px;
-    font-weight: bold;
-    font-size: 14px;
-    color: #2596be;
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--brand);
 }
-
 .calendar-day.empty {
-    border: none;
-    background: transparent;
-    box-shadow: none;
-    cursor: default;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  cursor: default;
 }
 
-/* TASQUES */
-#task-list {
-    list-style: none;
-    padding: 0;
-    margin: 10px 0;
-}
-
+/* =================== Llista de tasques =================== */
+#task-list { list-style: none; padding: 0; margin: 0; }
 #task-list li {
-    margin-bottom: 10px;
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.2s;
-    cursor: grab;
-    border-radius: 0 5px 5px 0;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e5eef3;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-sm);
+  transition: 0.2s;
+  cursor: grab;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(38, 163, 200, 0.06);
 }
-
 #task-list li:hover {
-    background-color: #f0f8fc;
-    transform: translateX(2px);
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  background: #f7fcff;
+  transform: translateX(2px);
+  box-shadow: 0 4px 14px rgba(38, 163, 200, 0.12);
 }
+#task-list li:active { cursor: grabbing; opacity: 0.85; }
 
-#task-list li:active {
-    cursor: grabbing;
-    opacity: 0.7;
-}
-
-#task-list li.done .task-text {
-    text-decoration: line-through;
-    color: rgb(110, 197, 110);
-}
-
-.task-text {
-    font-size: 1.1em;
-    margin-bottom: 4px;
-    display: block;
-}
-
-.task-text.done {
-    text-decoration: line-through;
-    color: rgb(87, 161, 87);
-    font-weight: bold;
-}
+.task-text { font-size: 1.05rem; margin-bottom: 6px; display: block; font-weight: 600; }
+.task-text.done { text-decoration: line-through; color: #3ea05b; }
 
 .task-description {
-    font-size: 0.85em;
-    color: #555;
-    margin: 6px 0 8px 0;
-    line-height: 1.4;
-    white-space: pre-wrap;
+  font-size: 0.92rem;
+  color: #57606a;
+  margin: 6px 0 8px;
+  line-height: 1.45;
+  white-space: pre-wrap;
 }
 
-.task-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 8px;
+.task-actions { display: flex; gap: 8px; margin-top: 8px; }
+.task-actions button {
+  border: 1px solid #cfe7f1;
+  background: #fff;
+  color: #2b93b6;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 14px;
+  transition: 0.15s;
 }
+.task-actions button:hover { background: #eaf6fa; }
 
-button.icon-button {
-    background: none;
-    border: none;
-    color: #888;
-    cursor: pointer;
-    font-size: 16px;
-}
+.priority-indicator { color: #f1b314; margin-right: 8px; font-size: 0.95em; }
+/* Franges per prioritat */
+#task-list li.priority-1 { border-left: 5px solid #9be59b; }
+#task-list li.priority-2 { border-left: 5px solid #a6d5ff; }
+#task-list li.priority-3 { border-left: 5px solid #ffe06e; }
+#task-list li.priority-4 { border-left: 5px solid #ffb366; }
+#task-list li.priority-5 { border-left: 5px solid #ff7a6b; }
 
-button.icon-button:hover {
-    color: #2596be;
-}
-
-.priority-indicator {
-    color: gold;
-    margin-right: 8px;
-    font-size: 0.9em;
-}
-
-#task-list li.priority-1 {
-    background-color: rgba(144, 238, 144, 0.2);
-    border-left: 4px solid #90ee90;
-}
-#task-list li.priority-2 {
-    background-color: rgba(173, 216, 230, 0.3);
-    border-left: 4px solid #add8e6;
-}
-#task-list li.priority-3 {
-    background-color: rgba(255, 255, 0, 0.1);
-    border-left: 4px solid #ffff00;
-}
-#task-list li.priority-4 {
-    background-color: rgba(255, 165, 0, 0.2);
-    border-left: 4px solid #ffa500;
-}
-#task-list li.priority-5 {
-    background-color: rgba(255, 99, 71, 0.2);
-    border-left: 4px solid #ff6347;
-}
-
-/* INPUT TASQUES */
-.task-input-container {
-    display: flex;
-    margin-top: 10px;
-    gap: 5px;
-}
-
+/* =================== Input afegir =================== */
+.task-input-container { display: flex; gap: 8px; margin-top: 12px; }
 input#new-task {
-    flex: 1;
-    padding: 6px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #cfe0ea;
+  border-radius: var(--radius-sm);
+  outline: none;
+  background: #ffffff;
 }
-
 button#add-task {
-    background-color: #2596be;
-    color: white;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
+  background: var(--brand);
+  color: white;
+  padding: 10px 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s;
 }
+button#add-task:hover { background: var(--brand-dark); }
 
-button#add-task:hover {
-    background-color: #1e7fa1;
+/* =================== Etiquetes en dies =================== */
+.tasques { font-size: 0.9em; margin-top: 5px; line-height: 1.2em; }
+.tasques span { display: inline-block; font-weight: 800; }
+.tasques span[data-type="pendents"] { color: #ff9800; }
+.tasques span[data-type="acabades"] { color: #2e7d32; }
+
+/* =================== Modals (popup) =================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 16, 26, 0.5); /* mica més fosc i global */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
 }
-
-.tasques span[data-type="pendents"] {
-    color: orange;
+.modal-card {
+  width: min(92vw, 560px);
+  background: #ffffff;
+  border-radius: 14px;
+  border: 2px solid var(--brand);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: pop 0.12s ease-out;
 }
-
-.tasques span[data-type="acabades"] {
-    color: green;
+@keyframes pop {
+  from { transform: translateY(4px) scale(0.98); opacity: 0.95; }
+  to   { transform: translateY(0)  scale(1);     opacity: 1; }
 }
-
-.tasques {
-    font-size: 0.9em;
-    margin-top: 5px;
-    text-align: left;
-    line-height: 1.2em;
+.modal-header {
+  padding: 14px 16px;
+  background: #eaf6fa;
+  border-bottom: var(--line);
+  font-weight: 800;
+  color: var(--brand);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-
-.tasques span {
-    display: inline-block;
-    font-weight: bold;
+.modal-body { padding: 16px; }
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 12px 16px 16px;
+  border-top: var(--line);
+  background: #fbfdfe;
 }
-
-/* BOTONS TANCAR */
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    cursor: pointer;
-    font-size: 20px;
-    color: #2596be;
+.modal-actions .btn {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #cfe0ea;
+  background: #fff;
+  color: var(--brand);
+  font-weight: 700;
+  cursor: pointer;
 }
+.modal-actions .btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+.modal-actions .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.close-btn:hover {
-    color: #1e7fa1;
+.btn-icon {
+  border: 1px solid #cfe0ea;
+  background: #fff;
+  color: var(--brand);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  cursor: pointer;
 }
+.btn-icon:hover { background: #eaf6fa; }
 
-.hidden {
-    display: none;
-}
-
-/* PAPERERA */
-#deleted-tasks-wrapper {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    max-width: 300px;
-    z-index: 999;
-    font-size: 14px;
-}
-
-#deleted-controls {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-#deleted-controls button {
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    background: #f5f5f5;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#deleted-tasks-panel.task-box {
-    max-height: 350px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    background: #fff;
-    padding: 10px;
-    border-radius: 6px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
-}
-
-#deleted-tasks-list li {
-    border-bottom: 1px solid #eee;
-    padding: 4px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#deleted-tasks-list li button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-/* MODAL D'EDICIÓ */
-.edit-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.edit-form {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.2);
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
+/* Formulari modal d’edició */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .form-row { grid-template-columns: 1fr; } }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-weight: 700; color: #385; margin-bottom: 6px; }
 .form-group input,
 .form-group textarea,
 .form-group select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cfe0ea;
+  border-radius: var(--radius-sm);
+  outline: none;
+  background: #fff;
 }
+.form-group textarea { min-height: 110px; resize: vertical; }
 
-.form-group textarea {
-    height: 80px;
-    resize: vertical;
-}
-
-.form-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.form-buttons button {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#cancel-edit {
-    background-color: #ccc;
-}
-
-#save-edit {
-    background-color: #2596be;
-    color: white;
-}
+/* Paperera */
+.trash-list       { list-style: none; margin: 0; padding: 0; }
+.trash-list li    { padding: 10px 8px; border-bottom: var(--line); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.trash-item-main  { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 0; }
+.trash-item-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge-date       { background: #eaf6fa; color: var(--brand); border: 1px solid #cfe0ea; padding: 2px 6px; border-radius: 999px; font-size: 12px; }

@@ -1,59 +1,58 @@
 <!DOCTYPE html>
 <html lang="ca">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Calendari de tasques - Marcel</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<header>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <header id="site-header">
     <a class="titol-principal" href="index.html">Calendari de tasques - Marcel</a>
-</header>
+  </header>
 
-<body>
+  <body>
     <div id="calendar-container">
-        <!-- Requadre 1: Calendari -->
-        <div class="calendar-box">
-            <div id="calendar-controls">
-                <button id="prev-month">Anterior</button>
-                <span id="month-year"></span>
-                <button id="next-month">Següent</button>
-            </div>
-            <div id="calendar"></div>
+      <!-- Columna esquerra: Calendari -->
+      <div class="calendar-box">
+        <div id="calendar-controls">
+          <button id="prev-month">Anterior</button>
+          <span id="month-year"></span>
+          <button id="next-month">Següent</button>
+        </div>
+        <div id="calendar"></div>
+      </div>
+
+      <!-- Columna dreta: accions + panell dia -->
+      <div id="right-col">
+        <!-- Requadre separat: Accions (NO sticky) -->
+        <div id="actions-card" class="card">
+          <button id="undo-btn" class="pill" disabled>↶ Desfer</button>
+          <button id="redo-btn" class="pill" disabled>↷ Refer</button>
+          <button id="show-trash" class="pill">🗑️ Paperera</button>
         </div>
 
-        <!-- Requadre 2: Tasques -->
+        <!-- Panell del dia / sense dia -->
         <div id="task-panel" class="task-box">
-            <span id="close-day" class="close-btn hidden">✕</span>
+          <div id="task-panel-header">
             <h2 id="day-title">Tasques pendents (sense dia)</h2>
-            <ul id="task-list"></ul>
-            <div class="task-input-container">
-                <input type="text" id="new-task" placeholder="Afegeix una tasca...">
-                <button id="add-task">Afegir</button>
-            </div>
-        </div>
+            <button id="close-day" class="panel-close" title="Tancar dia seleccionat">✕</button>
+          </div>
 
-        <!-- Requadre 3: Detalls de la tasca -->
-        <div id="task-details" class="task-box hidden">
-            <span id="close-details" class="close-btn">✕</span>
-            <h2 id="task-title">Detalls de la tasca</h2>
-            <p id="task-description"></p>
-            <button id="edit-task">Editar</button>
-            <button id="delete-task">Eliminar</button>
+          <ul id="task-list"></ul>
+
+          <div class="task-input-container">
+            <input type="text" id="new-task" placeholder="Afegeix una tasca..." />
+            <button id="add-task">Afegir</button>
+          </div>
         </div>
+      </div>
     </div>
 
-        <div id="deleted-tasks-wrapper">
-            <div id="deleted-controls">
-                <button id="show-trash">👁️ Veure paperera</button>
-                <button id="empty-trash">🗑️ Buida paperera</button>
-            </div>
-            <div id="deleted-tasks-panel" class="task-box hidden">
-                <h3 style="margin-top: 0">Tasques eliminades</h3>
-                <ul id="deleted-tasks-list"></ul>
-            </div>
-        </div>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-<script src="script.js"></script>
-</body>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <!-- App -->
+    <script src="script.js"></script>
+  </body>
 </html>
