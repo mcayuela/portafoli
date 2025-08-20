@@ -1,7 +1,0 @@
-img {
-    height: 200px;
-}
-
-img:hover {
-    filter: invert(100%);
-}

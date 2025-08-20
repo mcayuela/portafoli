@@ -1,7 +1,0 @@
-button {
-    margin: 50px 50px;
-}
-
-button:hover {
-    transform: scale(2);
-}
