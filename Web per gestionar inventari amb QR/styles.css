@@ -376,3 +376,206 @@ body {
     display: flex;
     align-items: center;
 }
+
+/* Reparacions */
+.reparacions-container {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background: #f6fbfd;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 16px rgba(38,150,190,0.08);
+}
+.reparacio-card {
+    background: #fff;
+    border: 2px solid #2596be;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(38,150,190,0.10);
+    padding: 18px 20px;
+    margin-bottom: 8px;
+    transition: box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.reparacio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.reparacio-data {
+    font-weight: bold;
+    color: #217aa3;
+    font-size: 16px;
+}
+
+.reparacio-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-editar {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #2596be;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+.btn-editar:hover {
+    background: #eaf6fa;
+}
+
+.btn-eliminar {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #d9534f !important;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+.btn-eliminar:hover {
+    background: #fdeaea;
+}
+
+.reparacio-body {
+    margin-top: 6px;
+    font-size: 16px;
+    color: #222;
+}
+
+.reparacio-imgs {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+}
+
+.reparacio-img {
+    max-width: 48px;
+    max-height: 48px;
+    border-radius: 8px;
+    border: 1px solid #b3d6e6;
+    box-shadow: 0 1px 4px rgba(38,150,190,0.08);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.reparacio-img:hover {
+    transform: scale(1.2);
+    z-index: 2;
+}
+
+.btn-afegir {
+    background: #2596be;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 17px;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: background 0.2s;
+    box-shadow: 0 1px 4px rgba(38,150,190,0.08);
+}
+.btn-afegir:hover {
+    background: #217aa3;
+}
+
+.btn-upload-img {
+    background: #b3d6e6;
+    color: #217aa3;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    transition: background 0.2s;
+}
+.btn-upload-img:hover {
+    background: #2596be;
+    color: #fff;
+}
+
+.imatges-preview {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.modal-reparacio {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(38,150,190,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 14px;
+    padding: 28px;
+    min-width: 340px;
+    box-shadow: 0 4px 24px rgba(38,150,190,0.18);
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 22px;
+    font-size: 32px;
+    color: #2596be;
+    cursor: pointer;
+}
+
+.btn-guardar {
+    background: #2596be;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 17px;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: background 0.2s;
+    box-shadow: 0 1px 4px rgba(38,150,190,0.08);
+}
+.btn-guardar:hover {
+    background: #217aa3;
+}
+
+/* Modal imatge gran */
+.modal-img-gran {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(38,150,190,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+.modal-img-gran img {
+    max-width: 80vw;
+    max-height: 80vh;
+    border-radius: 16px;
+    box-shadow: 0 2px 24px rgba(38,150,190,0.25);
+}
+.modal-img-close {
+    position: absolute;
+    top: 24px;
+    right: 40px;
+    font-size: 36px;
+    color: #d9534f;
+    cursor: pointer;
+    z-index: 10001;
+}
