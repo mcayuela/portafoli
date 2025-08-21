@@ -143,6 +143,143 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
   tasquesOriginals.forEach((t, i) => indexMap.set(t.id, i));
 
   const ordenarPerPrioritat = (a, b) => (b.priority ?? 3) - (a.priority ?? 3);
+
+  // Si estem a "sense dia"
+  if (selectedDate == null) {
+    // Només pendents, sense títol ni secció
+    const pendents = tasquesOriginals.filter(t => !t.done).slice().sort(ordenarPerPrioritat);
+    pendents.forEach((tasca) => {
+      const realIndex = indexMap.get(tasca.id);
+      if (realIndex === undefined) return;
+
+      const li = document.createElement("li");
+      li.draggable = true;
+      li.classList.add(`priority-${tasca.priority ?? 3}`);
+
+      const priorityIndicator = document.createElement("span");
+      priorityIndicator.className = "priority-indicator";
+      priorityIndicator.textContent = "★".repeat(tasca.priority ?? 3);
+
+      const textSpan = document.createElement("span");
+      textSpan.className = "task-text";
+      textSpan.textContent = tasca.text;
+
+      textSpan.onclick = (e) => {
+        e.stopPropagation();
+        openViewModal(tasca);
+      };
+
+      const descSpan = document.createElement("div");
+      descSpan.className = "task-description";
+      if (tasca.description) descSpan.textContent = tasca.description;
+
+      const actions = document.createElement("div");
+      actions.className = "task-actions";
+
+      // Assignar a un altre dia
+      const assignBtn = document.createElement("button");
+      assignBtn.textContent = "📅";
+      assignBtn.title = "Assignar a un altre dia";
+      assignBtn.onclick = () => {
+        taskBeingAssigned = {
+          id: tasca.id,
+          ...tasca,
+          from: UNASSIGNED_ID,
+          originalIndex: realIndex
+        };
+      };
+
+      // Editar
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "✏️";
+      editBtn.title = "Editar";
+      editBtn.onclick = () => openEditModal(tasca);
+
+      // Duplicar
+      const duplicateBtn = document.createElement("button");
+      duplicateBtn.textContent = "📋";
+      duplicateBtn.title = "Duplicar";
+      duplicateBtn.onclick = async () => {
+        const docSnap = await db.collection("tasques").doc(UNASSIGNED_ID).get();
+        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const idx = tasques.findIndex(t => t.id === tasca.id);
+        if (idx >= 0) {
+          const copia = {
+            ...tasca,
+            id: crearId(),
+            text: tasca.text + " (còpia)"
+          };
+          tasques.splice(idx + 1, 0, copia);
+          pushUndo({ type: "add", day: UNASSIGNED_ID, id: copia.id, task: copia });
+          await guardarTasques(UNASSIGNED_ID, tasques);
+        }
+      };
+
+      // Eliminar
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "🗑️";
+      deleteBtn.title = "Eliminar";
+      deleteBtn.onclick = async () => {
+        const docSnap = await db.collection("tasques").doc(UNASSIGNED_ID).get();
+        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const idx = tasques.findIndex(t => t.id === tasca.id);
+        if (idx >= 0) {
+          const eliminada = tasques.splice(idx, 1)[0];
+          pushUndo({ type: "delete", day: UNASSIGNED_ID, task: eliminada, position: idx });
+          tasquesEliminades.push({ ...eliminada, from: UNASSIGNED_ID, deletedAt: Date.now() });
+          await guardarTasques(UNASSIGNED_ID, tasques);
+        }
+      };
+
+      // Botó fet/pendent: mou la tasca al dia actual i la marca com a feta
+      const doneBtn = document.createElement("button");
+      doneBtn.title = "Marcar com a feta";
+      doneBtn.innerHTML = '<span style="color:#27ae60;font-size:1.2em;">✓</span>';
+      doneBtn.onclick = async (e) => {
+        e.stopPropagation();
+        // Treure de "sense dia"
+        const docSnap = await db.collection("tasques").doc(UNASSIGNED_ID).get();
+        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const idx = tasques.findIndex(t => t.id === tasca.id);
+        if (idx >= 0) {
+          const movedTask = tasques.splice(idx, 1)[0];
+          await guardarTasques(UNASSIGNED_ID, tasques);
+
+          // Afegir al dia actual i marcar com a feta
+          const avuiISO = obtenirDataISO(new Date());
+          const diaSnap = await db.collection("tasques").doc(avuiISO).get();
+          const diaTasques = diaSnap.exists ? diaSnap.data().tasques : [];
+          movedTask.done = true;
+          diaTasques.push(movedTask);
+          await guardarTasques(avuiISO, diaTasques);
+
+          pushUndo({
+            type: "move",
+            from: UNASSIGNED_ID,
+            to: avuiISO,
+            id: movedTask.id,
+            originalPosition: idx,
+            destPosition: diaTasques.length - 1
+          });
+        }
+      };
+
+      actions.appendChild(assignBtn);
+      actions.appendChild(editBtn);
+      actions.appendChild(duplicateBtn);
+      actions.appendChild(deleteBtn);
+      actions.appendChild(doneBtn);
+
+      li.appendChild(priorityIndicator);
+      li.appendChild(textSpan);
+      li.appendChild(descSpan);
+      li.appendChild(actions);
+      taskList.appendChild(li);
+    });
+    return;
+  }
+
+  // Si NO estem a "sense dia", comportament normal
   const pendents = tasquesOriginals.filter(t => !t.done).slice().sort(ordenarPerPrioritat);
   const fetes    = tasquesOriginals.filter(t =>  t.done).slice().sort(ordenarPerPrioritat);
 
@@ -160,21 +297,6 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
 
       const li = document.createElement("li");
       li.draggable = true;
-
-      // Drag payload per ID
-      li.ondragstart = (e) => {
-        e.dataTransfer.setData("application/json", JSON.stringify({
-          id: tasca.id,
-          text: tasca.text,
-          done: tasca.done,
-          description: tasca.description,
-          priority: tasca.priority,
-          from: selectedDate ?? UNASSIGNED_ID,
-          originalIndex: realIndex
-        }));
-        e.dataTransfer.effectAllowed = "move";
-      };
-
       li.classList.add(`priority-${tasca.priority ?? 3}`);
 
       const priorityIndicator = document.createElement("span");
@@ -186,18 +308,9 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
       textSpan.textContent = tasca.text;
       if (tasca.done) textSpan.classList.add("done");
 
-      // Toggle done
-      textSpan.onclick = async () => {
-        const docId = selectedDate ?? UNASSIGNED_ID;
-        const docSnap = await db.collection("tasques").doc(docId).get();
-        const tasques = docSnap.exists ? docSnap.data().tasques : [];
-        const idx = tasques.findIndex(t => t.id === tasca.id);
-        if (idx >= 0) {
-          const previousDone = tasques[idx].done;
-          tasques[idx].done = !tasques[idx].done;
-          pushUndo({ type: "toggle", day: docId, id: tasca.id, previousDone });
-          await guardarTasques(docId, tasques);
-        }
+      textSpan.onclick = (e) => {
+        e.stopPropagation();
+        openViewModal(tasca);
       };
 
       const descSpan = document.createElement("div");
@@ -226,6 +339,27 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
       editBtn.title = "Editar";
       editBtn.onclick = () => openEditModal(tasca);
 
+      // Duplicar
+      const duplicateBtn = document.createElement("button");
+      duplicateBtn.textContent = "📋";
+      duplicateBtn.title = "Duplicar";
+      duplicateBtn.onclick = async () => {
+        const docId = selectedDate ?? UNASSIGNED_ID;
+        const docSnap = await db.collection("tasques").doc(docId).get();
+        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const idx = tasques.findIndex(t => t.id === tasca.id);
+        if (idx >= 0) {
+          const copia = {
+            ...tasca,
+            id: crearId(),
+            text: tasca.text + " (còpia)"
+          };
+          tasques.splice(idx + 1, 0, copia);
+          pushUndo({ type: "add", day: docId, id: copia.id, task: copia });
+          await guardarTasques(docId, tasques);
+        }
+      };
+
       // Eliminar
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "🗑️";
@@ -243,9 +377,64 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
         }
       };
 
+      // Botó fet/pendent
+      const doneBtn = document.createElement("button");
+      doneBtn.title = tasca.done ? "Marcar com a pendent" : "Marcar com a feta";
+      doneBtn.innerHTML = tasca.done
+        ? '<span style="color:#e74c3c;font-size:1.2em;">✗</span>'
+        : '<span style="color:#27ae60;font-size:1.2em;">✓</span>';
+      doneBtn.onclick = async (e) => {
+        e.stopPropagation();
+        const docId = selectedDate ?? UNASSIGNED_ID;
+        const docSnap = await db.collection("tasques").doc(docId).get();
+        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const idx = tasques.findIndex(t => t.id === tasca.id);
+        if (idx >= 0) {
+          const previousDone = tasques[idx].done;
+          tasques[idx].done = !tasques[idx].done;
+          pushUndo({ type: "toggle", day: docId, id: tasca.id, previousDone });
+          await guardarTasques(docId, tasques);
+        }
+      };
+
+      if ((selectedDate ?? UNASSIGNED_ID) !== UNASSIGNED_ID) {
+        const toNoDateBtn = document.createElement("button");
+        toNoDateBtn.textContent = "⇨ Sense dia";
+        toNoDateBtn.title = "Mou a Sense dia";
+        toNoDateBtn.onclick = async () => {
+          // Treu la tasca del dia actual
+          const docId = selectedDate ?? UNASSIGNED_ID;
+          const docSnap = await db.collection("tasques").doc(docId).get();
+          let tasques = docSnap.exists ? docSnap.data().tasques : [];
+          const idx = tasques.findIndex(t => t.id === tasca.id);
+          if (idx >= 0) {
+            const movedTask = tasques.splice(idx, 1)[0];
+            await guardarTasques(docId, tasques);
+
+            // Afegeix la tasca a "sense dia"
+            const noDateSnap = await db.collection("tasques").doc(UNASSIGNED_ID).get();
+            const noDateTasks = noDateSnap.exists ? noDateSnap.data().tasques : [];
+            noDateTasks.push(movedTask);
+            await guardarTasques(UNASSIGNED_ID, noDateTasks);
+
+            pushUndo({
+              type: "move",
+              from: UNASSIGNED_ID,
+              to: docId,
+              id: movedTask.id,
+              originalPosition: idx,
+              destPosition: noDateTasks.length - 1
+            });
+          }
+        };
+        actions.appendChild(toNoDateBtn);
+      }
+
       actions.appendChild(assignBtn);
       actions.appendChild(editBtn);
+      actions.appendChild(duplicateBtn);
       actions.appendChild(deleteBtn);
+      actions.appendChild(doneBtn);
 
       li.appendChild(priorityIndicator);
       li.appendChild(textSpan);
@@ -823,30 +1012,13 @@ async function doRedo() {
 // ==============================
 // Accions UI
 // ==============================
-addTaskButton.onclick = async () => {
-  const text = newTaskInput.value.trim();
-  if (!text) return;
-
-  const docId  = selectedDate ?? UNASSIGNED_ID;
-  const snap   = await db.collection("tasques").doc(docId).get();
-  const tasq   = snap.exists ? snap.data().tasques : [];
-  const newId  = crearId();
-  const nova   = { id: newId, text, done: false, description: "", priority: 3 };
-
-  tasq.push(nova);
-  pushUndo({ type: "add", day: docId, id: newId, task: nova });
-  await guardarTasques(docId, tasq);
-  newTaskInput.value = "";
-};
-
-newTaskInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") addTaskButton.click();
-});
-
 showTrashBtn.onclick = () => openTrashModal();
 undoBtn.onclick      = () => doUndo();
 redoBtn.onclick      = () => doRedo();
 closeDayBtn.onclick  = () => mostrarTasquesPendentsSenseDia();
+document.getElementById('add-task-modal').addEventListener('click', function() {
+  openTaskModal(); // Debes tener una función que abra el modal de edición/creació
+});
 
 document.getElementById("prev-month").onclick = () => {
   currentDate.setMonth(currentDate.getMonth() - 1);
@@ -857,6 +1029,86 @@ document.getElementById("next-month").onclick = () => {
   renderCalendar();
 };
 
+document.getElementById("search-input").oninput = async function() {
+  const term = this.value.trim().toLowerCase();
+  const resultsList = document.getElementById("search-results");
+  resultsList.innerHTML = "";
+
+  if (!term) return;
+
+  // Cerca a tots els dies, evita duplicats per id
+  const snapshot = await db.collection("tasques").get();
+  const seenIds = new Set();
+  const results = [];
+  snapshot.forEach(doc => {
+    const docId = doc.id;
+    const tasques = doc.data().tasques || [];
+    tasques.forEach(t => {
+      if (
+        (t.text.toLowerCase().includes(term) ||
+        (t.description ?? "").toLowerCase().includes(term))
+        && !seenIds.has(t.id)
+      ) {
+        seenIds.add(t.id);
+        results.push({
+          ...t,
+          docId,
+        });
+      }
+    });
+  });
+
+  if (!results.length) {
+    resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cap resultat</li>";
+    return;
+  }
+
+  results.forEach(tasca => {
+    const li = document.createElement("li");
+    li.className = "search-result-item";
+
+    // Títol clickable
+    const title = document.createElement("span");
+    title.className = "search-result-title";
+    title.textContent = tasca.text;
+    title.onclick = () => {
+      if (tasca.docId === UNASSIGNED_ID) {
+        mostrarTasquesPendentsSenseDia();
+      } else {
+        const parts = tasca.docId.split("-");
+        if (parts.length === 3) {
+          // Format dia-mes-any
+          const data = new Date(parts[0], parts[1] - 1, parts[2]);
+          mostrarTasquesDelDia(data);
+        }
+      }
+    };
+
+    // Data
+    const date = document.createElement("span");
+    date.className = "search-result-date";
+    if (tasca.docId === UNASSIGNED_ID) {
+      date.textContent = "Sense dia";
+    } else {
+      // Format dia-mes-any
+      const parts = tasca.docId.split("-");
+      if (parts.length === 3) {
+        date.textContent = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      } else {
+        date.textContent = tasca.docId;
+      }
+    }
+
+    li.appendChild(title);
+    li.appendChild(date);
+
+    // Clic a tota la fila per anar al dia
+    li.onclick = () => title.onclick();
+
+    resultsList.appendChild(li);
+  });
+};
+
 // ==============================
 // Inici
 // ==============================
@@ -865,3 +1117,143 @@ window.addEventListener("DOMContentLoaded", () => {
   mostrarTasquesPendentsSenseDia(); // arrenca amb “sense dia”
   setUndoRedoDisabled();
 });
+
+function openTaskModal() {
+  const tascaBuida = {
+    id: crearId(),
+    text: "",
+    description: "",
+    priority: 3,
+    done: false,
+    repeat: "",
+    repeatDay: ""
+  };
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `
+    <div class="form-group">
+      <label>Títol</label>
+      <input type="text" id="edit-task-title" />
+    </div>
+    <div class="form-group">
+      <label>Descripció</label>
+      <textarea id="edit-task-desc"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Prioritat (1-5)</label>
+        <select id="edit-task-priority">
+          <option value="1">1 - Molt baixa</option>
+          <option value="2">2 - Baixa</option>
+          <option value="3">3 - Mitjana</option>
+          <option value="4">4 - Alta</option>
+          <option value="5">5 - Molt alta</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Marcar com a feta</label>
+        <select id="edit-task-done">
+          <option value="false">No</option>
+          <option value="true">Sí</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Repetició</label>
+      <select id="edit-task-repeat">
+        <option value="">Cap</option>
+        <option value="daily">Diària</option>
+        <option value="weekly">Setmanal</option>
+        <option value="monthly">Mensual</option>
+      </select>
+    </div>
+    <div class="form-group" id="repeat-weekday-group" style="display:none;">
+      <label>Dia de la setmana</label>
+      <select id="edit-task-repeat-day">
+        <option value="1">Dilluns</option>
+        <option value="2">Dimarts</option>
+        <option value="3">Dimecres</option>
+        <option value="4">Dijous</option>
+        <option value="5">Divendres</option>
+        <option value="6">Dissabte</option>
+        <option value="0">Diumenge</option>
+      </select>
+    </div>
+  `;
+  wrap.querySelector("#edit-task-title").value = "";
+  wrap.querySelector("#edit-task-desc").value  = "";
+  wrap.querySelector("#edit-task-priority").value = "3";
+  wrap.querySelector("#edit-task-done").value = "false";
+
+  // Mostra/oculta el selector de dia de la setmana
+  wrap.querySelector("#edit-task-repeat").onchange = function() {
+    wrap.querySelector("#repeat-weekday-group").style.display =
+      this.value === "weekly" ? "" : "none";
+  };
+
+  openModal({
+    title: "Afegir Tasca",
+    bodyNode: wrap,
+    showClose: true,
+    actions: [
+      { label: "Cancel·lar", onClick: () => false },
+      {
+        label: "Crear",
+        primary: true,
+        onClick: async () => {
+          const text = wrap.querySelector("#edit-task-title").value.trim();
+          if (!text) return true; // no cerrar si vacío
+          const docId = selectedDate ?? UNASSIGNED_ID;
+          const docSnap = await db.collection("tasques").doc(docId).get();
+          const tasques = docSnap.exists ? docSnap.data().tasques : [];
+          const nova = {
+            id: crearId(),
+            text,
+            description: wrap.querySelector("#edit-task-desc").value,
+            priority: parseInt(wrap.querySelector("#edit-task-priority").value),
+            done: wrap.querySelector("#edit-task-done").value === "true",
+            repeat: wrap.querySelector("#edit-task-repeat").value,
+            repeatDay: wrap.querySelector("#edit-task-repeat-day")?.value ?? ""
+          };
+          tasques.push(nova);
+          pushUndo({ type: "add", day: docId, id: nova.id, task: nova });
+          await guardarTasques(docId, tasques);
+          return false;
+        }
+      }
+    ]
+  });
+}
+
+function parseLinks(text) {
+  return text.replace(
+    /(https?:\/\/[^\s]+)/g,
+    '<a href="$1" target="_blank">$1</a>'
+  );
+}
+
+function openViewModal(tasca) {
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `
+    <div style="margin-bottom:8px;">
+      <strong style="font-size:1.15em;color:#2596be;">${tasca.text}</strong>
+    </div>
+    <div style="margin-bottom:8px;">
+      <span style="color:#888;">Prioritat:</span> ${tasca.priority ?? 3}
+    </div>
+    <div style="margin-bottom:8px;">
+      <span style="color:#888;">Descripció:</span><br>
+      <div style="white-space:pre-line;">${parseLinks(tasca.description ?? "")}</div>
+    </div>
+    <div style="margin-bottom:8px;">
+      <span style="color:#888;">Estat:</span> ${tasca.done ? '<span style="color:#27ae60;">Feta</span>' : '<span style="color:#e74c3c;">Pendent</span>'}
+    </div>
+  `;
+  openModal({
+    title: "Vista de tasca",
+    bodyNode: wrap,
+    showClose: true,
+    actions: [
+      { label: "Tancar", onClick: () => false }
+    ]
+  });
+}

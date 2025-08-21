@@ -36,6 +36,12 @@
           <button id="show-trash" class="pill">🗑️ Paperera</button>
         </div>
 
+        <!-- Requadre separat: Cerca (NO sticky) -->
+        <div id="search-card" class="card">
+          <input type="text" id="search-input" placeholder="Cerca tasques..." />
+          <ul id="search-results" class="search-results"></ul>
+        </div>
+
         <!-- Panell del dia / sense dia -->
         <div id="task-panel" class="task-box">
           <div id="task-panel-header">
@@ -46,8 +52,7 @@
           <ul id="task-list"></ul>
 
           <div class="task-input-container">
-            <input type="text" id="new-task" placeholder="Afegeix una tasca..." />
-            <button id="add-task">Afegir</button>
+            <button id="add-task-modal">Afegir Tasca</button>
           </div>
         </div>
       </div>
