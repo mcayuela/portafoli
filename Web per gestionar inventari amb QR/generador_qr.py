@@ -21,7 +21,7 @@ with open(fitxer_json, 'r', encoding='utf-8') as f:
 
 # Font per escriure el text (pots canviar la ruta/font si vols)
 try:
-    font = ImageFont.truetype("arial.ttf", 24)
+    font = ImageFont.truetype("arial.ttf", 60)  # Augmenta la mida de la font
 except:
     font = ImageFont.load_default()
 
@@ -43,7 +43,7 @@ for dispositiu in dispositius:
         qr_img = qr_img.rotate(90, expand=True)
 
         # Crea imatge pel text
-        text_img = Image.new("RGB", (qr_img.height, 60), "white")
+        text_img = Image.new("RGB", (qr_img.height, 120), "white")  # Augmenta l'alçada de la imatge del text
         draw = ImageDraw.Draw(text_img)
         bbox = draw.textbbox((0, 0), text, font=font)
         w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
