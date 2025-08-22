@@ -12,6 +12,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage();
 
 // ==============================
 // Helpers & constants
@@ -507,57 +508,6 @@ function openEditModal(tasca) {
   wrap.querySelector("#edit-task-priority").value = String(tasca.priority ?? 3);
   wrap.querySelector("#edit-task-done").value = String(!!tasca.done);
 
-  // Grup d’imatges amb botó
-  const imgGroup = document.createElement("div");
-  imgGroup.className = "form-group";
-  imgGroup.innerHTML = `
-    <label>Imatges</label>
-    <button type="button" id="edit-add-image-btn" class="btn">Afegir imatge</button>
-    <input type="file" id="edit-task-images" multiple accept="image/*" style="display:none;" />
-    <div id="edit-task-image-preview" style="display:flex;gap:4px;margin-top:6px;"></div>
-  `;
-  wrap.appendChild(imgGroup);
-
-  // Mostra les imatges existents
-  const previewDiv = imgGroup.querySelector("#edit-task-image-preview");
-  (tasca.images ?? []).forEach(url => {
-    const img = document.createElement("img");
-    img.src = url;
-    img.style.width = "40px";
-    img.style.height = "40px";
-    img.style.objectFit = "cover";
-    img.style.border = "1px solid #ccc";
-    img.style.cursor = "pointer";
-    img.onclick = () => openImageModal(url);
-    previewDiv.appendChild(img);
-  });
-
-  // Botó que obre el selector
-  const imageInput = imgGroup.querySelector("#edit-task-images");
-  const addImageBtn = imgGroup.querySelector("#edit-add-image-btn");
-  let imageFiles = [];
-  addImageBtn.onclick = () => imageInput.click();
-
-  // Previsualització de noves miniatures
-  imageInput.onchange = function() {
-    imageFiles = Array.from(this.files);
-    imageFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = document.createElement("img");
-        img.src = e.target.result;
-        img.style.width = "40px";
-        img.style.height = "40px";
-        img.style.objectFit = "cover";
-        img.style.border = "1px solid #ccc";
-        img.style.cursor = "pointer";
-        img.onclick = () => openImageModal(e.target.result);
-        previewDiv.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
   openModal({
     title: "Editar Tasca",
     bodyNode: wrap,
@@ -579,21 +529,11 @@ function openEditModal(tasca) {
               priority: tasques[idx].priority,
               done: tasques[idx].done
             };
-            let imageUrls = tasca.images ?? [];
-            if (imageFiles.length) {
-              for (const file of imageFiles) {
-                const ref = firebase.storage().ref().child(`tasques/${crearId()}_${file.name}`);
-                await ref.put(file);
-                const url = await ref.getDownloadURL();
-                imageUrls.push(url);
-              }
-            }
             const next = {
               text: wrap.querySelector("#edit-task-title").value,
               description: wrap.querySelector("#edit-task-desc").value,
               priority: parseInt(wrap.querySelector("#edit-task-priority").value),
-              done: wrap.querySelector("#edit-task-done").value === "true",
-              images: imageUrls
+              done: wrap.querySelector("#edit-task-done").value === "true"
             };
             pushUndo({ type: "edit", day: docId, id: tasca.id, previous, next });
             tasques[idx] = { ...tasques[idx], ...next };
@@ -1110,85 +1050,88 @@ document.getElementById("next-month").onclick = () => {
   renderCalendar();
 };
 
-document.getElementById("search-input").oninput = async function() {
-  const term = this.value.trim().toLowerCase();
+let searchTimeout = null;
+document.getElementById("search-input").oninput = function() {
   const resultsList = document.getElementById("search-results");
-  resultsList.innerHTML = "";
+  // Animació: esvaeix la llista
+  resultsList.classList.add("fade-out");
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(async () => {
+    const term = this.value.trim().toLowerCase();
+    resultsList.innerHTML = "";
 
-  if (!term) return;
-
-  // Cerca a tots els dies, evita duplicats per id
-  const snapshot = await db.collection("tasques").get();
-  const seenIds = new Set();
-  const results = [];
-  snapshot.forEach(doc => {
-    const docId = doc.id;
-    const tasques = doc.data().tasques || [];
-    tasques.forEach(t => {
-      if (
-        (t.text.toLowerCase().includes(term) ||
-        (t.description ?? "").toLowerCase().includes(term))
-        && !seenIds.has(t.id)
-      ) {
-        seenIds.add(t.id);
-        results.push({
-          ...t,
-          docId,
-        });
-      }
-    });
-  });
-
-  if (!results.length) {
-    resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cap resultat</li>";
-    return;
-  }
-
-  results.forEach(tasca => {
-    const li = document.createElement("li");
-    li.className = "search-result-item";
-
-    // Títol clickable
-    const title = document.createElement("span");
-    title.className = "search-result-title";
-    title.textContent = tasca.text;
-    title.onclick = () => {
-      if (tasca.docId === UNASSIGNED_ID) {
-        mostrarTasquesPendentsSenseDia();
-      } else {
-        const parts = tasca.docId.split("-");
-        if (parts.length === 3) {
-          // Format dia-mes-any
-          const data = new Date(parts[0], parts[1] - 1, parts[2]);
-          mostrarTasquesDelDia(data);
-        }
-      }
-    };
-
-    // Data
-    const date = document.createElement("span");
-    date.className = "search-result-date";
-    if (tasca.docId === UNASSIGNED_ID) {
-      date.textContent = "Sense dia";
-    } else {
-      // Format dia-mes-any
-      const parts = tasca.docId.split("-");
-      if (parts.length === 3) {
-        date.textContent = `${parts[2]}-${parts[1]}-${parts[0]}`;
-      } else {
-        date.textContent = tasca.docId;
-      }
+    if (!term) {
+      resultsList.classList.remove("fade-out");
+      return;
     }
 
-    li.appendChild(title);
-    li.appendChild(date);
+    // Cerca a tots els dies, evita duplicats per id
+    const snapshot = await db.collection("tasques").get();
+    const seenIds = new Set();
+    const results = [];
+    snapshot.forEach(doc => {
+      const docId = doc.id;
+      const tasques = doc.data().tasques || [];
+      tasques.forEach(t => {
+        if (
+          (t.text.toLowerCase().includes(term) ||
+          (t.description ?? "").toLowerCase().includes(term))
+          && !seenIds.has(t.id)
+        ) {
+          seenIds.add(t.id);
+          results.push({
+            ...t,
+            docId,
+          });
+        }
+      });
+    });
 
-    // Clic a tota la fila per anar al dia
-    li.onclick = () => title.onclick();
-
-    resultsList.appendChild(li);
-  });
+    if (!results.length) {
+      resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cap resultat</li>";
+    } else {
+      results.forEach(tasca => {
+        const li = document.createElement("li");
+        li.className = "search-result-item";
+        const title = document.createElement("span");
+        title.className = "search-result-title";
+        title.textContent = tasca.text;
+        title.onclick = () => {
+          if (tasca.docId === UNASSIGNED_ID) {
+            mostrarTasquesPendentsSenseDia();
+          } else {
+            const parts = tasca.docId.split("-");
+            if (parts.length === 3) {
+              const data = new Date(parts[0], parts[1] - 1, parts[2]);
+              mostrarTasquesDelDia(data);
+            }
+          }
+        };
+        const date = document.createElement("span");
+        date.className = "search-result-date";
+        if (tasca.docId === UNASSIGNED_ID) {
+          date.textContent = "Sense dia";
+        } else {
+          const parts = tasca.docId.split("-");
+          if (parts.length === 3) {
+            date.textContent = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          } else {
+            date.textContent = tasca.docId;
+          }
+        }
+        li.appendChild(title);
+        li.appendChild(date);
+        li.onclick = () => title.onclick();
+        resultsList.appendChild(li);
+      });
+    }
+    // Animació: apareix la llista
+    resultsList.classList.remove("fade-out");
+    resultsList.classList.add("fade-in");
+    setTimeout(() => resultsList.classList.remove("fade-in"), 300);
+  }, 300); // 300ms de debounce
 };
+
 
 // ==============================
 // Inici
@@ -1198,6 +1141,61 @@ window.addEventListener("DOMContentLoaded", () => {
   mostrarTasquesPendentsSenseDia(); // arrenca amb “sense dia”
   setUndoRedoDisabled();
 });
+
+function parseLinks(text) {
+  // Replace URLs in text with clickable links
+  return text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+}
+
+function openViewModal(tasca) {
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `
+    <div style="margin-bottom:8px;">
+      <strong style="font-size:1.15em;color:#2596be;">${tasca.text}</strong>
+    </div>
+    <div style="margin-bottom:8px;">
+      <span style="color:#888;">Prioritat:</span> ${tasca.priority ?? 3}
+    </div>
+    <div style="margin-bottom:8px;">
+      <span style="color:#888;">Estat:</span> ${tasca.done ? '<span style="color:#27ae60;">Feta</span>' : '<span style="color:#e74c3c;">Pendent</span>'}
+    </div>
+    <div style="margin-bottom:8px;">
+      <span style="color:#888;">Descripció:</span><br>
+      <div style="white-space:pre-line;">${parseLinks(tasca.description ?? "")}</div>
+    </div>
+  `;
+
+  openModal({
+    title: "Detalls de la tasca",
+    bodyNode: wrap,
+    showClose: true,
+    actions: [
+      { label: "Tancar", onClick: () => false }
+    ]
+  });
+}
+
+function openImageModal(url) {
+  // Modal pantalla completa per imatge
+  const img = document.createElement("img");
+  img.src = url;
+  img.style.margin = "auto";
+  img.style.display = "block";
+  img.style.maxHeight = "90vh";
+  img.style.maxWidth = "90vw";
+  openModal({
+    title: "",
+    bodyNode: img,
+    showClose: true,
+    actions: []
+  });
+}
+
+function getSelectedDays() {
+  // Obté els valors dels checkboxes seleccionats
+  return Array.from(document.querySelectorAll("#repeat-weekday-checkboxes input:checked"))
+    .map(cb => parseInt(cb.value));
+}
 
 function openTaskModal() {
   const wrap = document.createElement("div");
@@ -1239,61 +1237,27 @@ function openTaskModal() {
       </select>
     </div>
     <div class="form-group" id="repeat-weekday-group" style="display:none;">
-      <label>Dia de la setmana</label>
-      <select id="edit-task-repeat-day">
-        <option value="1">Dilluns</option>
-        <option value="2">Dimarts</option>
-        <option value="3">Dimecres</option>
-        <option value="4">Dijous</option>
-        <option value="5">Divendres</option>
-        <option value="6">Dissabte</option>
-        <option value="0">Diumenge</option>
-      </select>
+      <label>Dies de la setmana</label>
+      <div id="repeat-weekday-checkboxes">
+        <label><input type="checkbox" value="1"> Dilluns</label>
+        <label><input type="checkbox" value="2"> Dimarts</label>
+        <label><input type="checkbox" value="3"> Dimecres</label>
+        <label><input type="checkbox" value="4"> Dijous</label>
+        <label><input type="checkbox" value="5"> Divendres</label>
+        <label><input type="checkbox" value="6"> Dissabte</label>
+        <label><input type="checkbox" value="0"> Diumenge</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Data final</label>
+      <input type="date" id="edit-task-repeat-end" />
     </div>
   `;
 
-  // Mostra/oculta el selector de dia de la setmana
+  // Mostra/oculta el selector de dies de la setmana
   wrap.querySelector("#edit-task-repeat").onchange = function() {
     wrap.querySelector("#repeat-weekday-group").style.display =
       this.value === "weekly" ? "" : "none";
-  };
-
-  // Afegir grup d’imatges amb botó
-  const imgGroup = document.createElement("div");
-  imgGroup.className = "form-group";
-  imgGroup.innerHTML = `
-    <label>Imatges</label>
-    <button type="button" id="edit-add-image-btn" class="btn">Afegir imatge</button>
-    <input type="file" id="edit-task-images" multiple accept="image/*" style="display:none;" />
-    <div id="edit-task-image-preview" style="display:flex;gap:4px;margin-top:6px;"></div>
-  `;
-  wrap.appendChild(imgGroup);
-
-  // Previsualització de noves miniatures
-  const previewDiv = imgGroup.querySelector("#edit-task-image-preview");
-  const imageInput = imgGroup.querySelector("#edit-task-images");
-  const addImageBtn = imgGroup.querySelector("#edit-add-image-btn");
-  let imageFiles = [];
-  addImageBtn.onclick = () => imageInput.click();
-
-  imageInput.onchange = function() {
-    previewDiv.innerHTML = "";
-    imageFiles = Array.from(this.files);
-    imageFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = document.createElement("img");
-        img.src = e.target.result;
-        img.style.width = "40px";
-        img.style.height = "40px";
-        img.style.objectFit = "cover";
-        img.style.border = "1px solid #ccc";
-        img.style.cursor = "pointer";
-        img.onclick = () => openImageModal(e.target.result);
-        previewDiv.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
   };
 
   openModal({
@@ -1307,32 +1271,60 @@ function openTaskModal() {
         primary: true,
         onClick: async () => {
           const text = wrap.querySelector("#edit-task-title").value.trim();
-          if (!text) return true; // no cerrar si vacío
+          if (!text) return true; // no tancar si està buit
           const docId = selectedDate ?? UNASSIGNED_ID;
           const docSnap = await db.collection("tasques").doc(docId).get();
           const tasques = docSnap.exists ? docSnap.data().tasques : [];
-          let imageUrls = [];
-          if (imageFiles.length) {
-            for (const file of imageFiles) {
-              const ref = firebase.storage().ref().child(`tasques/${crearId()}_${file.name}`);
-              await ref.put(file);
-              const url = await ref.getDownloadURL();
-              imageUrls.push(url);
-            }
-          }
-          const nova = {
+          const novaTasca = {
             id: crearId(),
             text,
             description: wrap.querySelector("#edit-task-desc").value,
             priority: parseInt(wrap.querySelector("#edit-task-priority").value),
             done: wrap.querySelector("#edit-task-done").value === "true",
-            repeat: wrap.querySelector("#edit-task-repeat").value,
-            repeatDay: wrap.querySelector("#edit-task-repeat-day")?.value ?? "",
-            images: imageUrls
           };
-          tasques.push(nova);
-          pushUndo({ type: "add", day: docId, id: nova.id, task: nova });
-          await guardarTasques(docId, tasques);
+
+          // Variables de repetició
+          const repeatType = wrap.querySelector("#edit-task-repeat").value;
+          const repeatDays = getSelectedDays();
+          const repeatEnd = wrap.querySelector("#edit-task-repeat-end").value;
+          const repeatGroupId = crearId();
+
+          if (!repeatType) {
+            // crea una sola tasca
+            await guardarTasques(docId, [...tasques, novaTasca]);
+          } else {
+            // crea múltiples tasques repetides
+            const tasquesRepetides = [];
+            let date = selectedDate ? new Date(selectedDate) : new Date();
+            const endDate = repeatEnd ? new Date(repeatEnd) : date;
+            while (date <= endDate) {
+              if (
+                (repeatType === "daily") ||
+                (repeatType === "weekly" && repeatDays.includes(date.getDay()))
+              ) {
+                tasquesRepetides.push({
+                  ...novaTasca,
+                  repeat: repeatType,
+                  repeatDays,
+                  repeatEnd,
+                  repeatGroupId
+                });
+                // Guarda la tasca al dia corresponent
+                const diaISO = obtenirDataISO(date);
+                const diaSnap = await db.collection("tasques").doc(diaISO).get();
+                const diaTasques = diaSnap.exists ? diaSnap.data().tasques : [];
+                diaTasques.push({
+                  ...novaTasca,
+                  repeat: repeatType,
+                  repeatDays,
+                  repeatEnd,
+                  repeatGroupId
+                });
+                await guardarTasques(diaISO, diaTasques);
+              }
+              date.setDate(date.getDate() + 1);
+            }
+          }
           return false;
         }
       }
@@ -1340,72 +1332,26 @@ function openTaskModal() {
   });
 }
 
-function parseLinks(text) {
-  // Replace URLs in text with clickable links
-  return text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
-}
-
-function openViewModal(tasca) {
-  const wrap = document.createElement("div");
-  wrap.innerHTML = `
-    <div style="margin-bottom:8px;">
-      <strong style="font-size:1.15em;color:#2596be;">${tasca.text}</strong>
-    </div>
-    <div style="margin-bottom:8px;">
-      <span style="color:#888;">Prioritat:</span> ${tasca.priority ?? 3}
-    </div>
-    <div style="margin-bottom:8px;">
-      <span style="color:#888;">Estat:</span> ${tasca.done ? '<span style="color:#27ae60;">Feta</span>' : '<span style="color:#e74c3c;">Pendent</span>'}
-    </div>
-    <div style="margin-bottom:8px;">
-      <span style="color:#888;">Descripció:</span><br>
-      <div style="white-space:pre-line;">${parseLinks(tasca.description ?? "")}</div>
-    </div>
-  `;
-
-  // Show images if any
-  if (tasca.images && tasca.images.length) {
-    const imgPreview = document.createElement("div");
-    imgPreview.style.display = "flex";
-    imgPreview.style.gap = "6px";
-    imgPreview.style.marginTop = "8px";
-    tasca.images.forEach(url => {
-      const img = document.createElement("img");
-      img.src = url;
-      img.style.width = "80px";
-      img.style.height = "80px";
-      img.style.objectFit = "cover";
-      img.style.border = "1px solid #ccc";
-      img.style.cursor = "pointer";
-      img.onclick = () => openImageModal(url);
-      imgPreview.appendChild(img);
+async function eliminarTasca(tasca, mode) {
+  if (mode === "nomesAquesta") {
+    // elimina només la tasca actual
+    const docSnap = await db.collection("tasques").doc(UNASSIGNED_ID).get();
+    const tasques = docSnap.exists ? docSnap.data().tasques : [];
+    const idx = tasques.findIndex(t => t.id === tasca.id);
+    if (idx >= 0) {
+      const eliminada = tasques.splice(idx, 1)[0];
+      pushUndo({ type: "delete", day: UNASSIGNED_ID, task: eliminada, position: idx });
+      tasquesEliminades.push({ ...eliminada, from: UNASSIGNED_ID, deletedAt: Date.now() });
+      await guardarTasques(UNASSIGNED_ID, tasques);
+    }
+  } else if (mode === "totesRepetides") {
+    // elimina totes les tasques amb el mateix repeatGroupId
+    const snapshot = await db.collection("tasques").get();
+    snapshot.forEach(doc => {
+      const tasques = doc.data().tasques || [];
+      const noves = tasques.filter(t => t.repeatGroupId !== tasca.repeatGroupId);
+      guardarTasques(doc.id, noves);
     });
-    wrap.appendChild(imgPreview);
   }
-
-  openModal({
-    title: "Detalls de la tasca",
-    bodyNode: wrap,
-    showClose: true,
-    actions: [
-      { label: "Tancar", onClick: () => false }
-    ]
-  });
-}
-
-function openImageModal(url) {
-  // Modal pantalla completa per imatge
-  const img = document.createElement("img");
-  img.src = url;
-  img.style.margin = "auto";
-  img.style.display = "block";
-  img.style.maxHeight = "90vh";
-  img.style.maxWidth = "90vw";
-  openModal({
-    title: "",
-    bodyNode: img,
-    showClose: true,
-    actions: []
-  });
 }
 
