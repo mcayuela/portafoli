@@ -475,6 +475,21 @@ button#add-task:hover {
 
 .modal-body {
   padding: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #2596be #eaf6fa;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+  background: #eaf6fa;
+  border-radius: 8px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #2596be;
+  border-radius: 8px;
 }
 
 .modal-actions {
@@ -691,7 +706,7 @@ button#add-task:hover {
 #repeat-weekday-checkboxes {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
   justify-content: flex-start;
@@ -714,7 +729,7 @@ button#add-task:hover {
 }
 
 #repeat-weekday-checkboxes label:hover {
-  background: #d4ecf6;
+  background: rgba(37,150,190,0.15);
   color: #2596be;
   border-color: #2596be;
 }
@@ -730,8 +745,13 @@ button#add-task:hover {
 
 .calendar-day.dia-especial {
   background: #ffeaea !important;
-  border-color: #e74c3c !important;
+  border-color: #bbbd41 !important;
   position: relative;
+}
+
+.calendar-day.dia-especial:hover {
+  background: rgb(252, 255, 87, 0.25) !important;
+  border-color: #bbbd41 !important;
 }
 
 .calendar-day.dia-especial:hover::after {
@@ -739,14 +759,61 @@ button#add-task:hover {
   left: 50%;
   top: 8px;
   transform: translateX(-50%);
-  background: #e74c3c;
+  background: rgb(252, 255, 87, 0.25);
   color: #fff;
   font-size: 0.98em;
   padding: 6px 18px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(231,76,60,0.13);
+  box-shadow: 0 2px 8px rgb(252, 255, 87, 0.25);
   white-space: pre-line;
   z-index: 10;
   pointer-events: none;
   position: absolute;
+}
+
+.special-day {
+  background: rgb(252, 255, 87, 0.25) !important;
+  border: 1.5px solid #bbbd41 !important;
+}
+.special-tooltip {
+  font-size: 1em;
+  pointer-events: none;
+  background: rgb(252, 255, 87, 0.25);
+  color: #a3a534;
+  border: 1.5px solid #bbbd41;
+  padding: 6px 18px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgb(252, 255, 87, 0.25);
+  white-space: pre-line;
+  z-index: 10;
+  position: absolute;
+}
+
+.festa-day {
+  background: rgba(39,174,96,0.18) !important;
+  border: 1.5px solid #27ae60 !important;
+}
+.festa-tooltip {
+  font-size: 1em;
+  pointer-events: none;
+}
+
+.calendar-context-menu .context-menu-item:hover {
+  background: rgba(37,150,190,0.40) !important;
+  border-radius: 5px;
+}
+
+#repeat-calendar-popup input[type="date"] {
+  border: 1.5px solid #2596be;
+  border-radius: 6px;
+  background: #eaf6fa;
+  color: #17608c;
+}
+#repeat-calendar-popup button {
+  background: #2596be;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
 }

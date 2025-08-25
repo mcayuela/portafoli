@@ -147,7 +147,7 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
   // Si estem a "sense dia"
   if (selectedDate == null) {
     // Només pendents, sense títol ni secció
-    const pendents = tasquesOriginals.filter(t => !t.done).slice().sort(ordenarPerPrioritat);
+    const pendents = tasquesOriginals.filter(t => !t.done && !t.specialDay).slice().sort(ordenarPerPrioritat);
     pendents.forEach((tasca) => {
       const realIndex = indexMap.get(tasca.id);
       if (realIndex === undefined) return;
@@ -280,8 +280,12 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
   }
 
   // Si NO estem a "sense dia", comportament normal
-  const pendents = tasquesOriginals.filter(t => !t.done).slice().sort(ordenarPerPrioritat);
-  const fetes    = tasquesOriginals.filter(t =>  t.done).slice().sort(ordenarPerPrioritat);
+  const pendents = tasquesOriginals
+    .filter(t => !t.done && !t.specialDay && !t.festaDay && t.text)
+    .slice().sort(ordenarPerPrioritat);
+  const fetes = tasquesOriginals
+    .filter(t => t.done && !t.specialDay && !t.festaDay && t.text)
+    .slice().sort(ordenarPerPrioritat);
 
   const afegirSeccio = (titol, llista, color) => {
     if (!llista.length) return;
@@ -481,27 +485,11 @@ function openEditModal(tasca) {
         </select>
       </div>
     </div>
-    <div class="form-group" style="margin-bottom:10px;">
-      <label>
-        <input type="checkbox" id="edit-task-special-day" />
-        Dia especial
-      </label>
-      <div id="special-day-motiu-group" style="display:none; margin-top:8px;">
-        <label for="edit-task-special-motiu" style="font-weight:600;">Motiu:</label>
-        <input type="text" id="edit-task-special-motiu" placeholder="Escriu el motiu..." style="width:80%;" />
-      </div>
-    </div>
   `;
-  wrap.querySelector("#edit-task-title").value = tasca.text;
+  wrap.querySelector("#edit-task-title").value = tasca.text ?? "";
   wrap.querySelector("#edit-task-desc").value  = tasca.description ?? "";
   wrap.querySelector("#edit-task-priority").value = String(tasca.priority ?? 3);
   wrap.querySelector("#edit-task-done").value = String(!!tasca.done);
-
-  const specialCheckbox = wrap.querySelector("#edit-task-special-day");
-  const motiuGroup = wrap.querySelector("#special-day-motiu-group");
-  specialCheckbox.onchange = function() {
-    motiuGroup.style.display = this.checked ? "" : "none";
-  };
 
   openModal({
     title: "Editar Tasca",
@@ -513,7 +501,10 @@ function openEditModal(tasca) {
         label: "Guardar",
         primary: true,
         onClick: async () => {
-          const docId = selectedDate ?? UNASSIGNED_ID;
+          // Troba el docId correcte
+          let docId = selectedDate ?? UNASSIGNED_ID;
+          // Si la tasca té la propietat data, usa-la
+          if (tasca.data) docId = tasca.data;
           const docSnap = await db.collection("tasques").doc(docId).get();
           const tasques = docSnap.exists ? docSnap.data().tasques : [];
           const idx = tasques.findIndex(t => t.id === tasca.id);
@@ -533,6 +524,7 @@ function openEditModal(tasca) {
             pushUndo({ type: "edit", day: docId, id: tasca.id, previous, next });
             tasques[idx] = { ...tasques[idx], ...next };
             await guardarTasques(docId, tasques);
+            escoltarTasques(docId); // Actualitza la llista
           }
           return false;
         }
@@ -701,19 +693,23 @@ async function renderCalendar() {
     const diaSetmana = date.getDay();
     if (diaSetmana === 0 || diaSetmana === 6) {
       div.classList.add("weekend");
-    } else {
-      div.onclick = () => {
-        if (taskBeingAssigned) {
-          assignarTascaADia(taskBeingAssigned, iso);
-          taskBeingAssigned = null;
-        } else {
-          mostrarTasquesDelDia(date);
-        }
-      };
     }
+    // Ara tots els dies (inclòs especial) tenen clic!
+    div.onclick = () => {
+      if (taskBeingAssigned) {
+        assignarTascaADia(taskBeingAssigned, iso);
+        taskBeingAssigned = null;
+      } else {
+        mostrarTasquesDelDia(date);
+      }
+    };
 
-    const pendents = comptadorTasques.filter((t) => t.data === iso && !t.done).length;
-    const fetes    = comptadorTasques.filter((t) => t.data === iso &&  t.done).length;
+    const pendents = comptadorTasques.filter(
+      t => t.data === iso && !t.done && (!t.specialDay || t.text) && (!t.festaDay || t.text)
+    ).length;
+    const fetes = comptadorTasques.filter(
+      t => t.data === iso && t.done && (!t.specialDay || t.text) && (!t.festaDay || t.text)
+    ).length;
 
     let tasquesHtml = "";
     if (pendents > 0 || fetes > 0) {
@@ -728,6 +724,103 @@ async function renderCalendar() {
       ${tasquesHtml}
     `;
     calendar.appendChild(div);
+
+    // Comprova si el dia té una tasca especial
+    const tasquesDia = comptadorTasques.filter(t => t.data === iso);
+    const especial = tasquesDia.some(t => t.specialDay);
+    const festa = tasquesDia.some(t => t.festaDay);
+
+    if (especial) {
+      div.classList.add("special-day");
+      const motiu = tasquesDia.find(t => t.specialDay && t.specialMotiu)?.specialMotiu || "";
+      if (motiu) div.setAttribute("data-motiu", motiu);
+    }
+    if (festa) {
+      div.classList.add("festa-day");
+      const motiu = tasquesDia.find(t => t.festaDay && t.festaMotiu)?.festaMotiu || "";
+      if (motiu) div.setAttribute("data-festa-motiu", motiu);
+    }
+
+    // Tooltip per dies especials
+    if (especial && div.getAttribute("data-motiu")) {
+      div.addEventListener("mouseenter", showSpecialTooltip);
+      div.addEventListener("mouseleave", removeSpecialTooltip);
+      div.addEventListener("click", showSpecialTooltip);
+
+      function showSpecialTooltip(e) {
+        removeSpecialTooltip();
+        let tooltip = document.createElement("div");
+        tooltip.className = "special-tooltip";
+        tooltip.textContent = div.getAttribute("data-motiu");
+        tooltip.style.position = "absolute";
+        tooltip.style.background = "rgb(252, 255, 255)";
+        tooltip.style.border = "1px solid #bbbd41";
+        tooltip.style.color = "#bbbd41";
+        tooltip.style.padding = "6px 12px";
+        tooltip.style.borderRadius = "6px";
+        tooltip.style.zIndex = "1000";
+        tooltip.style.left = (div.getBoundingClientRect().left + window.scrollX) + "px";
+        tooltip.style.top = (div.getBoundingClientRect().bottom + window.scrollY + 2) + "px";
+        tooltip.id = "special-tooltip";
+        document.body.appendChild(tooltip);
+
+        // Elimina el tooltip si cliques fora o a un altre dia
+        setTimeout(() => {
+          document.addEventListener("mousedown", globalTooltipRemover);
+        }, 10);
+      }
+      function removeSpecialTooltip() {
+        const tooltip = document.getElementById("special-tooltip");
+        if (tooltip) tooltip.remove();
+        document.removeEventListener("mousedown", globalTooltipRemover);
+      }
+      function globalTooltipRemover(e) {
+        if (!div.contains(e.target)) removeSpecialTooltip();
+      }
+    }
+
+    // Tooltip per dies de festa
+    if (festa && div.getAttribute("data-festa-motiu")) {
+      div.addEventListener("mouseenter", showFestaTooltip);
+      div.addEventListener("mouseleave", removeFestaTooltip);
+      div.addEventListener("click", showFestaTooltip);
+
+      function showFestaTooltip(e) {
+        removeFestaTooltip();
+        let tooltip = document.createElement("div");
+        tooltip.className = "festa-tooltip";
+        tooltip.textContent = div.getAttribute("data-festa-motiu");
+        tooltip.style.position = "absolute";
+        tooltip.style.background = "#fff";
+        tooltip.style.border = "1px solid #27ae60";
+        tooltip.style.color = "#27ae60";
+        tooltip.style.padding = "6px 12px";
+        tooltip.style.borderRadius = "6px";
+        tooltip.style.zIndex = "1000";
+        tooltip.style.left = (div.getBoundingClientRect().left + window.scrollX) + "px";
+        tooltip.style.top = (div.getBoundingClientRect().bottom + window.scrollY + 2) + "px";
+        tooltip.id = "festa-tooltip";
+        document.body.appendChild(tooltip);
+
+        setTimeout(() => {
+          document.addEventListener("mousedown", globalFestaTooltipRemover);
+        }, 10);
+      }
+      function removeFestaTooltip() {
+        const tooltip = document.getElementById("festa-tooltip");
+        if (tooltip) tooltip.remove();
+        document.removeEventListener("mousedown", globalFestaTooltipRemover);
+      }
+      function globalFestaTooltipRemover(e) {
+        if (!div.contains(e.target)) removeFestaTooltip();
+      }
+    }
+
+    // Menú contextual per al dia
+    div.oncontextmenu = function(e) {
+      e.preventDefault();
+      openDayContextMenu(div, iso);
+    };
   }
 }
 
@@ -840,6 +933,8 @@ async function assignarTascaADia(taskData, nouDia) {
     await guardarTasques(nouDia, toTasks);
     pushUndo({ type: "add", day: nouDia, id: newId, task: nova });
   }
+
+  renderCalendar(); // <-- afegeix aquesta línia
 }
 
 // ==============================
@@ -1200,7 +1295,73 @@ function openTaskModal() {
         </select>
       </div>
     </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label id="edit-task-title">Repetició:</label>
+      <select id="edit-task-repeat-type">
+        <option value="">Cap</option>
+        <option value="diaria">Diària</option>
+        <option value="setmanal">Setmanal</option>
+        <option value="mensual">Mensual</option>
+      </select>
+      <div id="repeat-options" style="margin-top:8px;display:none;">
+        <!-- S'omplirà dinàmicament -->
+      </div>
+    </div>
   `;
+
+  const repeatType = wrap.querySelector("#edit-task-repeat-type");
+  const repeatOptions = wrap.querySelector("#repeat-options");
+  repeatType.onchange = function() {
+    repeatOptions.innerHTML = "";
+    repeatOptions.style.display = this.value ? "" : "none";
+    if (this.value === "diaria") {
+      repeatOptions.innerHTML = `
+        <div id="repeat-weekday-checkboxes">
+          <label><input type="checkbox" value="1" /> Dilluns</label>
+          <label><input type="checkbox" value="2" /> Dimarts</label>
+          <label><input type="checkbox" value="3" /> Dimecres</label>
+          <label><input type="checkbox" value="4" /> Dijous</label>
+          <label><input type="checkbox" value="5" /> Divendres</label>
+        </div>
+        <label style="color:#2596be;">Data final de repetició:</label>
+        <input type="text" id="edit-task-repeat-end" readonly style="width:120px; margin-right:8px;" />
+        <button id="open-repeat-calendar" type="button" style="background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">Calendari</button>
+        <div id="repeat-calendar-popup" style="display:none;position:absolute;z-index:1001;"></div>
+      `;
+
+      // Només aquí existeix el botó!
+      const repeatEndInput = repeatOptions.querySelector("#edit-task-repeat-end");
+      const calendarBtn = repeatOptions.querySelector("#open-repeat-calendar");
+      const calendarPopup = repeatOptions.querySelector("#repeat-calendar-popup");
+
+      calendarBtn.onclick = function(e) {
+        calendarPopup.style.display = "";
+        calendarPopup.innerHTML = `
+          <input type="date" id="repeat-end-date" style="font-size:1em;padding:6px;border-radius:6px;border:1px solid #2596be;" />
+          <button id="set-repeat-end" style="margin-left:8px;background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">OK</button>
+        `;
+        calendarPopup.style.left = calendarBtn.getBoundingClientRect().left + window.scrollX + "px";
+        calendarPopup.style.top = calendarBtn.getBoundingClientRect().bottom + window.scrollY + "px";
+
+        calendarPopup.querySelector("#set-repeat-end").onclick = function() {
+          const val = calendarPopup.querySelector("#repeat-end-date").value;
+          if (val) {
+            repeatEndInput.value = val;
+            calendarPopup.style.display = "none";
+          }
+        };
+        setTimeout(() => {
+          document.addEventListener("mousedown", function handler(ev) {
+            if (!calendarPopup.contains(ev.target) && ev.target !== calendarBtn) {
+              calendarPopup.style.display = "none";
+              document.removeEventListener("mousedown", handler);
+            }
+          });
+        }, 10);
+      };
+    }
+    // No facis res per setmanal/mensual aquí!
+  };
 
   openModal({
     title: "Afegir Tasca",
@@ -1217,14 +1378,57 @@ function openTaskModal() {
           const docId = selectedDate ?? UNASSIGNED_ID;
           const docSnap = await db.collection("tasques").doc(docId).get();
           const tasques = docSnap.exists ? docSnap.data().tasques : [];
-          const novaTasca = {
-            id: crearId(),
-            text,
-            description: wrap.querySelector("#edit-task-desc").value,
-            priority: parseInt(wrap.querySelector("#edit-task-priority").value),
-            done: wrap.querySelector("#edit-task-done").value === "true",
-          };
-          await guardarTasques(docId, [...tasques, novaTasca]);
+          // Recull la repetició
+          const repeatTypeVal = repeatType.value;
+          let repeat = null;
+          let tasquesACrear = [];
+          if (repeatTypeVal === "diaria") {
+            repeat = { type: repeatTypeVal };
+            repeat.days = Array.from(wrap.querySelectorAll("#repeat-weekday-checkboxes input[type=checkbox]:checked")).map(cb => parseInt(cb.value));
+            // Recupera el valor de repeatEndInput aquí!
+            const repeatEndInput = wrap.querySelector("#edit-task-repeat-end");
+            const endDateStr = repeatEndInput ? repeatEndInput.value : "";
+            let baseDate = selectedDate ? new Date(selectedDate) : new Date();
+            let dates = [];
+            if (endDateStr) {
+              let endDate = new Date(endDateStr);
+              let d = new Date(baseDate);
+              while (d <= endDate) {
+                if (repeat.days.includes(d.getDay())) {
+                  dates.push(obtenirDataISO(d));
+                }
+                d.setDate(d.getDate() + 1);
+              }
+            }
+            // Guarda la tasca a cada dia calculat
+            for (const iso of dates) {
+              const docSnap = await db.collection("tasques").doc(iso).get();
+              const tasques = docSnap.exists ? docSnap.data().tasques : [];
+              tasques.push({
+                id: crearId(),
+                text,
+                description: wrap.querySelector("#edit-task-desc").value,
+                priority: parseInt(wrap.querySelector("#edit-task-priority").value),
+                done: wrap.querySelector("#edit-task-done").value === "true",
+                repeat: null
+              });
+              await guardarTasques(iso, tasques);
+            }
+          } else {
+            // Tasca normal o setmanal/mensual
+            const docId = selectedDate ?? UNASSIGNED_ID;
+            const docSnap = await db.collection("tasques").doc(docId).get();
+            const tasques = docSnap.exists ? docSnap.data().tasques : [];
+            tasques.push({
+              id: crearId(),
+              text,
+              description: wrap.querySelector("#edit-task-desc").value,
+              priority: parseInt(wrap.querySelector("#edit-task-priority").value),
+              done: wrap.querySelector("#edit-task-done").value === "true",
+              repeat
+            });
+            await guardarTasques(docId, tasques);
+          }
           escoltarTasques(selectedDate ?? UNASSIGNED_ID);
           return false;
         }
@@ -1233,29 +1437,158 @@ function openTaskModal() {
   });
 }
 
-async function eliminarTasca(tasca, mode) {
-  const docId = selectedDate ?? UNASSIGNED_ID;
-  if (mode === "nomesAquesta") {
-    // elimina només la tasca actual
-    const docSnap = await db.collection("tasques").doc(docId).get();
-    const tasques = docSnap.exists ? docSnap.data().tasques : [];
-    const idx = tasques.findIndex(t => t.id === tasca.id);
-    if (idx >= 0) {
-      const eliminada = tasques.splice(idx, 1)[0];
-      pushUndo({ type: "delete", day: docId, task: eliminada, position: idx });
-      tasquesEliminades.push({ ...eliminada, from: docId, deletedAt: Date.now() });
-      await guardarTasques(docId, tasques);
-      escoltarTasques(docId); // Actualitza la vista
-    }
-  } else if (mode === "totesRepetides") {
-    // elimina totes les tasques amb el mateix repeatGroupId
-    const snapshot = await db.collection("tasques").get();
-    snapshot.forEach(doc => {
-      const tasques = doc.data().tasques || [];
-      const noves = tasques.filter(t => t.repeatGroupId !== tasca.repeatGroupId);
-      guardarTasques(doc.id, noves);
+function openDayContextMenu(dayDiv, iso) {
+  document.querySelectorAll(".calendar-context-menu").forEach(m => m.remove());
+
+  const tasquesDia = comptadorTasques.filter(t => t.data === iso);
+  const especial = tasquesDia.some(t => t.specialDay);
+
+  const menu = document.createElement("div");
+  menu.className = "calendar-context-menu";
+  menu.style.position = "absolute";
+  menu.style.left = (dayDiv.getBoundingClientRect().left + window.scrollX) + "px";
+  menu.style.top = (dayDiv.getBoundingClientRect().bottom + window.scrollY) + "px";
+  menu.style.background = "#fff";
+  menu.style.border = "1px solid #ccc";
+  menu.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
+  menu.style.zIndex = "1000";
+  menu.style.padding = "8px";
+  menu.style.borderRadius = "8px";
+  menu.innerHTML = `
+    <div class="context-menu-item" id="toggle-special-day" style="cursor:pointer;padding:6px 12px;">
+      ${especial ? "Desmarcar com a dia especial" : "Marcar com a dia especial"}
+    </div>
+    <div class="context-menu-item" id="toggle-festa-day" style="cursor:pointer;padding:6px 12px;">
+      Marcar com a dia de Festa
+    </div>
+    <div class="context-menu-item" id="delete-all-tasks" style="cursor:pointer;padding:6px 12px;">
+      Borrar totes les tasques del dia
+    </div>
+  `;
+  document.body.appendChild(menu);
+
+  // Hover blauet
+  menu.querySelectorAll(".context-menu-item").forEach(item => {
+    item.onmouseenter = () => item.style.background = "rgba(37,150,190,0.18)";
+    item.onmouseleave = () => item.style.background = "";
+  });
+
+  setTimeout(() => {
+    document.addEventListener("click", function handler(e) {
+      if (!menu.contains(e.target)) {
+        menu.remove();
+        document.removeEventListener("click", handler);
+      }
     });
-    escoltarTasques(docId); // Actualitza la vista
-  }
+  }, 10);
+
+  menu.querySelector("#toggle-special-day").onclick = async () => {
+    menu.remove();
+    if (especial) {
+      const docSnap = await db.collection("tasques").doc(iso).get();
+      let tasques = docSnap.exists ? docSnap.data().tasques : [];
+      tasques = tasques.filter(t => !t.specialDay);
+      await guardarTasques(iso, tasques);
+      escoltarTasques(iso);
+    } else {
+      openSpecialDayModal(iso);
+    }
+  };
+
+  menu.querySelector("#toggle-festa-day").onclick = async () => {
+    menu.remove();
+    openFestaDayModal(iso);
+  };
+
+  menu.querySelector("#delete-all-tasks").onclick = async () => {
+    menu.remove();
+    await guardarTasques(iso, []);
+    escoltarTasques(iso);
+  };
 }
 
+function openSpecialDayModal(iso) {
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `
+    <div class="form-group">
+      <label for="special-day-motiu" style="font-weight:600;">Motiu del dia especial:</label>
+      <input type="text" id="special-day-motiu" placeholder="Escriu el motiu..." style="width:90%;" />
+    </div>
+  `;
+  openModal({
+    title: "Marcar dia com a especial",
+    bodyNode: wrap,
+    showClose: true,
+    actions: [
+      { label: "Cancel·lar", onClick: () => false },
+      {
+        label: "Guardar",
+        primary: true,
+        onClick: async () => {
+          const motiu = wrap.querySelector("#special-day-motiu").value.trim();
+          // Guarda el dia especial a Firestore
+          const docSnap = await db.collection("tasques").doc(iso).get();
+          const tasques = docSnap.exists ? docSnap.data().tasques : [];
+          // Marca el dia especial (guardem com una tasca especial invisible)
+          let found = tasques.find(t => t.specialDay);
+          if (found) {
+            found.specialMotiu = motiu;
+          } else {
+            tasques.push({
+              id: crearId(),
+              text: "",
+              specialDay: true,
+              specialMotiu: motiu
+            });
+          }
+          await guardarTasques(iso, tasques);
+          escoltarTasques(iso);
+          return false;
+        }
+      }
+    ]
+  });
+}
+
+function openFestaDayModal(iso) {
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `
+    <div class="form-group">
+      <label for="festa-day-motiu" style="font-weight:600;">Motiu dia de festa:</label>
+      <input type="text" id="festa-day-motiu" placeholder="Escriu el motiu..." style="width:90%;" />
+    </div>
+  `;
+  openModal({
+    title: "Marcar dia com a Festa",
+    bodyNode: wrap,
+    showClose: true,
+    actions: [
+      { label: "Cancel·lar", onClick: () => false },
+      {
+        label: "Guardar",
+        primary: true,
+        onClick: async () => {
+          const motiu = wrap.querySelector("#festa-day-motiu").value.trim();
+          // Guarda el dia de festa a Firestore
+          const docSnap = await db.collection("tasques").doc(iso).get();
+          const tasques = docSnap.exists ? docSnap.data().tasques : [];
+          // Marca el dia de festa (guardem com una tasca especial invisible)
+          let found = tasques.find(t => t.festaDay);
+          if (found) {
+            found.festaMotiu = motiu;
+          } else {
+            tasques.push({
+              id: crearId(),
+              text: "",
+              festaDay: true,
+              festaMotiu: motiu
+            });
+          }
+          await guardarTasques(iso, tasques);
+          escoltarTasques(iso);
+          return false;
+        }
+      }
+    ]
+  });
+}
