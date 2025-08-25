@@ -1200,28 +1200,7 @@ function openTaskModal() {
         </select>
       </div>
     </div>
-    <div class="form-group" style="margin-bottom:10px;">
-      <label>
-        <input type="checkbox" id="edit-task-special-day" />
-        Dia especial
-      </label>
-      <div id="special-day-motiu-group" style="display:none; margin-top:8px;">
-        <label for="edit-task-special-motiu" style="font-weight:600;">Motiu:</label>
-        <input type="text" id="edit-task-special-motiu" placeholder="Escriu el motiu..." style="width:80%;" />
-      </div>
-    </div>
   `;
-
-  wrap.querySelector("#edit-task-repeat").onchange = function() {
-    wrap.querySelector("#repeat-weekday-group").style.display =
-      this.value === "weekly" ? "" : "none";
-  };
-
-  // Funció per obtenir dies seleccionats (laborables)
-  function getSelectedDays() {
-    return Array.from(wrap.querySelectorAll("#repeat-weekday-checkboxes input:checked"))
-      .map(cb => parseInt(cb.value));
-  }
 
   openModal({
     title: "Afegir Tasca",
@@ -1245,60 +1224,7 @@ function openTaskModal() {
             priority: parseInt(wrap.querySelector("#edit-task-priority").value),
             done: wrap.querySelector("#edit-task-done").value === "true",
           };
-
-          // Repetició
-          const repeatType = wrap.querySelector("#edit-task-repeat").value;
-          const repeatDays = getSelectedDays();
-          const repeatEnd = wrap.querySelector("#edit-task-repeat-end").value;
-          const repeatGroupId = crearId();
-
-          if (!repeatType) {
-            await guardarTasques(docId, [...tasques, novaTasca]);
-          } else {
-            let date = selectedDate ? new Date(selectedDate) : new Date();
-            const endDate = repeatEnd ? new Date(repeatEnd) : date;
-
-            // Validació: si setmanal i no hi ha dies seleccionats, mostra error
-            if (repeatType === "weekly" && repeatDays.length === 0) {
-              alert("Selecciona almenys un dia de la setmana per la repetició setmanal.");
-              return true;
-            }
-
-            while (date <= endDate) {
-              const dayOfWeek = date.getDay();
-              // Salta caps de setmana
-              if (dayOfWeek === 0 || dayOfWeek === 6) {
-                date.setDate(date.getDate() + 1);
-                continue;
-              }
-              let shouldCreate = false;
-              if (repeatType === "daily") {
-                shouldCreate = true;
-              } else if (repeatType === "weekly" && repeatDays.includes(dayOfWeek)) {
-                shouldCreate = true;
-              } else if (repeatType === "monthly") {
-                // Només el mateix dia del mes que la data inicial, i laborable
-                const initialDay = selectedDate ? new Date(selectedDate).getDate() : new Date().getDate();
-                if (date.getDate() === initialDay) {
-                  shouldCreate = true;
-                }
-              }
-              if (shouldCreate) {
-                const diaISO = obtenirDataISO(date);
-                const diaSnap = await db.collection("tasques").doc(diaISO).get();
-                const diaTasques = diaSnap.exists ? diaSnap.data().tasques : [];
-                diaTasques.push({
-                  ...novaTasca,
-                  repeat: repeatType,
-                  repeatDays,
-                  repeatEnd,
-                  repeatGroupId
-                });
-                await guardarTasques(diaISO, diaTasques);
-              }
-              date.setDate(date.getDate() + 1);
-            }
-          }
+          await guardarTasques(docId, [...tasques, novaTasca]);
           escoltarTasques(selectedDate ?? UNASSIGNED_ID);
           return false;
         }
