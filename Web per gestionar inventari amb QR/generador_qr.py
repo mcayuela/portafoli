@@ -1,111 +1,119 @@
+import os
 import json
 import qrcode
-import os
 from PIL import Image, ImageDraw, ImageFont
-from datetime import datetime
+from collections import defaultdict
 
-# Ruta del fitxer JSON
 fitxer_json = os.path.join(os.path.dirname(__file__), 'inventari.json')
-
-
-# Carpeta on es guardaran els codis QR
 carpeta_qr = os.path.join(os.path.dirname(__file__), 'codis_qr')
 os.makedirs(carpeta_qr, exist_ok=True)
-
-# Domini base per generar les URL
 domini_base = 'https://mcayuela.com/Web%20per%20gestionar%20inventari%20amb%20QR/?id='
 
-# Carrega les dades del fitxer JSON
 with open(fitxer_json, 'r', encoding='utf-8') as f:
     dispositius = json.load(f)
 
-# Font per escriure el text (pots canviar la ruta/font si vols)
 try:
-    font = ImageFont.truetype("arial.ttf", 60)  # Augmenta la mida de la font
+    font_path = "arial.ttf"
+    font = ImageFont.truetype(font_path, 40)
 except:
     font = ImageFont.load_default()
 
-logo_path = os.path.join(os.path.dirname(__file__), 'logotmi-horitzontal.png')  # Nom de la foto que vols afegir
+logo_path = os.path.join(os.path.dirname(__file__), 'logotmi-horitzontal.png')
+try:
+    logo_img = Image.open(logo_path).convert("RGBA")
+except Exception:
+    logo_img = None
 
-def get_best_font_size(text, target_width, font_path="arial.ttf", max_size=200, min_size=10):
-    for size in range(max_size, min_size, -2):
-        try:
-            font = ImageFont.truetype(font_path, size)
-        except:
-            font = ImageFont.load_default()
-        dummy_img = Image.new("RGB", (target_width, 200))
-        draw = ImageDraw.Draw(dummy_img)
-        bbox = draw.textbbox((0, 0), text, font=font)
-        w = bbox[2] - bbox[0]
-        if w <= target_width:
-            return font, size
-    return ImageFont.load_default(), min_size
-
-# Genera un codi QR per a cada dispositiu
+dispositius_per_id = defaultdict(list)
 for dispositiu in dispositius:
-    id_pc = dispositiu.get('id')
-    data_pc = dispositiu.get('data', '')  # Assumeix format 'YYYY-MM-DD' o similar
-    if id_pc is not None:
-        # Extreu mes i any
-        try:
-            dt = datetime.strptime(data_pc, "%Y-%m-%d")
-            mes_any = dt.strftime("%m%y")
-        except:
-            mes_any = "0000"
-        text = f"{id_pc}/{mes_any}"
+    id_principal = dispositiu.get('id', '')
+    dispositius_per_id[id_principal].append(dispositiu)
 
-        url = f'{domini_base}{id_pc}'
-        qr_img = qrcode.make(url).convert("RGB")
-        qr_img = qr_img.rotate(90, expand=True)
+for id_principal, grup in dispositius_per_id.items():
+    for idx, dispositiu in enumerate(grup, start=1):
+        text_qr = f"{id_principal}/{idx:02d}"
 
-        # Troba la millor mida de font
-        font, font_size = get_best_font_size(text, qr_img.height)
+        url = f'{domini_base}{text_qr}'
+        qr_size = 240  # Fes el QR més petit (pots ajustar la mida)
 
-        # Crea imatge pel text
-        text_img = Image.new("RGB", (qr_img.height, font_size + 40), "white")
-        draw = ImageDraw.Draw(text_img)
-        bbox = draw.textbbox((0, 0), text, font=font)
-        w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        draw.text(((text_img.width - w) // 2, (text_img.height - h) // 2), text, fill="black", font=font)
-        text_img = text_img.rotate(90, expand=True)
+        qr_padding = 20  # Padding als costats del QR i del logo
 
-        # Carrega i gira la foto
-        if os.path.exists(logo_path):
-            logo_img = Image.open(logo_path).convert("RGBA")
-            logo_img = logo_img.rotate(90, expand=True)
-            # Redimensiona la foto per fer-la de la mateixa alçada que el text
-            scale = text_img.height / logo_img.height
-            new_size = (int(logo_img.width * scale), text_img.height)
-            logo_img = logo_img.resize(new_size, Image.LANCZOS)
-        else:
-            logo_img = None
-
-        # Uneix QR, text i foto
-        # Defineix separacions
-        separacio_qr_text = 5
-        separacio_text_logo = 40
-
-        # Calcula amplada total
-        total_width = (
-            qr_img.width +
-            separacio_qr_text +
-            text_img.width +
-            (separacio_text_logo if logo_img else 0) +
-            (logo_img.width if logo_img else 0)
+        # Genera el QR
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=0,
         )
-        total_height = max(qr_img.height, text_img.height)
+        qr.add_data(url)
+        qr.make(fit=True)
+        qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+        qr_img = qr_img.resize((qr_size, qr_size), Image.LANCZOS)
 
-        final_img = Image.new("RGB", (total_width, total_height), "white")
-        x = 0
-        final_img.paste(qr_img, (x, 0))
-        x += qr_img.width + separacio_qr_text
-        final_img.paste(text_img, (x, 0))
-        x += text_img.width + (separacio_text_logo if logo_img else 0)
+        # QR amb padding
+        qr_padded = Image.new("RGB", (qr_size + 2 * qr_padding, qr_size + 2 * qr_padding), "white")
+        qr_padded.paste(qr_img, (qr_padding, qr_padding))
+
+        # --- LOGO (blau) ---
         if logo_img:
-            final_img.paste(logo_img, (x, 0), logo_img)
+            logo_w_original, logo_h_original = logo_img.size
+            logo_h = int(qr_size * logo_h_original / logo_w_original)
+            logo_resized = logo_img.resize((qr_size, logo_h), Image.LANCZOS)
+            logo_bg = Image.new("RGB", (qr_size + 2 * qr_padding, logo_h + 2 * qr_padding), "white")
+            logo_bg.paste(logo_resized, (qr_padding, qr_padding), logo_resized)
+        else:
+            logo_bg = Image.new("RGB", (qr_size + 2 * qr_padding, 40 + 2 * qr_padding), "white")
 
-        nom_fitxer = f'qr_{id_pc}.png'
+        # Separacions
+        separacio_qr_text = -5
+        separacio_text_logo = -2
+
+        # Renderitza el text sota el QR (vermell)
+        text = text_qr
+        text_color = (0, 0, 0)  # Negre
+
+        # Calcula la mida de font màxima perquè el text no superi l'amplada del QR menys un marge
+        max_text_width = qr_size - 20  # 20 píxels de marge (pots ajustar)
+        font_size = 10
+        for size in range(10, 200):
+            test_font = ImageFont.truetype(font_path, size)
+            temp_img = Image.new("RGB", (1, 1))
+            temp_draw = ImageDraw.Draw(temp_img)
+            bbox = temp_draw.textbbox((0, 0), text, font=test_font)
+            test_width = bbox[2] - bbox[0]
+            if test_width > max_text_width:
+                break
+            font_size = size
+        font = ImageFont.truetype(font_path, font_size)
+        temp_img = Image.new("RGB", (1, 1))
+        temp_draw = ImageDraw.Draw(temp_img)
+        bbox = temp_draw.textbbox((0, 0), text, font=font)
+        text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        # Afegeix marge per evitar que es talli
+        # Defineix padding separat per cada costat
+        padding_text_left = 14
+        padding_text_right = 14
+        padding_text_top = 0
+        padding_text_bottom = 14
+        text_img = Image.new("RGB", (text_width + padding_text_left + padding_text_right, text_height + padding_text_top + padding_text_bottom), "white")
+        draw_text = ImageDraw.Draw(text_img)
+        draw_text.text((padding_text_left, padding_text_top), text, font=font, fill=text_color)
+
+        # Composició final
+        total_width = qr_size + 2 * qr_padding
+        total_height = qr_padded.height + separacio_qr_text + text_img.height + separacio_text_logo + logo_bg.height
+        final_img = Image.new("RGB", (total_width, total_height), "white")
+        y = 0
+        final_img.paste(qr_padded, (0, y))
+        y += qr_padded.height + separacio_qr_text
+        # Centra el text sota el QR (vermell)
+        x_text_centre = (total_width - text_img.width) // 2
+        final_img.paste(text_img, (x_text_centre, y))
+        y += text_img.height + separacio_text_logo
+        final_img.paste(logo_bg, (0, y))
+
+        nom_fitxer = f'qr_{text_qr.replace("/", "_")}.png'
         ruta_fitxer = os.path.join(carpeta_qr, nom_fitxer)
         final_img.save(ruta_fitxer)
 
-print(f"S'han generat {len(dispositius)} codis QR a la carpeta '{carpeta_qr}'.")
+print(f"S'han generat {sum(len(grup) for grup in dispositius_per_id.values())} codis QR a la carpeta '{carpeta_qr}'.")
