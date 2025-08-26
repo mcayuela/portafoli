@@ -220,12 +220,33 @@ function amagarLoader() {
 
 // --- Render principal ---
 async function main() {
-    mostrarLoader();
     const content = document.getElementById("content");
+    const loader = document.querySelector('.contenidor-loader');
+    // Amaga contingut, mostra loader
+    if (content) content.style.display = 'none';
+    if (loader) loader.style.display = 'flex';
+
+    let timeoutId;
+    let trobat = false;
+
+    // Timeout de 60 segons
+    timeoutId = setTimeout(() => {
+        if (!trobat) {
+            if (loader) loader.style.display = 'none';
+            if (content) {
+                content.style.display = '';
+                content.innerHTML = "<p>No s'ha trobat cap PC.</p>";
+            }
+        }
+    }, 60000);
+
     try {
         if (id) {
             const pc = await obtenirPC(id);
-            amagarLoader();
+            trobat = true;
+            clearTimeout(timeoutId);
+            if (loader) loader.style.display = 'none';
+            if (content) content.style.display = '';
             if (pc) {
                 content.innerHTML = `
                     <div class="detall-container">
@@ -371,18 +392,25 @@ async function main() {
                     };
                 });
             } else {
-                content.innerHTML = "<p>PC no trobat.</p>";
+                content.innerHTML = "<p>No s'ha trobat cap PC.</p>";
             }
         } else {
-            mostrarLoader();
             const data = await obtenirPCs();
-            amagarLoader();
+            trobat = true;
+            clearTimeout(timeoutId);
+            if (loader) loader.style.display = 'none';
+            if (content) content.style.display = '';
             lastData = data;
             renderLlistat(data, 1);
         }
     } catch (err) {
-        amagarLoader();
-        document.getElementById("content").innerHTML = "<p>Error carregant l'inventari.</p>";
+        trobat = true;
+        clearTimeout(timeoutId);
+        if (loader) loader.style.display = 'none';
+        if (content) {
+            content.style.display = '';
+            content.innerHTML = "<p>Error carregant l'inventari.</p>";
+        }
         console.error(err);
     }
 }

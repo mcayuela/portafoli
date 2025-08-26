@@ -681,4 +681,18 @@ body {
     align-items: center;
     flex-direction: column;
     min-height: 200px;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(244,247,249,0.35); /* opcional: lleuger fons difuminat */
+    z-index: 99999;
+}
+
+.loader-text {
+    margin-top: 18px;
+    color: #2596be;
+    font-size: 1.2em;
+    font-weight: 600;
+    text-align: center;
 }
