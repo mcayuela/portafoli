@@ -208,169 +208,182 @@ function renderReparacions(reparacions = [], pcId) {
     return html;
 }
 
+// Funcions per mostrar/amagar loader
+function mostrarLoader() {
+    const loader = document.querySelector('.contenidor-loader');
+    if (loader) loader.style.display = 'flex';
+}
+function amagarLoader() {
+    const loader = document.querySelector('.contenidor-loader');
+    if (loader) loader.style.display = 'none';
+}
+
 // --- Render principal ---
 async function main() {
+    mostrarLoader();
     const content = document.getElementById("content");
-    if (id) {
-        const pc = await obtenirPC(id);
-        if (pc) {
-            const icona = pc.portatil ? iconaPortatil : iconaSobretaula;
-            content.innerHTML = `
-                <div class="detall-container">
-                    <div class="detall-text">
-                        <h2>PC ID: ${pc.id}</h2>
-                        <p><strong>Nom:</strong> ${pc.nom || ''}</p>
-                        <p><strong>Model:</strong> ${pc.model || ''}</p>
-                        <p><strong>Processador:</strong> ${pc.processador || ''}</p>
-                        <p><strong>RAM:</strong> ${pc.ram || ''}</p>
-                        <p><strong>Emmagatzematge:</strong> ${pc.emmagatzematge || ''}</p>
-                        <p><strong>Tarjeta Gràfica:</strong> ${pc.tarjetaGrafica || ''}</p>
-                        <p><strong>Sistema Operatiu:</strong> ${pc.sistemaOperatiu || ''}</p>
-                        <p><strong>Data d'Adquisició:</strong> ${pc.dataAdquisicio || ''}</p>
-                        <p><strong>Portàtil:</strong> ${pc.portatil ? 'Sí' : 'No'}</p>
-                        <a href="index.html">Tornar a l'inventari</a>
-                        <hr>
-                        ${renderReparacions(pc.reparacions, pc.id)}
+    try {
+        if (id) {
+            const pc = await obtenirPC(id);
+            amagarLoader();
+            if (pc) {
+                content.innerHTML = `
+                    <div class="detall-container">
+                        <div class="detall-text">
+                            <h2>PC ID: ${pc.id}</h2>
+                            <p><strong>Nom:</strong> ${pc.nom || ''}</p>
+                            <p><strong>Model:</strong> ${pc.model || ''}</p>
+                            <p><strong>Processador:</strong> ${pc.processador || ''}</p>
+                            <p><strong>RAM:</strong> ${pc.ram || ''}</p>
+                            <p><strong>Emmagatzematge:</strong> ${pc.emmagatzematge || ''}</p>
+                            <p><strong>Tarjeta Gràfica:</strong> ${pc.tarjetaGrafica || ''}</p>
+                            <p><strong>Sistema Operatiu:</strong> ${pc.sistemaOperatiu || ''}</p>
+                            <p><strong>Data d'Adquisició:</strong> ${pc.dataAdquisicio || ''}</p>
+                            <p><strong>Portàtil:</strong> ${pc.portatil ? 'Sí' : 'No'}</p>
+                            <a href="index.html">Tornar a l'inventari</a>
+                            <hr>
+                            ${renderReparacions(pc.reparacions, pc.id)}
+                        </div>
+                        <div class="detall-icona">
+                            ${(pc.portatil ? iconaPortatil : iconaSobretaula)}
+                        </div>
                     </div>
-                    <div class="detall-icona">
-                        ${icona}
-                    </div>
-                </div>
-            `;
-
-            // Afegir reparació (modal)
-            document.getElementById('btn-afegir-reparacio').onclick = () => {
-                document.getElementById('modal-reparacio').style.display = 'flex';
-            };
-            document.getElementById('modal-close').onclick = () => {
-                document.getElementById('modal-reparacio').style.display = 'none';
-            };
-
-            // Imatges input preview
-            let filesArray = [];
-            document.getElementById('btn-upload-img').onclick = () => {
-                document.getElementById('imatges-input').click();
-            };
-            document.getElementById('imatges-input').onchange = (e) => {
-                filesArray = Array.from(e.target.files);
-                const preview = document.getElementById('imatges-preview');
-                preview.innerHTML = '';
-                filesArray.forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        const img = document.createElement('img');
-                        img.src = ev.target.result;
-                        img.className = 'reparacio-img';
-                        img.style.maxWidth = '40px';
-                        img.style.maxHeight = '40px';
-                        img.style.margin = '2px';
-                        preview.appendChild(img);
-                        img.onclick = () => {
-                            document.getElementById('img-gran').src = ev.target.result;
-                            document.getElementById('modal-img-gran').style.display = 'flex';
-                        };
-                    };
-                    reader.readAsDataURL(file);
-                });
-            };
-
-            // Modal imatge gran
-            document.getElementById('modal-img-close').onclick = () => {
-                document.getElementById('modal-img-gran').style.display = 'none';
-            };
-
-            // Afegir reparació amb imatges
-            document.getElementById('form-reparacio').onsubmit = async (e) => {
-                e.preventDefault();
-                const descripcio = e.target.descripcio.value;
-                let imatges = [];
-                // Pujar imatges a Firebase Storage (opcional, aquí només DataURL)
-                if (filesArray.length > 0) {
-                    imatges = await Promise.all(filesArray.map(async file => {
-                        return new Promise(resolve => {
-                            const reader = new FileReader();
-                            reader.onload = ev => resolve(ev.target.result);
-                            reader.readAsDataURL(file);
-                        });
-                    }));
-                }
-                const novaReparacio = {
-                    data: new Date().toISOString().slice(0, 10),
-                    descripcio,
-                    imatges
-                };
-                await afegirReparacio(pc.id, novaReparacio);
-                document.getElementById('modal-reparacio').style.display = 'none';
-                alert('Reparació afegida!');
-                main();
-            };
-
-            // Eliminar reparació
-            document.querySelectorAll('.btn-eliminar').forEach(btn => {
-                btn.onclick = async () => {
-                    const idx = parseInt(btn.getAttribute('data-idx'));
-                    const reparacions = pc.reparacions || [];
-                    reparacions.splice(idx, 1);
-                    await updateDoc(doc(db, "pcs", pc.id.toString()), { reparacions });
-                    main();
-                };
-            });
-
-            // Editar reparació
-            document.querySelectorAll('.btn-editar').forEach(btn => {
-                btn.onclick = () => {
-                    const idx = parseInt(btn.getAttribute('data-idx'));
-                    const reparacio = pc.reparacions[idx];
+                `;
+                // --- Afegir reparació (modal) ---
+                document.getElementById('btn-afegir-reparacio').onclick = () => {
                     document.getElementById('modal-reparacio').style.display = 'flex';
-                    document.getElementById('form-reparacio').descripcio.value = reparacio.descripcio;
-                    document.getElementById('imatges-preview').innerHTML = '';
-                    if (reparacio.imatges && reparacio.imatges.length > 0) {
-                        reparacio.imatges.forEach(img => {
-                            const imgEl = document.createElement('img');
-                            imgEl.src = img;
-                            imgEl.className = 'reparacio-img';
-                            imgEl.style.maxWidth = '40px';
-                            imgEl.style.maxHeight = '40px';
-                            imgEl.style.margin = '2px';
-                            document.getElementById('imatges-preview').appendChild(imgEl);
-                            imgEl.onclick = () => {
-                                document.getElementById('img-gran').src = img;
+                };
+                document.getElementById('modal-close').onclick = () => {
+                    document.getElementById('modal-reparacio').style.display = 'none';
+                };
+                // --- Imatges input preview ---
+                let filesArray = [];
+                document.getElementById('btn-upload-img').onclick = () => {
+                    document.getElementById('imatges-input').click();
+                };
+                document.getElementById('imatges-input').onchange = (e) => {
+                    filesArray = Array.from(e.target.files);
+                    const preview = document.getElementById('imatges-preview');
+                    preview.innerHTML = '';
+                    filesArray.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            const img = document.createElement('img');
+                            img.src = ev.target.result;
+                            img.className = 'reparacio-img';
+                            img.style.maxWidth = '40px';
+                            img.style.maxHeight = '40px';
+                            img.style.margin = '2px';
+                            preview.appendChild(img);
+                            img.onclick = () => {
+                                document.getElementById('img-gran').src = ev.target.result;
                                 document.getElementById('modal-img-gran').style.display = 'flex';
                             };
-                        });
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                };
+                // --- Modal imatge gran ---
+                document.getElementById('modal-img-close').onclick = () => {
+                    document.getElementById('modal-img-gran').style.display = 'none';
+                };
+                // --- Afegir reparació amb imatges ---
+                document.getElementById('form-reparacio').onsubmit = async (e) => {
+                    e.preventDefault();
+                    mostrarLoader();
+                    const descripcio = e.target.descripcio.value;
+                    let imatges = [];
+                    if (filesArray.length > 0) {
+                        imatges = await Promise.all(filesArray.map(async file => {
+                            return new Promise(resolve => {
+                                const reader = new FileReader();
+                                reader.onload = ev => resolve(ev.target.result);
+                                reader.readAsDataURL(file);
+                            });
+                        }));
                     }
-                    // Guardar edició
-                    document.getElementById('form-reparacio').onsubmit = async (e) => {
-                        e.preventDefault();
-                        reparacio.descripcio = e.target.descripcio.value;
-                        // No permet editar imatges en aquesta versió (pots ampliar si vols)
-                        reparacio.data = reparacio.data || new Date().toISOString().slice(0, 10);
-                        pc.reparacions[idx] = reparacio;
-                        await updateDoc(doc(db, "pcs", pc.id.toString()), { reparacions: pc.reparacions });
-                        document.getElementById('modal-reparacio').style.display = 'none';
-                        alert('Reparació actualitzada!');
+                    const novaReparacio = {
+                        data: new Date().toISOString().slice(0, 10),
+                        descripcio,
+                        imatges
+                    };
+                    await afegirReparacio(pc.id, novaReparacio);
+                    document.getElementById('modal-reparacio').style.display = 'none';
+                    alert('Reparació afegida!');
+                    amagarLoader();
+                    main();
+                };
+                // --- Eliminar reparació ---
+                document.querySelectorAll('.btn-eliminar').forEach(btn => {
+                    btn.onclick = async () => {
+                        mostrarLoader();
+                        const idx = parseInt(btn.getAttribute('data-idx'));
+                        const reparacions = pc.reparacions || [];
+                        reparacions.splice(idx, 1);
+                        await updateDoc(doc(db, "pcs", pc.id.toString()), { reparacions });
+                        amagarLoader();
                         main();
                     };
-                };
-            });
-
-            // Imatge gran des de targeta
-            document.querySelectorAll('.reparacio-img').forEach(img => {
-                img.onclick = () => {
-                    document.getElementById('img-gran').src = img.src;
-                    document.getElementById('modal-img-gran').style.display = 'flex';
-                };
-            });
+                });
+                // --- Editar reparació ---
+                document.querySelectorAll('.btn-editar').forEach(btn => {
+                    btn.onclick = () => {
+                        const idx = parseInt(btn.getAttribute('data-idx'));
+                        const reparacio = pc.reparacions[idx];
+                        document.getElementById('modal-reparacio').style.display = 'flex';
+                        document.getElementById('form-reparacio').descripcio.value = reparacio.descripcio;
+                        document.getElementById('imatges-preview').innerHTML = '';
+                        if (reparacio.imatges && reparacio.imatges.length > 0) {
+                            reparacio.imatges.forEach(img => {
+                                const imgEl = document.createElement('img');
+                                imgEl.src = img;
+                                imgEl.className = 'reparacio-img';
+                                imgEl.style.maxWidth = '40px';
+                                imgEl.style.maxHeight = '40px';
+                                imgEl.style.margin = '2px';
+                                document.getElementById('imatges-preview').appendChild(imgEl);
+                                imgEl.onclick = () => {
+                                    document.getElementById('img-gran').src = img;
+                                    document.getElementById('modal-img-gran').style.display = 'flex';
+                                };
+                            });
+                        }
+                        // Guardar edició
+                        document.getElementById('form-reparacio').onsubmit = async (e) => {
+                            e.preventDefault();
+                            mostrarLoader();
+                            reparacio.descripcio = e.target.descripcio.value;
+                            reparacio.data = reparacio.data || new Date().toISOString().slice(0, 10);
+                            pc.reparacions[idx] = reparacio;
+                            await updateDoc(doc(db, "pcs", pc.id.toString()), { reparacions: pc.reparacions });
+                            document.getElementById('modal-reparacio').style.display = 'none';
+                            alert('Reparació actualitzada!');
+                            amagarLoader();
+                            main();
+                        };
+                    };
+                });
+                // --- Imatge gran des de targeta ---
+                document.querySelectorAll('.reparacio-img').forEach(img => {
+                    img.onclick = () => {
+                        document.getElementById('img-gran').src = img.src;
+                        document.getElementById('modal-img-gran').style.display = 'flex';
+                    };
+                });
+            } else {
+                content.innerHTML = "<p>PC no trobat.</p>";
+            }
         } else {
-            content.innerHTML = "<p>PC no trobat.</p>";
+            mostrarLoader();
+            const data = await obtenirPCs();
+            amagarLoader();
+            lastData = data;
+            renderLlistat(data, 1);
         }
-    } else {
-        const data = await obtenirPCs();
-        lastData = data;
-        renderLlistat(data, 1);
+    } catch (err) {
+        amagarLoader();
+        document.getElementById("content").innerHTML = "<p>Error carregant l'inventari.</p>";
+        console.error(err);
     }
 }
-main().catch(err => {
-    document.getElementById("content").innerHTML = "<p>Error carregant l'inventari.</p>";
-    console.error(err);
-});
+main();

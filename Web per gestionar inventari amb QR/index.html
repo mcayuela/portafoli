@@ -7,8 +7,20 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <header id="site-header">
+        <img src="logo_tmi_sensefons.png" alt="Logo esquerra">
+        <h1>
+            <a href="index.html" class="titol-btn">Inventari de Dispositius</a>
+        </h1>
+        <img src="logo_tmi_sensefons.png" alt="Logo dreta">
+    </header>
+    <!-- LOADER -->
+    <div class="contenidor-loader">
+        <div class="loader"></div>
+        <div class="text-loader" style="color: #2596be;">Carregant...</div>
+    </div>
     <!-- LOGIN -->
-    <div id="login-container">
+    <div id="login-container" style="display:none;">
         <h2>Inicia sessió</h2>
         <input type="email" id="email" placeholder="Correu electrònic">
         <input type="password" id="password" placeholder="Contrasenya">
@@ -18,11 +30,7 @@
     </div>
     <!-- CONTINGUT PRINCIPAL -->
     <div id="main-content" style="display:none;">
-        <h1>
-            <a href="index.html" class="titol-btn">Inventari de Dispositius</a>
-        </h1>
         <div id="content">
-            Carregant...
             <div id="buscador-container">
                 <input type="text" id="buscador" placeholder="Cerca per ID o Nom..." autocomplete="off">
                 <span class="buscador-icona">
