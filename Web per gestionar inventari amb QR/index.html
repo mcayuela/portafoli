@@ -7,24 +7,37 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>
-        <a href="index.html" class="titol-btn">Inventari de Dispositius</a>
-    </h1>
-    <div id="content">
-        Carregant...
-        <div id="buscador-container">
-            <input type="text" id="buscador" placeholder="Cerca per ID o Nom..." autocomplete="off">
-            <span class="buscador-icona">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <circle cx="9" cy="9" r="7" stroke="#2596be" stroke-width="2"/>
-                    <line x1="14.2" y1="14.2" x2="18" y2="18" stroke="#2596be" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </span>
-        </div>
-        <select class="filtreDepartament">
-            <option value="">Tots els departaments</option>
-        </select>
+    <!-- LOGIN -->
+    <div id="login-container">
+        <h2>Inicia sessió</h2>
+        <input type="email" id="email" placeholder="Correu electrònic">
+        <input type="password" id="password" placeholder="Contrasenya">
+        <button id="loginBtn">Login</button>
+        <button id="logoutBtn" style="display:none;">Logout</button>
+        <p id="msg"></p>
     </div>
+    <!-- CONTINGUT PRINCIPAL -->
+    <div id="main-content" style="display:none;">
+        <h1>
+            <a href="index.html" class="titol-btn">Inventari de Dispositius</a>
+        </h1>
+        <div id="content">
+            Carregant...
+            <div id="buscador-container">
+                <input type="text" id="buscador" placeholder="Cerca per ID o Nom..." autocomplete="off">
+                <span class="buscador-icona">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="9" cy="9" r="7" stroke="#2596be" stroke-width="2"/>
+                        <line x1="14.2" y1="14.2" x2="18" y2="18" stroke="#2596be" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </div>
+            <select class="filtreDepartament">
+                <option value="">Tots els departaments</option>
+            </select>
+        </div>
+    </div>
+    <script type="module" src="login.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
-<script type="module" src="script.js"></script>
 </html>
