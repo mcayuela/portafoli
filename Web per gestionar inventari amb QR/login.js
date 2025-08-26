@@ -59,4 +59,10 @@ onAuthStateChanged(auth, (user) => {
         mainContent.style.display = "none";
     }
 });
+    emailInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") loginBtn.click();
+    });
+    passwordInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") loginBtn.click();
+    });
 });
