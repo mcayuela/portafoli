@@ -9,16 +9,35 @@ body {
     flex-direction: column;
 }
 
-background {
-    background: #fff;
+#site-header {
+    height: var(--header-h, 80px);
+    padding: 0 16px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(244, 247, 249, 0.55);
+    backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(37, 150, 190, 0.15);
 }
 
-h1 {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    padding-left: 40px;
-    padding-bottom: 20px;
-    margin-top: 30px;
+#site-header img {
+    height: 60px;
+    width: 60px;
+    object-fit: cover;
+    display: block;
+}
+
+.titol-principal {
+    color: var(--brand);
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-align: center;
+    text-decoration: none;
+    flex: 1 1 0%;
 }
 
 .titol-btn:hover {
@@ -99,15 +118,6 @@ h1 {
     .detall-icona {
         align-self: center;
     }
-}
-
-header {
-    background: #2596be;
-    color: #fff;
-    padding: 24px 0 16px 0;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(37,150,190,0.08);
-    letter-spacing: 1px;
 }
 
 h1, h2, h3 {
