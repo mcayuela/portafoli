@@ -1,8 +1,6 @@
 // ==============================
 // Configuració de Firebase
 // ==============================
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAfukNNktawfNYdPAspAfRryWs-qumSagk",
@@ -14,9 +12,9 @@ const firebaseConfig = {
   measurementId: "G-BTGTJQFCR3"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+// Inicialitza Firebase amb compat
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // ==============================
 // Helpers & constants
@@ -647,6 +645,25 @@ async function getTasques() {
 // ==============================
 // Calendari
 // ==============================
+function renderCalendar() {
+  const calendarDiv = document.getElementById("calendar");
+  calendarDiv.innerHTML = "";
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const div = document.createElement("div");
+    div.textContent = day;
+    div.className = "calendar-day";
+    calendarDiv.appendChild(div);
+  }
+}
+
+// Executa la funció per mostrar els dies
+renderCalendar();
+
 async function renderCalendar() {
   await getTasques();
 
@@ -939,7 +956,7 @@ async function assignarTascaADia(taskData, nouDia) {
     pushUndo({ type: "add", day: nouDia, id: newId, task: nova });
   }
 
-  renderCalendar(); // <-- afegeix aquesta línia
+  renderCalendar();
 }
 
 // ==============================
