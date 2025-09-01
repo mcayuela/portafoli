@@ -706,3 +706,43 @@ body {
     font-weight: 600;
     text-align: center;
 }
+
+/* Header corporatiu */
+#site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    padding: 10px 40px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 30px;
+}
+.logo-esquerra img,
+.logo-dreta img {
+    height: 48px;
+}
+.titol-principal {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #2596be;
+    text-decoration: none;
+    font-family: 'Source Sans Pro', Arial, sans-serif;
+    margin: 0 20px;
+}
+.titol-principal:hover {
+    text-decoration: underline;
+}
+@media (max-width: 600px) {
+    #site-header {
+        flex-direction: column;
+        padding: 10px 10px;
+    }
+    .logo-esquerra img,
+    .logo-dreta img {
+        height: 36px;
+    }
+    .titol-principal {
+        font-size: 1.1rem;
+        margin: 10px 0;
+    }
+}
