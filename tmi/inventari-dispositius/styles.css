@@ -31,13 +31,13 @@ body {
 }
 
 .titol-principal {
-    color: var(--brand);
-    font-size: 2.1rem;
-    font-weight: 800;
-    letter-spacing: 0.4px;
-    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2596be;
     text-decoration: none;
-    flex: 1 1 0%;
+    font-family: 'Source Sans Pro', Arial, sans-serif;
+    margin: 0 20px;
+    text-align: center;
 }
 
 .titol-btn:hover {
@@ -661,15 +661,6 @@ body {
     display: block;
 }
 
-.titol-principal {
-    flex: 1;
-    text-align: center;
-    font-size: 2em;
-    color: #2596be;
-    font-weight: 700;
-    margin: 0;
-}
-
 .loader {
     border: 8px solid #f3fcff; /* Light grey */
     border-top: 8px solid #2596be; /* Blue */
@@ -721,14 +712,7 @@ body {
 .logo-dreta img {
     height: 48px;
 }
-.titol-principal {
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: #2596be;
-    text-decoration: none;
-    font-family: 'Source Sans Pro', Arial, sans-serif;
-    margin: 0 20px;
-}
+
 .titol-principal:hover {
     text-decoration: underline;
 }

@@ -7,7 +7,7 @@ from collections import defaultdict
 fitxer_json = os.path.join(os.path.dirname(__file__), 'inventari.json')
 carpeta_qr = os.path.join(os.path.dirname(__file__), 'codis_qr')
 os.makedirs(carpeta_qr, exist_ok=True)
-domini_base = 'https://mcayuela.com/Web%20per%20gestionar%20inventari%20amb%20QR/?id='
+domini_base = 'https://mcayuela.com/tmi/inventari-dispositius/?id='
 
 with open(fitxer_json, 'r', encoding='utf-8') as f:
     dispositius = json.load(f)

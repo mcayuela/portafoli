@@ -1,67 +1,102 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #333;
+    background: #f6f8fa;
+    margin: 0;
+    padding-right: 0;
+    min-height: 100vh;           /* Assegura que el contenidor es pugui centrar verticalment */
+    display: flex;
+    flex-direction: column;
+}
+
+#site-header {
+    height: var(--header-h, 80px);
+    padding: 0 16px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgb(255, 255, 255);
+    backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(37, 150, 190, 0.15);
+}
+
+header#site-header {
+    padding: 10px 40px;
+    background: rgb(255, 255, 255);
+    backdrop-filter: blur(15px);
+}
+
+#site-header img {
+    height: 60px;
+    width: 60px;
+    object-fit: cover;
+    display: block;
+}
+
+.logo-esquerra img,
+.logo-dreta img {
+    height: 48px;
+}
+
+.titol-principal {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2596be;
+    text-decoration: none;
+    font-family: 'Source Sans Pro', Arial, sans-serif;
+    margin: 0 20px;
+    text-align: center;
+}
+
+.titol-principal:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    #site-header {
+        flex-direction: column;
+        padding: 10px 10px;
+    }
+    .logo-esquerra img,
+    .logo-dreta img {
+        height: 36px;
+    }
+    .titol-principal {
+        font-size: 1.1rem;
+        margin: 10px 0;
+    }
+}
+
+/* Títols i enllaços */
 h1 {
     color: #2596be;
     font-weight: 500;
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 1.5rem;
-    margin-top: 30px;
+    margin-top: 50px;
+    padding-left: 40px;
 }
 
 h2 {
     font-weight: 500;
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 1.25rem;
-    margin-top: 30px;
+    margin-top: 16px;
+    padding-left: 40px;
 }
 
 a {
     color: #2596be;
     text-decoration: none;
+    font-weight: 700;
+    transition: text-decoration 0.2s, color 0.2s;
+    margin-left: 50px;
 }
 
 a:hover {
     text-decoration: underline;
-}
-
-body {
-    padding-left: 40px;
-}
-
-/* Header corporatiu */
-#site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #fff;
-  padding: 10px 40px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  margin-bottom: 30px;
-}
-.logo-esquerra img,
-.logo-dreta img {
-  height: 48px;
-}
-.titol-principal {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #2596be;
-  text-decoration: none;
-  font-family: 'Source Sans Pro', Arial, sans-serif;
-  margin: 0 20px;
-}
-.titol-principal:hover {
-  text-decoration: underline;
-}
-@media (max-width: 600px) {
-  #site-header {
-    flex-direction: column;
-    padding: 10px 10px;
-  }
-  .logo-esquerra img,
-  .logo-dreta img {
-    height: 36px;
-  }
-  .titol-principal {
-    font-size: 1.1rem;
-    margin: 10px 0;
-  }
+    color: #217aa3;
 }

@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import os
 
-fitxer_excel = 'C:/Users/itpractice/OneDrive - TECNICAS MECANICAS ILERDENSES SL/Documentos/GitHub/portafoli/Web extensions telefòniques/arxiu_telefonia.xlsx'
+fitxer_excel = 'C:/Users/itpractice/OneDrive - TECNICAS MECANICAS ILERDENSES SL/Documentos/GitHub/portafoli/tmi/bd-telefonia/arxiu_telefonia.xlsx'
 
 df = pd.read_excel(fitxer_excel, engine='openpyxl')
 df.columns = df.columns.str.strip()
@@ -43,7 +43,7 @@ df_filtrat = df_filtrat[[col for col in ordre_columnes if col in df_filtrat.colu
 
 dades_json = df_filtrat.to_dict(orient='records')
 
-output_path = 'C:/Users/itpractice/OneDrive - TECNICAS MECANICAS ILERDENSES SL/Documentos/GitHub/portafoli/Web extensions telefòniques/numeros_moms_extensions.json'
+output_path = 'C:/Users/itpractice/OneDrive - TECNICAS MECANICAS ILERDENSES SL/Documentos/GitHub/portafoli/tmi/bd-telefonia/numeros_moms_extensions.json'
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(dades_json, f, ensure_ascii=False, indent=4)
 
