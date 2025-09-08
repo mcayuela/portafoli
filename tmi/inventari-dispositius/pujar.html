@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <title>Pujar opcions a Firebase</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    // Configuració Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqsy5zE7YnUuMt80ZskvvUVFjIiVTdOB8",
+      authDomain: "inventari-pc-s.firebaseapp.com",
+      projectId: "inventari-pc-s",
+      storageBucket: "inventari-pc-s.firebasestorage.app",
+      messagingSenderId: "998595234302",
+      appId: "1:998595234302:web:d253d36f99d82b549f18af",
+      measurementId: "G-0QM2VV5NZD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function pujarOpcions(e) {
+      e.preventDefault();
+      const ram = document.getElementById('ram').value.split(',').map(x => x.trim()).filter(Boolean);
+      const emmagatzematge = document.getElementById('emmagatzematge').value.split(',').map(x => x.trim()).filter(Boolean);
+      const sistemaOperatiu = document.getElementById('sistemaOperatiu').value.split(',').map(x => x.trim()).filter(Boolean);
+
+      let missatge = "";
+      try {
+        await setDoc(doc(db, "configuracio", "ram"), { valors: ram });
+        missatge += "RAM pujada correctament. ";
+      } catch (err) {
+        missatge += "Error pujant RAM: " + err.message + " ";
+      }
+      try {
+        await setDoc(doc(db, "configuracio", "emmagatzematge"), { valors: emmagatzematge });
+        missatge += "Emmagatzematge pujat correctament. ";
+      } catch (err) {
+        missatge += "Error pujant emmagatzematge: " + err.message + " ";
+      }
+      try {
+        await setDoc(doc(db, "configuracio", "sistemaOperatiu"), { valors: sistemaOperatiu });
+        missatge += "Sistema Operatiu pujat correctament.";
+      } catch (err) {
+        missatge += "Error pujant sistema operatiu: " + err.message;
+      }
+      document.getElementById('resultat').textContent = missatge;
+    }
+
+    window.onload = () => {
+      document.getElementById('form-opcions').onsubmit = pujarOpcions;
+    };
+  </script>
+</head>
+<body>
+  <h2>Pujar opcions de RAM, Emmagatzematge i Sistema Operatiu a Firebase</h2>
+  <form id="form-opcions">
+    <label>RAM (separat per comes):<br>
+      <input id="ram" value="8GB,16GB,32GB,64GB">
+    </label><br><br>
+    <label>Emmagatzematge (separat per comes):<br>
+      <input id="emmagatzematge" value="64GB,128GB,256GB,500GB,1TB,2TB">
+    </label><br><br>
+    <label>Sistema Operatiu (separat per comes):<br>
+      <input id="sistemaOperatiu" value="Win 7,Win 8,Win 10,Win 11">
+    </label><br><br>
+    <button type="submit">Pujar opcions</button>
+  </form>
+  <div id="resultat"></div>
+</body>
+</html>

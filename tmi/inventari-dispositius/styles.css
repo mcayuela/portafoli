@@ -153,7 +153,7 @@ button:hover, .btn:hover {
     box-shadow: 0 4px 16px rgba(37,150,190,0.13);
 }
 
-input, select, textarea {
+input:not([type="checkbox"]), select, textarea {
     border: 1.5px solid #b3d6e6;
     border-radius: 7px;
     padding: 10px 14px;
@@ -386,279 +386,161 @@ body {
 }
 .buscador-icona {
     position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-75%);
+    right: 130px;
+    top: 27%;
     pointer-events: none;
     display: flex;
     align-items: center;
 }
 
-/* Reparacions */
-.reparacions-container {
-    margin-top: 32px;
+.buscador-container {
     display: flex;
-    flex-direction: column;
-    gap: 24px;
-    background: #f6fbfd;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 2px 16px rgba(38,150,190,0.08);
-}
-.reparacio-card {
-    background: #fff;
-    border: 2px solid #2596be;
-    border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(38,150,190,0.10);
-    padding: 18px 20px;
-    margin-bottom: 8px;
-    transition: box-shadow 0.2s;
-    display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 10px;
 }
-.reparacio-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.reparacio-data {
-    font-weight: bold;
-    color: #217aa3;
-    font-size: 16px;
-}
 
-.reparacio-actions {
-    display: flex;
-    gap: 12px;
-}
-
-.btn-editar {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #2596be;
-    padding: 4px;
-    border-radius: 4px;
-    transition: background 0.2s;
-}
-.btn-editar:hover {
-    background: #eaf6fa;
-}
-
-.btn-eliminar {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #d9534f !important;
-    padding: 4px;
-    border-radius: 4px;
-    transition: background 0.2s;
-}
-.btn-eliminar:hover {
-    background: #fdeaea;
-}
-
-.reparacio-body {
-    margin-top: 6px;
-    font-size: 16px;
-    color: #222;
-}
-
-.reparacio-imgs {
-    margin-top: 8px;
-    display: flex;
-    gap: 8px;
-}
-
-.reparacio-img {
-    max-width: 48px;
-    max-height: 48px;
-    border-radius: 8px;
+.buscador-input {
+    height: 38px;
+    padding: 0 10px;
+    border-radius: 6px;
     border: 1px solid #b3d6e6;
-    box-shadow: 0 1px 4px rgba(38,150,190,0.08);
-    cursor: pointer;
-    transition: transform 0.2s;
+    font-size: 16px;
+    background: #f2faff;
+    transition: border 0.2s;
 }
-.reparacio-img:hover {
-    transform: scale(1.2);
-    z-index: 2;
+.buscador-input:focus {
+    outline: none;
+    border: 1.5px solid #2596be;
 }
 
-.btn-afegir {
+/* Botó afegir dispositiu */
+.btn-afegir-dispositiu {
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 6px;
+    border: none;
     background: #2596be;
     color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 17px;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    margin-top: 12px;
-    transition: background 0.2s;
-    box-shadow: 0 1px 4px rgba(38,150,190,0.08);
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    display: flex;
+    align-items: center;
+    margin: 0px 0px 10px 0px;
 }
-.btn-afegir:hover {
+.btn-afegir-dispositiu:hover {
     background: #217aa3;
 }
 
-.btn-upload-img {
-    background: #b3d6e6;
-    color: #217aa3;
-    border: none;
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 15px;
-    cursor: pointer;
-    margin-top: 6px;
-    margin-bottom: 6px;
-    transition: background 0.2s;
-}
-.btn-upload-img:hover {
-    background: #2596be;
-    color: #fff;
-}
-
-.imatges-preview {
-    display: flex;
-    gap: 6px;
-    margin-top: 6px;
-    margin-bottom: 6px;
-}
-
-.modal-reparacio {
+/* MODAL Afegir dispositiu */
+.modal-afegir-dispositiu {
+    display: none;
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(38,150,190,0.15);
-    display: flex;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.2);
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 1000;
 }
 
-.modal-content {
+#modal-content-dispositiu {
     background: #fff;
-    border-radius: 14px;
-    padding: 28px;
-    min-width: 340px;
-    box-shadow: 0 4px 24px rgba(38,150,190,0.18);
+    padding: 32px 40px 32px 32px;
+    border-radius: 18px;
+    min-width: 380px;
+    max-width: 98vw;
+    width: 520px;
+    height: 600px;
+    max-height: 92vh;
+    box-shadow: 0 4px 32px rgba(37,150,190,0.18);
+    display: flex;
+    flex-direction: column;
     position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #2596be #eaf4fa;
 }
 
-.modal-close {
+/* Separador visual a la dreta del contingut, abans de l’scrollbar */
+#modal-content-dispositiu::after {
+    content: "";
     position: absolute;
-    top: 14px;
+    top: 0;
+    right: 18px; /* ajusta segons l'amplada del teu scrollbar */
+    width: 15px;
+    height: 100%;
+    background: transparent;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Scrollbar corporatiu per a modal (Firefox i Chrome) */
+#modal-content-dispositiu::-webkit-scrollbar {
+    width: 10px;
+    background: #eaf4fa;
+    border-radius: 8px;
+    margin-left: 15px;
+}
+#modal-content-dispositiu::-webkit-scrollbar-thumb {
+    background: #2596be;
+    border-radius: 8px;
+}
+#modal-content-dispositiu::-webkit-scrollbar-thumb:hover {
+    background: #217aa3;
+}
+#modal-content-dispositiu {
+    scrollbar-width: thin;
+    scrollbar-color: #2596be #eaf4fa;
+}
+
+/* Botó tancar modal (creueta corporativa) */
+#modal-close-dispositiu {
+    position: absolute;
+    top: 15px;
     right: 22px;
-    font-size: 32px;
+    background: none;
+    border: none;
+    font-size: 2.1rem;
     color: #2596be;
     cursor: pointer;
+    z-index: 2;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-weight: 700;
+    line-height: 1;
+    transition: color 0.5s;
+    padding: 2px 7px 7px 7px;
+}
+#modal-close-dispositiu:hover {
+    color: #c0392b;
+    background: none;
+}
+
+/* Formulari dins el modal */
+#form-afegir-dispositiu {
+    flex: 1 1 auto;
+    overflow: auto;
+    margin-top: 20px;
+}
+#form-afegir-dispositiu label {
+    margin-bottom: 4px;
+    margin-top: 0;
+    font-weight: 500;
+    color: #217aa3;
+    display: block;
+    position: relative;
+    /* Afegim separació entre el text i l'input */
+    padding-bottom: 10px;
+}
+
+#form-afegir-dispositiu input:not([type="checkbox"]) {
+    margin-bottom: -20px;
 }
 
 .btn-guardar {
-    background: #2596be;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 17px;
-    cursor: pointer;
     margin-top: 12px;
-    transition: background 0.2s;
-    box-shadow: 0 1px 4px rgba(38,150,190,0.08);
-}
-.btn-guardar:hover {
-    background: #217aa3;
-}
-
-/* Modal imatge gran */
-.modal-img-gran {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(38,150,190,0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-}
-.modal-img-gran img {
-    max-width: 80vw;
-    max-height: 80vh;
-    border-radius: 16px;
-    box-shadow: 0 2px 24px rgba(38,150,190,0.25);
-}
-.modal-img-close {
-    position: absolute;
-    top: 24px;
-    right: 40px;
-    font-size: 36px;
-    color: #d9534f;
-    cursor: pointer;
-    z-index: 10001;
-}
-
-#login-container {
-    max-width: 340px;
-    margin: 60px auto 40px auto;
-    background: #eaf6fa;
-    border-radius: 12px;
-    box-shadow: 0 2px 16px rgba(37,150,190,0.08);
-    padding: 32px 24px;
-    text-align: center;
-}
-#login-container h2 {
-    color: #2596be;
-    margin-bottom: 18px;
-}
-#login-container input[type="email"],
-#login-container input[type="password"] {
-    width: 90%;
-    margin-bottom: 12px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1.5px solid #2596be;
-    font-size: 1em;
-}
-#login-container button {
-    background: #2596be;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 18px;
-    margin: 8px 4px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1em;
-    transition: background 0.18s;
-}
-#login-container button:hover {
-    background: #17608c;
-}
-#login-container #msg {
-    margin-top: 18px;
-    color: #bbbd41;
-    font-weight: 600;
-}
-
-#site-header {
-    height: var(--header-h, 80px);
-    padding: 0 16px;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: rgba(244, 247, 249, 0.55); /* més transparent */
-    backdrop-filter: blur(16px);            /* més blur, més difuminat */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(37, 150, 190, 0.15);
-}
-
-#site-header img {
-    height: 60px;
-    width: 60px;
-    object-fit: cover;
-    display: block;
 }
 
 .loader {
@@ -677,25 +559,20 @@ body {
 }
 
 .contenidor-loader {
-    display: none;
-    justify-content: center;
-    align-items: center;
+    display: flex;
     flex-direction: column;
-    min-height: 200px;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(244,247,249,0.35); /* opcional: lleuger fons difuminat */
-    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px; /* o el que vulguis */
+    padding-top: 180px;
 }
 
 .loader-text {
     margin-top: 18px;
-    color: #2596be;
-    font-size: 1.2em;
-    font-weight: 600;
-    text-align: center;
+    font-size: 1.1rem;
+    color: #217aa3;
+    font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
 /* Header corporatiu */
@@ -729,4 +606,145 @@ body {
         font-size: 1.1rem;
         margin: 10px 0;
     }
+}
+
+#input-processador {
+    border: none;
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+}
+
+/* Llista de processadors: desplegable alineat i ample correcte */
+.llista-processadors {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    margin-top: 2px; /* separació petita entre input i llista */
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 10;
+    background: #fff;
+    border: 1.5px solid #2596be;
+    border-radius: 0 0 8px 8px;
+    max-height: 180px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    box-shadow: 0 4px 16px rgba(37,150,190,0.10);
+}
+
+.llista-processadors li {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #217aa3;
+    font-size: 16px;
+    transition: background 0.15s;
+}
+.llista-processadors li:hover,
+.llista-processadors li.selected {
+    background: #eaf4fa;
+    color: #2596be;
+}
+
+#modal-content-dispositiu h3 {
+    margin-top: 3px;
+}
+
+#modal-content-dispositiu form label {
+    margin-bottom: 4px;
+    margin-top: 0;
+    font-weight: 500;
+    color: #217aa3;
+    display: block;
+    position: relative;
+    /* Afegim separació entre el text i l'input */
+    padding-bottom: 10px;
+}
+
+#modal-content-dispositiu form label input:not([type="checkbox"]),
+#modal-content-dispositiu form label select,
+#modal-content-dispositiu form label textarea {
+    width: 90%;
+    min-width: 200px;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: block;
+    margin-left: 2px;
+    margin-right: 10px;
+    border: 1.5px solid #b3d6e6;
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-size: 1rem;
+    background: #fafdff;
+    color: #217aa3;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+#modal-content-dispositiu form label input:not([type="checkbox"]):focus,
+#modal-content-dispositiu form label select:focus,
+#modal-content-dispositiu form label textarea:focus {
+    border-color: #2596be;
+    box-shadow: 0 0 0 2px #b3e0f7;
+    outline: none;
+}
+
+/* Elimina l'estil específic del processador */
+#input-processador {
+    border: none;
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+}
+
+/* Estil del checkbox personalitzat */
+.checkbox-portatil {
+    margin-left: 10px;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid #2596be;
+    border-radius: 7px;
+    background: #fafdff;
+    cursor: pointer;
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0 !important;
+    padding-bottom: 10px !important;
+}
+
+.checkbox-portatil:checked {
+    background: rgb(37, 150, 190, 0.8);
+    border-color: #2596be;
+}
+
+.checkbox-portatil:checked::after {
+    content: '';
+    position: absolute;
+    left: 5.2px;
+    top: 2.3px;
+    width: 3px;
+    height: 7px;
+    border: solid #ffffff;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+    display: block;
+}
+
+.checkbox-portatil:hover {
+    border: 2.5px solid #2596be;
+    background: #2596be;
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.label-portatil {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
 }

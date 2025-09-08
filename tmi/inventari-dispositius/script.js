@@ -1,6 +1,6 @@
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Configuració Firebase
 const firebaseConfig = {
@@ -42,19 +42,246 @@ let lastPage = 1;
 let lastFiltrat = null;
 
 function renderBuscador() {
-    if (document.getElementById('buscador-container')) return;
+    // Neteja el buscador i modal si ja existeixen
+    const oldBuscador = document.getElementById('buscador-container');
+    if (oldBuscador) oldBuscador.remove();
+    const oldModal = document.getElementById('modal-afegir-dispositiu');
+    if (oldModal) oldModal.remove();
+
     const buscadorHtml = `
-        <div id="buscador-container">
-            <input type="text" id="buscador" placeholder="Cerca per ID o Nom..." autocomplete="off">
+        <div id="buscador-container" class="buscador-container">
+            <input type="text" id="buscador" class="buscador-input" placeholder="Cerca per ID o Nom..." autocomplete="off">
             <span class="buscador-icona">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <circle cx="9" cy="9" r="7" stroke="#2596be" stroke-width="2"/>
                     <line x1="14.2" y1="14.2" x2="18" y2="18" stroke="#2596be" stroke-width="2" stroke-linecap="round"/>
                 </svg>
             </span>
+            <button id="btn-afegir-dispositiu" class="btn-afegir-dispositiu">+ Afegir dispositiu</button>
+        </div>
+        <div id="modal-afegir-dispositiu" class="modal-afegir-dispositiu">
+            <div id="modal-content-dispositiu">
+                <button id="modal-close-dispositiu" title="Tancar">&times;</button>
+                <h3>Afegir nou dispositiu</h3>
+                <form id="form-afegir-dispositiu">
+                    <label>ID:<br><input name="id" required></label><br>
+                    <label>Nom:<br><input name="nom" required></label><br>
+                    <label>Model:<br><input name="model"></label><br>
+                    <label>Processador:<br>
+                        <input name="processador" id="input-processador" autocomplete="off">
+                        <ul id="llista-processadors" class="llista-processadors" style="display:none;"></ul>
+                    </label><br>
+                    <label>RAM:<br>
+                        <input name="ram" id="input-ram" autocomplete="off">
+                        <ul id="llista-ram" class="llista-processadors" style="display:none;"></ul>
+                    </label><br>
+                    <label>Emmagatzematge:<br>
+                        <input name="emmagatzematge" id="input-emmagatzematge" autocomplete="off">
+                        <ul id="llista-emmagatzematge" class="llista-processadors" style="display:none;"></ul>
+                    </label><br>
+                    <label>Tarjeta Gràfica:<br><input name="tarjetaGrafica"></label><br>
+                    <label>Sistema Operatiu:<br>
+                        <input name="sistemaOperatiu" id="input-sistemaoperatiu" autocomplete="off">
+                        <ul id="llista-sistemaoperatiu" class="llista-processadors" style="display:none;"></ul>
+                    </label><br>
+                    <label>Data d'Adquisició:<br><input name="dataAdquisicio" type="date"></label><br>
+                    <label class="label-portatil">
+                        Portàtil:
+                        <input type="checkbox" name="portatil" class="checkbox-portatil">
+                    </label>
+                    <button type="submit" class="btn-guardar">Guardar</button>
+                </form>
+            </div>
         </div>
     `;
     document.getElementById("content").insertAdjacentHTML('afterbegin', buscadorHtml);
+
+    // Funció per trobar el següent ID disponible (màxim + 1)
+    async function obtenirProximID() {
+        const snapshot = await getDocs(collection(db, "pcs"));
+        const ids = snapshot.docs.map(doc => parseInt(doc.id, 10)).filter(n => !isNaN(n));
+        if (ids.length === 0) return 1;
+        const maxId = Math.max(...ids);
+        return maxId + 1;
+    }
+
+    // --- Firebase: Obtenir processadors ---
+    async function obtenirProcesadors() {
+        const docRef = doc(db, "configuracio", "procesadors");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            // Combina tots els arrays en un sol array pla
+            const data = docSnap.data();
+            let llista = [];
+            Object.values(data).forEach(arr => llista = llista.concat(arr));
+            return llista;
+        }
+        return [];
+    }
+
+    // Obtenir opcions de RAM, Emmagatzematge i Sistema Operatiu
+    async function obtenirOpcionsConfig(nom) {
+        const docRef = doc(db, "configuracio", nom);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return docSnap.data().valors || [];
+        }
+        return [];
+    }
+
+    // Obrir modal
+    document.getElementById('btn-afegir-dispositiu').onclick = async () => {
+        document.getElementById('modal-afegir-dispositiu').style.display = 'flex';
+        // Omple l'ID automàticament amb el màxim + 1
+        const idInput = document.querySelector('#form-afegir-dispositiu input[name="id"]');
+        if (idInput) {
+            idInput.value = await obtenirProximID();
+            idInput.select();
+        }
+        // Omple el datalist de processadors
+        const processadors = await obtenirProcesadors();
+        const inputProc = document.getElementById('input-processador');
+        const llista = document.getElementById('llista-processadors');
+        let filtrats = processadors;
+
+        function mostraLlistaProcessadors(val) {
+            filtrats = processadors.filter(p => p.toLowerCase().includes(val.toLowerCase()));
+            if (filtrats.length === 0 || !val) {
+                llista.style.display = 'none';
+                return;
+            }
+            llista.innerHTML = filtrats.map(p => `<li>${p}</li>`).join('');
+            llista.style.display = 'block';
+        }
+
+        inputProc.oninput = function() {
+            mostraLlistaProcessadors(this.value);
+        };
+        inputProc.onfocus = function() {
+            mostraLlistaProcessadors(this.value);
+        };
+        inputProc.onblur = function() {
+            setTimeout(() => { llista.style.display = 'none'; }, 150);
+        };
+        llista.onclick = function(e) {
+            if (e.target.tagName === 'LI') {
+                inputProc.value = e.target.textContent;
+                llista.style.display = 'none';
+            }
+        };
+
+        // RAM
+        const opcionsRam = await obtenirOpcionsConfig('ram');
+        const inputRam = document.getElementById('input-ram');
+        const llistaRam = document.getElementById('llista-ram');
+        function mostraLlistaRam(val) {
+            const filtrats = opcionsRam.filter(r => r.toLowerCase().includes(val.toLowerCase()));
+            if (filtrats.length === 0 || !val) {
+                llistaRam.style.display = 'none';
+                return;
+            }
+            llistaRam.innerHTML = filtrats.map(r => `<li>${r}</li>`).join('');
+            llistaRam.style.display = 'block';
+        }
+        inputRam.oninput = function() { mostraLlistaRam(this.value); };
+        inputRam.onfocus = function() { mostraLlistaRam(this.value); };
+        inputRam.onblur = function() { setTimeout(() => { llistaRam.style.display = 'none'; }, 150); };
+        llistaRam.onclick = function(e) {
+            if (e.target.tagName === 'LI') {
+                inputRam.value = e.target.textContent;
+                llistaRam.style.display = 'none';
+            }
+        };
+
+        // Emmagatzematge
+        const opcionsEmm = await obtenirOpcionsConfig('emmagatzematge');
+        const inputEmm = document.getElementById('input-emmagatzematge');
+        const llistaEmm = document.getElementById('llista-emmagatzematge');
+        function mostraLlistaEmm(val) {
+            const filtrats = opcionsEmm.filter(r => r.toLowerCase().includes(val.toLowerCase()));
+            if (filtrats.length === 0 || !val) {
+                llistaEmm.style.display = 'none';
+                return;
+            }
+            llistaEmm.innerHTML = filtrats.map(r => `<li>${r}</li>`).join('');
+            llistaEmm.style.display = 'block';
+        }
+        inputEmm.oninput = function() { mostraLlistaEmm(this.value); };
+        inputEmm.onfocus = function() { mostraLlistaEmm(this.value); };
+        inputEmm.onblur = function() { setTimeout(() => { llistaEmm.style.display = 'none'; }, 150); };
+        llistaEmm.onclick = function(e) {
+            if (e.target.tagName === 'LI') {
+                inputEmm.value = e.target.textContent;
+                llistaEmm.style.display = 'none';
+            }
+        };
+
+        // Sistema Operatiu
+        const opcionsSO = await obtenirOpcionsConfig('sistemaOperatiu');
+        const inputSO = document.getElementById('input-sistemaoperatiu');
+        const llistaSO = document.getElementById('llista-sistemaoperatiu');
+        function mostraLlistaSO(val) {
+            const filtrats = opcionsSO.filter(r => r.toLowerCase().includes(val.toLowerCase()));
+            if (filtrats.length === 0 || !val) {
+                llistaSO.style.display = 'none';
+                return;
+            }
+            llistaSO.innerHTML = filtrats.map(r => `<li>${r}</li>`).join('');
+            llistaSO.style.display = 'block';
+        }
+        inputSO.oninput = function() { mostraLlistaSO(this.value); };
+        inputSO.onfocus = function() { mostraLlistaSO(this.value); };
+        inputSO.onblur = function() { setTimeout(() => { llistaSO.style.display = 'none'; }, 150); };
+        llistaSO.onclick = function(e) {
+            if (e.target.tagName === 'LI') {
+                inputSO.value = e.target.textContent;
+                llistaSO.style.display = 'none';
+            }
+        };
+    };
+
+    // Tancar modal amb botó
+    document.getElementById('modal-close-dispositiu').onclick = () => {
+        document.getElementById('modal-afegir-dispositiu').style.display = 'none';
+    };
+
+    // Tancar modal clicant fora
+    document.getElementById('modal-afegir-dispositiu').onclick = (e) => {
+        if (e.target.id === 'modal-afegir-dispositiu') {
+            document.getElementById('modal-afegir-dispositiu').style.display = 'none';
+        }
+    };
+
+    // Guardar nou dispositiu
+    document.getElementById('form-afegir-dispositiu').onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const nouDispositiu = {
+            id: fd.get('id'),
+            nom: fd.get('nom'),
+            model: fd.get('model'),
+            processador: fd.get('processador'),
+            ram: fd.get('ram'),
+            emmagatzematge: fd.get('emmagatzematge'),
+            tarjetaGrafica: fd.get('tarjetaGrafica'),
+            sistemaOperatiu: fd.get('sistemaOperatiu'),
+            dataAdquisicio: fd.get('dataAdquisicio'),
+            portatil: !!fd.get('portatil'),
+            reparacions: []
+        };
+        try {
+            await updateDoc(doc(db, "pcs", nouDispositiu.id.toString()), nouDispositiu)
+                .catch(async () => {
+                    // Si no existeix, crea'l
+                    await setDoc(doc(db, "pcs", nouDispositiu.id.toString()), nouDispositiu);
+                });
+            alert("Dispositiu afegit correctament!");
+            document.getElementById('modal-afegir-dispositiu').style.display = 'none';
+            main();
+        } catch (err) {
+            alert("Error afegint dispositiu: " + err.message);
+        }
+    };
 }
 
 function filtraData(data, valor) {
@@ -411,7 +638,7 @@ async function main() {
             content.style.display = '';
             content.innerHTML = "<p>Error carregant l'inventari.</p>";
         }
-        console.error(err);
     }
 }
+
 main();
