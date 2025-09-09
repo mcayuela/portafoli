@@ -141,47 +141,66 @@ fetch('numeros_moms_extensions.json')  // <--- ruta actualitzada
         mostrarResultats(resultatsFiltrats, paginaActual);
 
         const selectDepartament = document.querySelector('.filtreDepartament');
+        const contenidorSubfiltre = document.getElementById('contenidor-subfiltre');
 
-        cercador.addEventListener('input', function () {
-            const text = cercador.value.trim().toLowerCase();
-            paginaActual = 1;
-            const valor = selectDepartament.value;
-            if (text.length === 0) {
-                resultatsFiltrats = extensions.filter(item => {
-                    return !valor || item.departament === valor;
-                });
+        // Crea mapa departament -> subdepartaments
+        const departamentMap = {};
+        extensions.forEach(e => {
+            if (!e.departament) return;
+            const [dep, subdep] = e.departament.split('/');
+            if (!departamentMap[dep]) departamentMap[dep] = new Set();
+            if (subdep) departamentMap[dep].add(subdep);
+        });
+
+        // Omple el select només amb departaments principals
+        selectDepartament.innerHTML = '<option value="">Tots els departaments</option>' +
+            Object.keys(departamentMap).map(dep => `<option value="${dep}">${dep}</option>`).join('');
+
+        // Quan tries departament
+        selectDepartament.addEventListener('change', function() {
+            const dep = selectDepartament.value;
+            // Si no hi ha departament, elimina subfiltre i mostra tot
+            if (!dep) {
+                contenidorSubfiltre.innerHTML = '';
+                resultatsFiltrats = extensions;
+                paginaActual = 1;
                 mostrarResultats(resultatsFiltrats, paginaActual);
                 return;
             }
+            // Si té subdepartaments, mostra el segon filtre
+            const subdeps = Array.from(departamentMap[dep] || []);
+            if (subdeps.length > 0) {
+                contenidorSubfiltre.innerHTML = `
+                    <select class="filtreSubdepartament">
+                        <option value="">Tots els subdepartaments</option>
+                        ${subdeps.map(sd => `<option value="${sd}">${sd}</option>`).join('')}
+                    </select>
+                `;
+                filtraIDepSub(dep, ''); // Mostra només el departament principal i subdeps
+                const selectSub = contenidorSubfiltre.querySelector('.filtreSubdepartament');
+                selectSub.addEventListener('change', function() {
+                    filtraIDepSub(dep, selectSub.value);
+                });
+            } else {
+                contenidorSubfiltre.innerHTML = '';
+                filtraIDepSub(dep, '');
+            }
+        });
 
-            resultatsFiltrats = extensions.filter(item => {
-                const coincideixText =
-                    item.nom.toLowerCase().includes(text) ||
-                    item.extensio.includes(text) ||
-                    item.departament.toLowerCase().includes(text) ||
-                    item.numero.includes(text);
-
-                const coincideixDepartament = !valor || item.departament === valor;
-
-                return coincideixText && coincideixDepartament;
-            });
+        function filtraIDepSub(dep, subdep) {
+            let dadesFiltrades;
+            if (!dep) {
+                dadesFiltrades = extensions;
+            } else if (!subdep) {
+                // Mostra tot el departament (amb o sense subdepartament)
+                dadesFiltrades = extensions.filter(pc => pc.departament && pc.departament.startsWith(dep));
+            } else {
+                // Mostra només el departament + subdepartament exacte
+                dadesFiltrades = extensions.filter(pc => pc.departament === `${dep}/${subdep}`);
+            }
+            resultatsFiltrats = dadesFiltrades;
+            paginaActual = 1;
             mostrarResultats(resultatsFiltrats, paginaActual);
-        });
-
-        const departamentsUnics = [...new Set(extensions.map(e => e.departament).filter(Boolean))].sort();
-        departamentsUnics.forEach(dep => {
-            const opt = document.createElement('option');
-            opt.value = dep;
-            opt.textContent = dep;
-            selectDepartament.appendChild(opt);
-        });
-
-        selectDepartament.addEventListener('change', () => {
-            const valor = selectDepartament.value;
-            const dadesFiltrades = extensions.filter(pc => {
-                if (!valor) return true;
-                return pc.departament === valor;
-            });
-            mostrarResultats(dadesFiltrades, 1);
-        });
-    });
+        }
+    })
+    .catch(error => console.error('Error al carregar el fitxer JSON:', error));

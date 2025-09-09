@@ -308,6 +308,91 @@ select option:hover {
     background-color: #444;
 }
 
+.filtreDepartament-dropdown {
+    position: relative;
+    display: inline-block;
+}
+.filtreDepartament-btn {
+    padding: 8px 16px;
+    border: 1.5px solid #2596be;
+    border-radius: 6px;
+    background: #fafdff;
+    color: #217aa3;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.filtreDepartament-llista {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 110%;
+    background: #fff;
+    border: 1.5px solid #2596be;
+    border-radius: 6px;
+    min-width: 180px;
+    z-index: 20;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 4px 16px rgba(37,150,190,0.10);
+}
+.filtreDepartament-llista.visible {
+    display: block;
+}
+.filtreDepartament-llista > li {
+    padding: 8px 16px;
+    cursor: pointer;
+    position: relative;
+    color: #217aa3;
+}
+.filtreDepartament-llista > li:hover,
+.filtreDepartament-llista > li:focus {
+    background: #eaf4fa;
+}
+.filtreDepartament-llista .has-subdeps > .subdeps {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background: #fff;
+    border: 1.5px solid #2596be;
+    border-radius: 6px;
+    min-width: 150px;
+    z-index: 30;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.filtreDepartament-llista .has-subdeps:hover > .subdeps {
+    display: block;
+}
+.filtreDepartament-llista .subdeps li {
+    padding: 8px 16px;
+    cursor: pointer;
+    color: #217aa3;
+}
+.filtreDepartament-llista .subdeps li:hover {
+    background: #eaf4fa;
+}
+
+.subdepartament-menu {
+    background: #fff;
+    border: 1.5px solid #2596be;
+    border-radius: 6px;
+    min-width: 150px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 4px 16px rgba(37,150,190,0.10);
+}
+.subdepartament-menu li {
+    padding: 8px 16px;
+    cursor: pointer;
+    color: #217aa3;
+}
+.subdepartament-menu li:hover {
+    background: #eaf4fa;
+}
 
 @media (max-width: 750px) {
     .filtreDepartament {
@@ -361,4 +446,29 @@ select option:hover {
     .paginacio {
         gap: 15px;
     }
+}
+
+.filtreSubdepartament {
+    margin-left: 10px;
+    padding: 10px;
+    border: 2px solid;
+    border-color: rgba(0, 0, 0, 0.5);
+    background: #f5f5f5;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    color: #000000;
+    opacity: 0.7;
+}
+
+.filtreSubdepartament:hover {
+    border: 2px solid #222d32;
+}
+
+/* Estil per a les opcions del subfiltre */
+.filtreSubdepartament option:checked {
+    background-color: #222d32;
+    color: white;
+}
+.filtreSubdepartament option:hover {
+    background-color: #222d32;
 }
