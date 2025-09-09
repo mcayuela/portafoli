@@ -76,7 +76,7 @@ itemsPagina.forEach(item => {
     colTelefon.classList.add('col-telefon');
 
     const colDepartament = document.createElement('div');
-    colDepartament.textContent = item.departament || 'No especificat';
+    colDepartament.textContent = (item.departament || 'No especificat').replace(/\//g, ' ');
     colDepartament.classList.add('col-departament');
 
     fila.appendChild(colNom);
