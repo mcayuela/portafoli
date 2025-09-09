@@ -2,9 +2,9 @@ import pandas as pd
 import json
 import os
 
-fitxer_excel = 'C:/Users/itpractice/OneDrive - TECNICAS MECANICAS ILERDENSES SL/Documentos/GitHub/portafoli/tmi/bd-telefonia/arxiu_telefonia.xlsx'
+fitxer_excel = os.path.join(os.path.dirname(__file__), 'arxiu_telefonia.xlsx')
 
-df = pd.read_excel(fitxer_excel, engine='openpyxl')
+df = pd.read_excel(fitxer_excel, engine='openpyxl', keep_default_na=False)
 df.columns = df.columns.str.strip()
 
 traduccio_columnes = {
@@ -23,7 +23,8 @@ df_filtrat = df_filtrat.astype(str).apply(lambda x: x.str.strip())
 
 df_filtrat = df_filtrat[
     ~df_filtrat['nom'].str.startswith(('TIPO_PUESTO', 'DDI')) &
-    ~df_filtrat['cognom'].str.startswith(('TIPO_PUESTO', 'DDI'))
+    ~df_filtrat['cognom'].str.startswith(('TIPO_PUESTO', 'DDI')) &
+    ~df_filtrat['departament'].str.startswith(('NULL', 'Null', 'null', 'nan'))
 ]
 
 df_filtrat['nom'] = df_filtrat['nom'] + ' ' + df_filtrat['cognom']
@@ -43,7 +44,7 @@ df_filtrat = df_filtrat[[col for col in ordre_columnes if col in df_filtrat.colu
 
 dades_json = df_filtrat.to_dict(orient='records')
 
-output_path = 'C:/Users/itpractice/OneDrive - TECNICAS MECANICAS ILERDENSES SL/Documentos/GitHub/portafoli/tmi/bd-telefonia/numeros_moms_extensions.json'
+output_path = os.path.join(os.path.dirname(__file__), 'arxiu_telefonia.json')
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(dades_json, f, ensure_ascii=False, indent=4)
 
