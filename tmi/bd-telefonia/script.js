@@ -7,6 +7,7 @@ const cercador = document.getElementById('buscador');
 const selectDepartament = document.querySelector('.filtreDepartament');
 const contenidorSubfiltre = document.getElementById('contenidor-subfiltre');
 const resultats = document.getElementById('resultats');
+const contadorContactes = document.querySelector('.contador-contactes');
 
 // Carrega dades del JSON
 fetch('arxiu_telefonia.json')
@@ -102,6 +103,7 @@ cercador.addEventListener('input', function() {
 // Mostra resultats (exemple bàsic, adapta-ho al teu HTML)
 function mostrarResultats(filtrats, pagina = 1) {
     resultats.innerHTML = '';
+    contadorContactes.textContent = `Contactes: ${filtrats.length}`;
     if (!filtrats.length) {
         resultats.innerHTML = '<div>No s\'han trobat resultats.</div>';
         return;

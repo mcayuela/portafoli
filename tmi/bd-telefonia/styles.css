@@ -246,6 +246,22 @@ select option:hover {
     margin-top: 1rem;
 }
 
+.fila-contador {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.contador-contactes {
+    margin-left: auto;
+    color: #222d32 !important;
+    padding: 5px 0;
+    text-align: right;
+    font-weight: 600 !important;
+    font-size: 1.05rem !important;
+}
+
 .resultat-item {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -432,6 +448,48 @@ select option:hover {
     background: #f0f8fb;
 }
 
+.fila-filtres-contador {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 8px;
+    gap: 16px;
+}
+
+.filtres {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.contador-contactes {
+    font-size: 1rem;
+    color: #222d32;
+    font-weight: 500;
+    padding: 5px 0;
+    text-align: right;
+    min-width: 120px;
+    margin-left: auto;
+}
+
+.contenidor-principal-superior {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 16px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.grup-filtres-cercador {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 @media (max-width: 750px) {
     .filtreDepartament {
         width: 100%;
@@ -456,21 +514,17 @@ select option:hover {
 }
 
 @media (max-width: 650px) {
-    .filtreDepartament {
-        width: 100%;
-    }
-    main {
-        padding-left: 0px;
-    }
-    .paginacio {
-        gap: 30px;
-    }
-    main {
-        text-align: center;
-    }
-    li.resultat-item {
+    .contenidor-principal-superior {
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .grup-filtres-cercador {
+        justify-content: flex-start;
+    }
+    .contador-contactes {
+        text-align: left;
+        margin-left: 0;
     }
 }
 
