@@ -1,7 +1,7 @@
 [
   {
     "id": "2301",
-    "nom": "Postventa-03",
+    "FQDN": "Postventa-03",
     "model": "HP EliteBook",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -13,7 +13,7 @@
   },
   {
     "id": "2305",
-    "nom": "RRHH-01",
+    "FQDN": "RRHH-01",
     "model": "Dell Latitude",
     "processador": "Intel Core i9",
     "ram": "64GB",
@@ -25,7 +25,7 @@
   },
   {
     "id": "2307",
-    "nom": "Compres-13",
+    "FQDN": "Compres-13",
     "model": "Lenovo ThinkPad",
     "processador": "Intel Core i7",
     "ram": "16GB",
@@ -37,7 +37,7 @@
   },
   {
     "id": "2203",
-    "nom": "IT-01",
+    "FQDN": "IT-01",
     "model": "HP ProDesk 400",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -49,7 +49,7 @@
   },
   {
     "id": "2204",
-    "nom": "IT-02",
+    "FQDN": "IT-02",
     "model": "Dell OptiPlex 3080",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -61,7 +61,7 @@
   },
   {
     "id": "2111",
-    "nom": "IT-03",
+    "FQDN": "IT-03",
     "model": "Lenovo ThinkCentre M720",
     "processador": "Intel Core i5",
     "ram": "8GB",
@@ -73,7 +73,7 @@
   },
   {
     "id": "2302",
-    "nom": "Direccio-01",
+    "FQDN": "Direccio-01",
     "model": "Apple MacBook Pro",
     "processador": "Apple M1",
     "ram": "16GB",
@@ -85,7 +85,7 @@
   },
   {
     "id": "2209",
-    "nom": "Direccio-02",
+    "FQDN": "Direccio-02",
     "model": "HP Spectre x360",
     "processador": "Intel Core i7",
     "ram": "16GB",
@@ -97,7 +97,7 @@
   },
   {
     "id": "2206",
-    "nom": "Comercial-01",
+    "FQDN": "Comercial-01",
     "model": "Dell XPS 13",
     "processador": "Intel Core i5",
     "ram": "8GB",
@@ -109,7 +109,7 @@
   },
   {
     "id": "2207",
-    "nom": "Comercial-02",
+    "FQDN": "Comercial-02",
     "model": "Lenovo Yoga Slim 7",
     "processador": "AMD Ryzen 7 4800U",
     "ram": "16GB",
@@ -121,7 +121,7 @@
   },
   {
     "id": "2110",
-    "nom": "Comercial-03",
+    "FQDN": "Comercial-03",
     "model": "HP Pavilion 15",
     "processador": "Intel Core i3",
     "ram": "8GB",
@@ -133,7 +133,7 @@
   },
   {
     "id": "2303",
-    "nom": "Produccio-01",
+    "FQDN": "Produccio-01",
     "model": "Dell Precision 3640",
     "processador": "Intel Xeon W-1250",
     "ram": "64GB",
@@ -145,7 +145,7 @@
   },
   {
     "id": "2304",
-    "nom": "Produccio-02",
+    "FQDN": "Produccio-02",
     "model": "HP ZBook Fury",
     "processador": "Intel Core i9",
     "ram": "128GB",
@@ -157,7 +157,7 @@
   },
   {
     "id": "2212",
-    "nom": "Produccio-03",
+    "FQDN": "Produccio-03",
     "model": "Lenovo ThinkPad P15",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -169,7 +169,7 @@
   },
   {
     "id": "2109",
-    "nom": "Magatzem-01",
+    "FQDN": "Magatzem-01",
     "model": "HP ProBook 450",
     "processador": "Intel Core i5",
     "ram": "8GB",
@@ -181,7 +181,7 @@
   },
   {
     "id": "2011",
-    "nom": "Magatzem-02",
+    "FQDN": "Magatzem-02",
     "model": "Dell Inspiron 15",
     "processador": "Intel Core i3",
     "ram": "8GB",
@@ -193,7 +193,7 @@
   },
   {
     "id": "2202",
-    "nom": "Magatzem-03",
+    "FQDN": "Magatzem-03",
     "model": "Lenovo IdeaPad 3",
     "processador": "AMD Ryzen 5 3500U",
     "ram": "12GB",
@@ -205,7 +205,7 @@
   },
   {
     "id": "2208",
-    "nom": "Finances-01",
+    "FQDN": "Finances-01",
     "model": "HP EliteBook",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -217,7 +217,7 @@
   },
   {
     "id": "2301",
-    "nom": "Finances-02",
+    "FQDN": "Finances-02",
     "model": "Dell Latitude",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -229,7 +229,7 @@
   },
   {
     "id": "2112",
-    "nom": "Finances-03",
+    "FQDN": "Finances-03",
     "model": "Lenovo ThinkPad E15",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -241,7 +241,7 @@
   },
   {
     "id": "2010",
-    "nom": "RRHH-02",
+    "FQDN": "RRHH-02",
     "model": "HP ProBook 440",
     "processador": "Intel Core i3",
     "ram": "8GB",
@@ -253,7 +253,7 @@
   },
   {
     "id": "2203",
-    "nom": "RRHH-03",
+    "FQDN": "RRHH-03",
     "model": "Dell Latitude 5410",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -265,7 +265,7 @@
   },
   {
     "id": "2304",
-    "nom": "RRHH-04",
+    "FQDN": "RRHH-04",
     "model": "Lenovo ThinkPad L14",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -277,7 +277,7 @@
   },
   {
     "id": "2108",
-    "nom": "RRHH-05",
+    "FQDN": "RRHH-05",
     "model": "HP EliteBook 840",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -289,7 +289,7 @@
   },
   {
     "id": "2302",
-    "nom": "RRHH-06",
+    "FQDN": "RRHH-06",
     "model": "Dell Latitude 5510",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -301,7 +301,7 @@
   },
   {
     "id": "2111",
-    "nom": "RRHH-07",
+    "FQDN": "RRHH-07",
     "model": "Lenovo ThinkPad T14",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -313,7 +313,7 @@
   },
   {
     "id": "2009",
-    "nom": "RRHH-08",
+    "FQDN": "RRHH-08",
     "model": "HP ProBook 450",
     "processador": "Intel Core i3",
     "ram": "8GB",
@@ -325,7 +325,7 @@
   },
   {
     "id": "2202",
-    "nom": "RRHH-09",
+    "FQDN": "RRHH-09",
     "model": "Dell Latitude 5411",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -337,7 +337,7 @@
   },
   {
     "id": "2303",
-    "nom": "RRHH-10",
+    "FQDN": "RRHH-10",
     "model": "Lenovo ThinkPad L15",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -349,7 +349,7 @@
   },
   {
     "id": "2207",
-    "nom": "Compres-01",
+    "FQDN": "Compres-01",
     "model": "HP EliteBook",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -361,7 +361,7 @@
   },
   {
     "id": "2301",
-    "nom": "Compres-02",
+    "FQDN": "Compres-02",
     "model": "Dell Latitude",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -373,7 +373,7 @@
   },
   {
     "id": "2110",
-    "nom": "Compres-03",
+    "FQDN": "Compres-03",
     "model": "Lenovo ThinkPad E15",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -385,7 +385,7 @@
   },
   {
     "id": "2008",
-    "nom": "Compres-04",
+    "FQDN": "Compres-04",
     "model": "HP ProBook 440",
     "processador": "Intel Core i3",
     "ram": "8GB",
@@ -397,7 +397,7 @@
   },
   {
     "id": "2201",
-    "nom": "Compres-05",
+    "FQDN": "Compres-05",
     "model": "Dell Latitude 5410",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -409,7 +409,7 @@
   },
   {
     "id": "2202",
-    "nom": "Compres-06",
+    "FQDN": "Compres-06",
     "model": "Lenovo ThinkPad L14",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -421,7 +421,7 @@
   },
   {
     "id": "2107",
-    "nom": "Compres-07",
+    "FQDN": "Compres-07",
     "model": "HP EliteBook 840",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -433,7 +433,7 @@
   },
   {
     "id": "2301",
-    "nom": "Compres-08",
+    "FQDN": "Compres-08",
     "model": "Dell Latitude 5510",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -445,7 +445,7 @@
   },
   {
     "id": "2109",
-    "nom": "Compres-09",
+    "FQDN": "Compres-09",
     "model": "Lenovo ThinkPad T14",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -457,7 +457,7 @@
   },
   {
     "id": "2007",
-    "nom": "Compres-10",
+    "FQDN": "Compres-10",
     "model": "HP ProBook 450",
     "processador": "Intel Core i3",
     "ram": "8GB",
@@ -469,7 +469,7 @@
   },
   {
     "id": "2202",
-    "nom": "Compres-11",
+    "FQDN": "Compres-11",
     "model": "Dell Latitude 5411",
     "processador": "Intel Core i5",
     "ram": "16GB",
@@ -481,7 +481,7 @@
   },
   {
     "id": "2203",
-    "nom": "Compres-12",
+    "FQDN": "Compres-12",
     "model": "Lenovo ThinkPad L15",
     "processador": "Intel Core i7",
     "ram": "32GB",
@@ -493,7 +493,7 @@
   },
   {
     "id": "2307",
-    "nom": "Compres-13",
+    "FQDN": "Compres-13",
     "model": "Lenovo ThinkPad",
     "processador": "Intel Core i7",
     "ram": "16GB",
@@ -505,7 +505,7 @@
   },
   {
     "id": "2206",
-    "nom": "Compres-14",
+    "FQDN": "Compres-14",
     "model": "HP EliteBook",
     "processador": "Intel Core i5",
     "ram": "16GB",

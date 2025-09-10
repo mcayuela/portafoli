@@ -416,7 +416,8 @@ body {
 /* Botó afegir dispositiu */
 .btn-afegir-dispositiu {
     height: 38px;
-    padding: 0 18px;
+    width: 1000px;
+    padding: 0 15px;
     border-radius: 6px;
     border: none;
     background: #2596be;
@@ -427,13 +428,14 @@ body {
     transition: background 0.2s, color 0.2s, border 0.2s;
     display: flex;
     align-items: center;
+    text-align: center;
     margin: 0px 0px 10px 0px;
 }
 .btn-afegir-dispositiu:hover {
     background: #217aa3;
 }
 
-/* MODAL Afegir dispositiu */
+/* MODAL Afegir dispositiu (PC i genèric) */
 .modal-afegir-dispositiu {
     display: none;
     position: fixed;
@@ -445,7 +447,9 @@ body {
     z-index: 1000;
 }
 
-#modal-content-dispositiu {
+/* Contingut del modal (PC i genèric) */
+#modal-content-dispositiu,
+#modal-content-altredispositiu {
     background: #fff;
     padding: 32px 40px 32px 32px;
     border-radius: 18px;
@@ -465,11 +469,12 @@ body {
 }
 
 /* Separador visual a la dreta del contingut, abans de l’scrollbar */
-#modal-content-dispositiu::after {
+#modal-content-dispositiu::after,
+#modal-content-altredispositiu::after {
     content: "";
     position: absolute;
     top: 0;
-    right: 18px; /* ajusta segons l'amplada del teu scrollbar */
+    right: 18px;
     width: 15px;
     height: 100%;
     background: transparent;
@@ -478,26 +483,31 @@ body {
 }
 
 /* Scrollbar corporatiu per a modal (Firefox i Chrome) */
-#modal-content-dispositiu::-webkit-scrollbar {
+#modal-content-dispositiu::-webkit-scrollbar,
+#modal-content-altredispositiu::-webkit-scrollbar {
     width: 10px;
     background: #eaf4fa;
     border-radius: 8px;
     margin-left: 15px;
 }
-#modal-content-dispositiu::-webkit-scrollbar-thumb {
+#modal-content-dispositiu::-webkit-scrollbar-thumb,
+#modal-content-altredispositiu::-webkit-scrollbar-thumb {
     background: #2596be;
     border-radius: 8px;
 }
-#modal-content-dispositiu::-webkit-scrollbar-thumb:hover {
+#modal-content-dispositiu::-webkit-scrollbar-thumb:hover,
+#modal-content-altredispositiu::-webkit-scrollbar-thumb:hover {
     background: #217aa3;
 }
-#modal-content-dispositiu {
+#modal-content-dispositiu,
+#modal-content-altredispositiu {
     scrollbar-width: thin;
     scrollbar-color: #2596be #eaf4fa;
 }
 
 /* Botó tancar modal (creueta corporativa) */
-#modal-close-dispositiu {
+#modal-close-dispositiu,
+#modal-close-altredispositiu {
     position: absolute;
     top: 15px;
     right: 22px;
@@ -513,34 +523,48 @@ body {
     transition: color 0.5s;
     padding: 2px 7px 7px 7px;
 }
-#modal-close-dispositiu:hover {
+#modal-close-dispositiu:hover,
+#modal-close-altredispositiu:hover {
     color: #c0392b;
     background: none;
 }
 
 /* Formulari dins el modal */
-#form-afegir-dispositiu {
+#form-afegir-dispositiu,
+#form-afegir-altredispositiu {
     flex: 1 1 auto;
     overflow: auto;
     margin-top: 20px;
 }
-#form-afegir-dispositiu label {
+#form-afegir-dispositiu label,
+#form-afegir-altredispositiu label {
     margin-bottom: 4px;
     margin-top: 0;
     font-weight: 500;
     color: #217aa3;
     display: block;
     position: relative;
-    /* Afegim separació entre el text i l'input */
     padding-bottom: 10px;
 }
 
-#form-afegir-dispositiu input:not([type="checkbox"]) {
+#form-afegir-dispositiu input:not([type="checkbox"]),
+#form-afegir-altredispositiu input:not([type="checkbox"]) {
     margin-bottom: -20px;
 }
 
 .btn-guardar {
     margin-top: 12px;
+}
+
+/* Inputs, selects i botons dins el modal genèric */
+#modal-afegir-altredispositiu select,
+#modal-afegir-altredispositiu input,
+#modal-afegir-altredispositiu button {
+    font-size: 1rem;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1.5px solid #2596be;
+    margin-bottom: 8px;
 }
 
 .loader {
@@ -606,145 +630,4 @@ body {
         font-size: 1.1rem;
         margin: 10px 0;
     }
-}
-
-#input-processador {
-    border: none;
-    background: none;
-    color: inherit;
-    padding: 0;
-    font-size: inherit;
-}
-
-/* Llista de processadors: desplegable alineat i ample correcte */
-.llista-processadors {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    margin-top: 2px; /* separació petita entre input i llista */
-    width: 100%;
-    box-sizing: border-box;
-    z-index: 10;
-    background: #fff;
-    border: 1.5px solid #2596be;
-    border-radius: 0 0 8px 8px;
-    max-height: 180px;
-    overflow-y: auto;
-    list-style: none;
-    padding: 0;
-    box-shadow: 0 4px 16px rgba(37,150,190,0.10);
-}
-
-.llista-processadors li {
-    padding: 8px 12px;
-    cursor: pointer;
-    color: #217aa3;
-    font-size: 16px;
-    transition: background 0.15s;
-}
-.llista-processadors li:hover,
-.llista-processadors li.selected {
-    background: #eaf4fa;
-    color: #2596be;
-}
-
-#modal-content-dispositiu h3 {
-    margin-top: 3px;
-}
-
-#modal-content-dispositiu form label {
-    margin-bottom: 4px;
-    margin-top: 0;
-    font-weight: 500;
-    color: #217aa3;
-    display: block;
-    position: relative;
-    /* Afegim separació entre el text i l'input */
-    padding-bottom: 10px;
-}
-
-#modal-content-dispositiu form label input:not([type="checkbox"]),
-#modal-content-dispositiu form label select,
-#modal-content-dispositiu form label textarea {
-    width: 90%;
-    min-width: 200px;
-    max-width: 100%;
-    box-sizing: border-box;
-    display: block;
-    margin-left: 2px;
-    margin-right: 10px;
-    border: 1.5px solid #b3d6e6;
-    border-radius: 7px;
-    padding: 10px 14px;
-    font-size: 1rem;
-    background: #fafdff;
-    color: #217aa3;
-    transition: border 0.2s, box-shadow 0.2s;
-}
-
-#modal-content-dispositiu form label input:not([type="checkbox"]):focus,
-#modal-content-dispositiu form label select:focus,
-#modal-content-dispositiu form label textarea:focus {
-    border-color: #2596be;
-    box-shadow: 0 0 0 2px #b3e0f7;
-    outline: none;
-}
-
-/* Elimina l'estil específic del processador */
-#input-processador {
-    border: none;
-    background: none;
-    color: inherit;
-    padding: 0;
-    font-size: inherit;
-}
-
-/* Estil del checkbox personalitzat */
-.checkbox-portatil {
-    margin-left: 10px;
-    appearance: none;
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    border: 2.5px solid #2596be;
-    border-radius: 7px;
-    background: #fafdff;
-    cursor: pointer;
-    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
-    position: relative;
-    display: inline-block;
-    vertical-align: middle;
-    padding: 0 !important;
-    padding-bottom: 10px !important;
-}
-
-.checkbox-portatil:checked {
-    background: rgb(37, 150, 190, 0.8);
-    border-color: #2596be;
-}
-
-.checkbox-portatil:checked::after {
-    content: '';
-    position: absolute;
-    left: 5.2px;
-    top: 2.3px;
-    width: 3px;
-    height: 7px;
-    border: solid #ffffff;
-    border-width: 0 3px 3px 0;
-    transform: rotate(45deg);
-    display: block;
-}
-
-.checkbox-portatil:hover {
-    border: 2.5px solid #2596be;
-    background: #2596be;
-    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
-}
-
-.label-portatil {
-    display: flex;
-    align-items: center;
-    margin-bottom: 12px;
 }

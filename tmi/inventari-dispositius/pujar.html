@@ -26,6 +26,8 @@
       const ram = document.getElementById('ram').value.split(',').map(x => x.trim()).filter(Boolean);
       const emmagatzematge = document.getElementById('emmagatzematge').value.split(',').map(x => x.trim()).filter(Boolean);
       const sistemaOperatiu = document.getElementById('sistemaOperatiu').value.split(',').map(x => x.trim()).filter(Boolean);
+      const usuaris = document.getElementById('usuaris').value.split(',').map(x => x.trim()).filter(Boolean);
+      const departaments = document.getElementById('departaments').value.split(',').map(x => x.trim()).filter(Boolean);
 
       let missatge = "";
       try {
@@ -42,9 +44,21 @@
       }
       try {
         await setDoc(doc(db, "configuracio", "sistemaOperatiu"), { valors: sistemaOperatiu });
-        missatge += "Sistema Operatiu pujat correctament.";
+        missatge += "Sistema Operatiu pujat correctament. ";
       } catch (err) {
-        missatge += "Error pujant sistema operatiu: " + err.message;
+        missatge += "Error pujant sistema operatiu: " + err.message + " ";
+      }
+      try {
+        await setDoc(doc(db, "configuracio", "usuaris"), { valors: usuaris });
+        missatge += "Usuaris pujats correctament. ";
+      } catch (err) {
+        missatge += "Error pujant usuaris: " + err.message + " ";
+      }
+      try {
+        await setDoc(doc(db, "configuracio", "departaments"), { valors: departaments });
+        missatge += "Departaments pujats correctament.";
+      } catch (err) {
+        missatge += "Error pujant departaments: " + err.message;
       }
       document.getElementById('resultat').textContent = missatge;
     }
@@ -55,7 +69,7 @@
   </script>
 </head>
 <body>
-  <h2>Pujar opcions de RAM, Emmagatzematge i Sistema Operatiu a Firebase</h2>
+  <h2>Pujar opcions de RAM, Emmagatzematge, Sistema Operatiu, Usuaris i Departaments a Firebase</h2>
   <form id="form-opcions">
     <label>RAM (separat per comes):<br>
       <input id="ram" value="8GB,16GB,32GB,64GB">
@@ -65,6 +79,12 @@
     </label><br><br>
     <label>Sistema Operatiu (separat per comes):<br>
       <input id="sistemaOperatiu" value="Win 7,Win 8,Win 10,Win 11">
+    </label><br><br>
+    <label>Usuaris (separat per comes):<br>
+      <input id="usuaris" value="usuari1,usuari2,usuari3">
+    </label><br><br>
+    <label>Departaments (separat per comes):<br>
+      <input id="departaments" value="IT,RRHH,Comercial,Producció">
     </label><br><br>
     <button type="submit">Pujar opcions</button>
   </form>

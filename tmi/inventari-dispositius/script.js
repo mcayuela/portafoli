@@ -36,6 +36,28 @@ const iconaSobretaula = `
         <rect x="49" y="32" width="4" height="8" rx="1" fill="#2596be"/>
     </svg>
 `;
+const iconaMonitor = `
+    <svg width="300" height="300" viewBox="0 0 64 64" fill="none">
+        <rect x="8" y="14" width="48" height="36" rx="3" fill="#2596be" stroke="#217aa3" stroke-width="2"/>
+        <rect x="4" y="54" width="56" height="4" rx="2" fill="#b3d6e6" stroke="#217aa3" stroke-width="2"/>
+        <rect x="20" y="54" width="24" height="2" rx="1" fill="#217aa3"/>
+    </svg>
+`;
+const iconaImpresora = `
+    <svg width="300" height="300" viewBox="0 0 64 64" fill="none">
+        <rect x="8" y="14" width="48" height="28" rx="3" fill="#2596be" stroke="#217aa3" stroke-width="2"/>
+        <rect x="4" y="46" width="56" height="4" rx="2" fill="#b3d6e6" stroke="#217aa3" stroke-width="2"/>
+        <rect x="20" y="46" width="24" height="2" rx="1" fill="#217aa3"/>
+        <path d="M16 14V10C16 7.79086 17.7909 6 20 6H44C46.2091 6 48 7.79086 48 10V14" stroke="#217aa3" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+`;
+const iconaMobil = `
+    <svg width="300" height="300" viewBox="0 0 64 64" fill="none">
+        <rect x="20" y="6" width="24" height="52" rx="3" fill="#2596be" stroke="#217aa3" stroke-width="2"/>
+        <rect x="16" y="58" width="32" height="4" rx="2" fill="#b3d6e6" stroke="#217aa3" stroke-width="2"/>
+        <rect x="28" y="58" width="8" height="2" rx="1" fill="#217aa3"/>
+    </svg>
+`;
 
 let lastData = null;
 let lastPage = 1;
@@ -47,25 +69,36 @@ function renderBuscador() {
     if (oldBuscador) oldBuscador.remove();
     const oldModal = document.getElementById('modal-afegir-dispositiu');
     if (oldModal) oldModal.remove();
+    const oldModalAltres = document.getElementById('modal-afegir-altredispositiu');
+    if (oldModalAltres) oldModalAltres.remove();
 
     const buscadorHtml = `
         <div id="buscador-container" class="buscador-container">
-            <input type="text" id="buscador" class="buscador-input" placeholder="Cerca per ID o Nom..." autocomplete="off">
+            <input type="text" id="buscador" class="buscador-input" placeholder="Cerca per ID o FQDN..." autocomplete="off">
             <span class="buscador-icona">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <circle cx="9" cy="9" r="7" stroke="#2596be" stroke-width="2"/>
                     <line x1="14.2" y1="14.2" x2="18" y2="18" stroke="#2596be" stroke-width="2" stroke-linecap="round"/>
                 </svg>
             </span>
+            <button id="btn-afegir-pc" class="btn-afegir-dispositiu">+ Afegir PC</button>
             <button id="btn-afegir-dispositiu" class="btn-afegir-dispositiu">+ Afegir dispositiu</button>
         </div>
         <div id="modal-afegir-dispositiu" class="modal-afegir-dispositiu">
             <div id="modal-content-dispositiu">
                 <button id="modal-close-dispositiu" title="Tancar">&times;</button>
-                <h3>Afegir nou dispositiu</h3>
+                <h3 style="margin-top: 0; padding-top: 2px;">Afegir nou dispositiu</h3>
                 <form id="form-afegir-dispositiu">
                     <label>ID:<br><input name="id" required></label><br>
-                    <label>Nom:<br><input name="nom" required></label><br>
+                    <label>FQDN:<br><input name="FQDN" required></label><br>
+                    <label>Usuari:<br>
+                        <input name="usuari" id="input-usuari" autocomplete="off">
+                        <ul id="llista-usuaris" class="llista-processadors" style="display:none;"></ul>
+                    </label><br>
+                    <label>Departament:<br>
+                        <input name="departament" id="input-departament" autocomplete="off">
+                        <ul id="llista-departaments" class="llista-processadors" style="display:none;"></ul>
+                    </label><br>
                     <label>Model:<br><input name="model"></label><br>
                     <label>Processador:<br>
                         <input name="processador" id="input-processador" autocomplete="off">
@@ -89,6 +122,31 @@ function renderBuscador() {
                         Portàtil:
                         <input type="checkbox" name="portatil" class="checkbox-portatil">
                     </label>
+                    <button type="submit" class="btn-guardar">Guardar</button>
+                </form>
+            </div>
+        </div>
+        <div id="modal-afegir-altredispositiu" class="modal-afegir-dispositiu">
+            <div id="modal-content-altredispositiu">
+                <button id="modal-close-altredispositiu" title="Tancar">&times;</button>
+                <h3 style="margin-top: 0; padding-top: 2px;">Afegir nou dispositiu</h3>
+                <form id="form-afegir-altredispositiu">
+                    <label>Model:<br><input name="model" required></label><br>
+                    <label>Tamany:<br><input name="tamany"></label><br>
+                    <label>Usuari:<br><input name="usuari" required></label><br>
+                    <label>Departament:<br>
+                        <input name="departament" id="input-departament-altre" autocomplete="off">
+                        <ul id="llista-departaments-altre" class="llista-processadors" style="display:none;"></ul>
+                    </label><br>
+                    <label>Any d'adquisició:<br><input name="anyAdquisicio" type="number" min="1980" max="2100"></label><br>
+                    <label>Tipus de dispositiu:<br>
+                        <select name="tipus" id="select-tipus-dispositiu" required>
+                            <option value="">-- Selecciona --</option>
+                            <option value="Monitor">Monitor</option>
+                            <option value="Impresora">Impresora</option>
+                            <option value="Mòbil">Mòbil</option>
+                        </select>
+                    </label><br>
                     <button type="submit" class="btn-guardar">Guardar</button>
                 </form>
             </div>
@@ -120,8 +178,8 @@ function renderBuscador() {
     }
 
     // Obtenir opcions de RAM, Emmagatzematge i Sistema Operatiu
-    async function obtenirOpcionsConfig(nom) {
-        const docRef = doc(db, "configuracio", nom);
+    async function obtenirOpcionsConfig(FQDN) {
+        const docRef = doc(db, "configuracio", FQDN);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             return docSnap.data().valors || [];
@@ -129,8 +187,8 @@ function renderBuscador() {
         return [];
     }
 
-    // Obrir modal
-    document.getElementById('btn-afegir-dispositiu').onclick = async () => {
+    // Obrir modal PC
+    document.getElementById('btn-afegir-pc').onclick = async () => {
         document.getElementById('modal-afegir-dispositiu').style.display = 'flex';
         // Omple l'ID automàticament amb el màxim + 1
         const idInput = document.querySelector('#form-afegir-dispositiu input[name="id"]');
@@ -238,17 +296,71 @@ function renderBuscador() {
                 llistaSO.style.display = 'none';
             }
         };
+
+        // Obtenir usuaris
+        const opcionsUsuaris = await obtenirOpcionsConfig('usuaris');
+        const inputUsuari = document.getElementById('input-usuari');
+        const llistaUsuaris = document.getElementById('llista-usuaris');
+        function mostraLlistaUsuaris(val) {
+            const filtrats = opcionsUsuaris.filter(u => u.toLowerCase().includes(val.toLowerCase()));
+            if (filtrats.length === 0 || !val) {
+                llistaUsuaris.style.display = 'none';
+                return;
+            }
+            llistaUsuaris.innerHTML = filtrats.map(u => `<li>${u}</li>`).join('');
+            llistaUsuaris.style.display = 'block';
+        }
+        inputUsuari.oninput = function() { mostraLlistaUsuaris(this.value); };
+        inputUsuari.onfocus = function() { mostraLlistaUsuaris(this.value); };
+        inputUsuari.onblur = function() { setTimeout(() => { llistaUsuaris.style.display = 'none'; }, 150); };
+        llistaUsuaris.onclick = function(e) {
+            if (e.target.tagName === 'LI') {
+                inputUsuari.value = e.target.textContent;
+                llistaUsuaris.style.display = 'none';
+            }
+        };
+
+        // Obtenir departaments
+        const opcionsDepartaments = await obtenirOpcionsConfig('departaments');
+        const inputDepartament = document.getElementById('input-departament');
+        const llistaDepartaments = document.getElementById('llista-departaments');
+        function mostraLlistaDepartaments(val) {
+            const filtrats = opcionsDepartaments.filter(d => d.toLowerCase().includes(val.toLowerCase()));
+            if (filtrats.length === 0 || !val) {
+                llistaDepartaments.style.display = 'none';
+                return;
+            }
+            llistaDepartaments.innerHTML = filtrats.map(d => `<li>${d}</li>`).join('');
+            llistaDepartaments.style.display = 'block';
+        }
+        inputDepartament.oninput = function() { mostraLlistaDepartaments(this.value); };
+        inputDepartament.onfocus = function() { mostraLlistaDepartaments(this.value); };
+        inputDepartament.onblur = function() { setTimeout(() => { llistaDepartaments.style.display = 'none'; }, 150); };
+        llistaDepartaments.onclick = function(e) {
+            if (e.target.tagName === 'LI') {
+                inputDepartament.value = e.target.textContent;
+                llistaDepartaments.style.display = 'none';
+            }
+        };
     };
 
     // Tancar modal amb botó
     document.getElementById('modal-close-dispositiu').onclick = () => {
         document.getElementById('modal-afegir-dispositiu').style.display = 'none';
     };
+    document.getElementById('modal-close-altredispositiu').onclick = () => {
+        document.getElementById('modal-afegir-altredispositiu').style.display = 'none';
+    };
 
     // Tancar modal clicant fora
     document.getElementById('modal-afegir-dispositiu').onclick = (e) => {
         if (e.target.id === 'modal-afegir-dispositiu') {
             document.getElementById('modal-afegir-dispositiu').style.display = 'none';
+        }
+    };
+    document.getElementById('modal-afegir-altredispositiu').onclick = (e) => {
+        if (e.target.id === 'modal-afegir-altredispositiu') {
+            document.getElementById('modal-afegir-altredispositiu').style.display = 'none';
         }
     };
 
@@ -258,7 +370,7 @@ function renderBuscador() {
         const fd = new FormData(e.target);
         const nouDispositiu = {
             id: fd.get('id'),
-            nom: fd.get('nom'),
+            FQDN: fd.get('FQDN'),
             model: fd.get('model'),
             processador: fd.get('processador'),
             ram: fd.get('ram'),
@@ -267,6 +379,8 @@ function renderBuscador() {
             sistemaOperatiu: fd.get('sistemaOperatiu'),
             dataAdquisicio: fd.get('dataAdquisicio'),
             portatil: !!fd.get('portatil'),
+            usuari: fd.get('usuari'),
+            departament: fd.get('departament'),
             reparacions: []
         };
         try {
@@ -282,13 +396,64 @@ function renderBuscador() {
             alert("Error afegint dispositiu: " + err.message);
         }
     };
+    // Guardar nou dispositiu altres
+    document.getElementById('form-afegir-altredispositiu').onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const tipus = fd.get('tipus'); // Ara només un valor
+        const nouDispositiu = {
+            model: fd.get('model'),
+            tamany: fd.get('tamany'),
+            usuari: fd.get('usuari'),
+            departament: fd.get('departament'),
+            anyAdquisicio: fd.get('anyAdquisicio'),
+            tipus: tipus ? [tipus] : [],
+            // Pots afegir més camps si vols
+        };
+        try {
+            await setDoc(doc(db, "altresDispositius", Date.now().toString()), nouDispositiu);
+            alert("Dispositiu afegit correctament!");
+            document.getElementById('modal-afegir-altredispositiu').style.display = 'none';
+            main();
+        } catch (err) {
+            alert("Error afegint dispositiu: " + err.message);
+        }
+    };
+
+    // Just després d'injectar el HTML del buscador i modals:
+    document.getElementById('btn-afegir-dispositiu').onclick = async () => {
+        document.getElementById('modal-afegir-altredispositiu').style.display = 'flex';
+
+        // Omple departaments (autocompletar)
+        const opcionsDepartaments = await obtenirOpcionsConfig('departaments');
+        const inputDepartament = document.getElementById('input-departament-altre');
+        const llistaDepartaments = document.getElementById('llista-departaments-altre');
+        function mostraLlistaDepartaments(val) {
+            const filtrats = opcionsDepartaments.filter(d => d.toLowerCase().includes(val.toLowerCase()));
+            if (filtrats.length === 0 || !val) {
+                llistaDepartaments.style.display = 'none';
+                return;
+            }
+            llistaDepartaments.innerHTML = filtrats.map(d => `<li>${d}</li>`).join('');
+            llistaDepartaments.style.display = 'block';
+        }
+        inputDepartament.oninput = function() { mostraLlistaDepartaments(this.value); };
+        inputDepartament.onfocus = function() { mostraLlistaDepartaments(this.value); };
+        inputDepartament.onblur = function() { setTimeout(() => { llistaDepartaments.style.display = 'none'; }, 150); };
+        llistaDepartaments.onclick = function(e) {
+            if (e.target.tagName === 'LI') {
+                inputDepartament.value = e.target.textContent;
+                llistaDepartaments.style.display = 'none';
+            }
+        };
+    };
 }
 
 function filtraData(data, valor) {
     valor = valor.trim().toLowerCase();
     if (!valor) return data;
     return data.filter(pc =>
-        (pc.nom || '').toLowerCase().includes(valor) ||
+        (pc.FQDN || '').toLowerCase().includes(valor) ||
         String(pc.id).includes(valor)
     );
 }
@@ -301,7 +466,7 @@ function renderLlistat(data, paginaActual) {
     const dataFiltrada = filtraData(data, valor);
 
     lastFiltrat = dataFiltrada;
-    dataFiltrada.sort((a, b) => (a.nom || '').localeCompare(b.nom || '', 'ca', { sensitivity: 'base' }));
+    dataFiltrada.sort((a, b) => (a.FQDN || '').localeCompare(b.FQDN || '', 'ca', { sensitivity: 'base' }));
 
     const PCS_PER_PAGINA = 40;
     const totalPagines = Math.max(1, Math.ceil(dataFiltrada.length / PCS_PER_PAGINA));
@@ -315,7 +480,7 @@ function renderLlistat(data, paginaActual) {
         html += `
             <div style="margin-bottom: 10px;word-break:break-word;">
                 <strong>ID:</strong> ${pc.id} -
-                <strong>Nom:</strong> ${pc.nom || ''} -
+                <strong>FQDN:</strong> ${pc.FQDN || ''} -
                 <a href="?id=${pc.id}">Més detalls</a>
             </div>
         `;
@@ -479,7 +644,7 @@ async function main() {
                     <div class="detall-container">
                         <div class="detall-text">
                             <h2>PC ID: ${pc.id}</h2>
-                            <p><strong>Nom:</strong> ${pc.nom || ''}</p>
+                            <p><strong>FQDN:</strong> ${pc.FQDN || ''}</p>
                             <p><strong>Model:</strong> ${pc.model || ''}</p>
                             <p><strong>Processador:</strong> ${pc.processador || ''}</p>
                             <p><strong>RAM:</strong> ${pc.ram || ''}</p>
@@ -488,12 +653,14 @@ async function main() {
                             <p><strong>Sistema Operatiu:</strong> ${pc.sistemaOperatiu || ''}</p>
                             <p><strong>Data d'Adquisició:</strong> ${pc.dataAdquisicio || ''}</p>
                             <p><strong>Portàtil:</strong> ${pc.portatil ? 'Sí' : 'No'}</p>
+                            <p><strong>Usuari:</strong> ${pc.usuari || ''}</p>
+                            <p><strong>Departament:</strong> ${pc.departament || ''}</p>
                             <a href="index.html">Tornar a l'inventari</a>
                             <hr>
                             ${renderReparacions(pc.reparacions, pc.id)}
                         </div>
                         <div class="detall-icona">
-                            ${(pc.portatil ? iconaPortatil : iconaSobretaula)}
+                            ${getIconaDispositiu(pc.tipus || [])}
                         </div>
                     </div>
                 `;
@@ -639,6 +806,13 @@ async function main() {
             content.innerHTML = "<p>Error carregant l'inventari.</p>";
         }
     }
+}
+
+function getIconaDispositiu(tipusArray) {
+    if (tipusArray.includes('Monitor')) return iconaMonitor;
+    if (tipusArray.includes('Impresora')) return iconaImpresora;
+    if (tipusArray.includes('Mòbil')) return iconaMobil;
+    return '';
 }
 
 main();
