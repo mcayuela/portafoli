@@ -137,21 +137,20 @@ function mostrarResultats(filtrats, pagina = 1) {
     const totalPagines = Math.ceil(filtrats.length / RESULTATS_PER_PAGINA);
     if (totalPagines > 1) {
         let paginacioHtml = `<div class="paginacio">`;
-        if (pagina > 1) {
-            paginacioHtml += `<button class="paginacio-btn" data-pagina="${pagina - 1}">&laquo; Anterior</button>`;
-        }
+        paginacioHtml += `<button class="paginacio-btn" data-pagina="${pagina - 1}" ${pagina === 1 ? 'disabled' : ''}>&lt;</button>`;
         paginacioHtml += `<span class="paginacio-info">Pàgina ${pagina} de ${totalPagines}</span>`;
-        if (pagina < totalPagines) {
-            paginacioHtml += `<button class="paginacio-btn" data-pagina="${pagina + 1}">Següent &raquo;</button>`;
-        }
+        paginacioHtml += `<button class="paginacio-btn" data-pagina="${pagina + 1}" ${pagina === totalPagines ? 'disabled' : ''}>&gt;</button>`;
         paginacioHtml += `</div>`;
         resultats.innerHTML += paginacioHtml;
 
         // Event listeners per als botons de paginació
         resultats.querySelectorAll('.paginacio-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                paginaActual = parseInt(this.dataset.pagina);
-                mostrarResultats(filtrats, paginaActual);
+                const novaPagina = parseInt(this.dataset.pagina);
+                if (!isNaN(novaPagina) && novaPagina >= 1 && novaPagina <= totalPagines && novaPagina !== pagina) {
+                    paginaActual = novaPagina;
+                    mostrarResultats(filtrats, paginaActual);
+                }
             });
         });
     }

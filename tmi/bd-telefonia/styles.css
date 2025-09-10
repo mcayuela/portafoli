@@ -105,40 +105,44 @@ a:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 60px;
+    gap: 16px;
     margin-top: 30px;
     margin-bottom: 30px;
     padding: 10px;
     margin-inline: auto;
 }
+
 .paginacio-btn {
-    width: 35px;
+    min-width: 35px;
     height: 35px;
-    font-size: 1rem;
-    border: 2px solid #bbb;
+    font-size: 1.2rem;
+    border: 2px solid #222d32;
     background: #fff;
     border-radius: 25px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    color: #222d32;
+    transition: background 0.2s, color 0.2s, border 0.2s, opacity 0.2s;
+    margin: 0 2px;
 }
-.paginacio-btn:hover {
+
+.paginacio-btn:hover:not(:disabled) {
     background: #222d32;
-    opacity: 0.7;
-    border-color: #eee;
-    color: #eee;
+    color: #fff;
+    border-color: #2e3b41;
 }
 .paginacio-btn:disabled {
     background: #f5f5f5;
     color: #bbb;
     border-color: #eee;
     cursor: default;
+    opacity: 0.5;
 }
 .paginacio-info {
     font-size: 1rem;
-    color: #444;
+    color: #222d32;
     font-family: inherit;
     text-align: center;
     min-width: 120px;
@@ -314,10 +318,10 @@ select option:hover {
 }
 .filtreDepartament-btn {
     padding: 8px 16px;
-    border: 1.5px solid #2596be;
+    border: 1.5px solid #222d32;
     border-radius: 6px;
     background: #fafdff;
-    color: #217aa3;
+    color: #222d32;
     cursor: pointer;
     font-size: 1rem;
 }
@@ -327,7 +331,7 @@ select option:hover {
     left: 0;
     top: 110%;
     background: #fff;
-    border: 1.5px solid #2596be;
+    border: 1.5px solid #222d32;
     border-radius: 6px;
     min-width: 180px;
     z-index: 20;
@@ -343,7 +347,7 @@ select option:hover {
     padding: 8px 16px;
     cursor: pointer;
     position: relative;
-    color: #217aa3;
+    color: #222d32;
 }
 .filtreDepartament-llista > li:hover,
 .filtreDepartament-llista > li:focus {
@@ -355,7 +359,7 @@ select option:hover {
     left: 100%;
     top: 0;
     background: #fff;
-    border: 1.5px solid #2596be;
+    border: 1.5px solid #222d32;
     border-radius: 6px;
     min-width: 150px;
     z-index: 30;
@@ -369,7 +373,7 @@ select option:hover {
 .filtreDepartament-llista .subdeps li {
     padding: 8px 16px;
     cursor: pointer;
-    color: #217aa3;
+    color: #222d32;
 }
 .filtreDepartament-llista .subdeps li:hover {
     background: #eaf4fa;
@@ -377,7 +381,7 @@ select option:hover {
 
 .subdepartament-menu {
     background: #fff;
-    border: 1.5px solid #2596be;
+    border: 1.5px solid #222d32;
     border-radius: 6px;
     min-width: 150px;
     list-style: none;
@@ -388,10 +392,44 @@ select option:hover {
 .subdepartament-menu li {
     padding: 8px 16px;
     cursor: pointer;
-    color: #217aa3;
+    color: #222d32;
 }
 .subdepartament-menu li:hover {
     background: #eaf4fa;
+}
+
+.taula-resultats {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 24px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(37,150,190,0.07);
+    font-size: 1rem;
+}
+
+.taula-resultats th, .taula-resultats td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e0e7ef;
+    color: #222d32;
+}
+
+.taula-resultats th {
+    background: #222d32b6;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.05rem;
+    border-bottom: 2px solid #222d32b6;
+}
+
+.taula-resultats tr:last-child td {
+    border-bottom: none;
+}
+
+.taula-resultats tr:hover td {
+    background: #f0f8fb;
 }
 
 @media (max-width: 750px) {

@@ -38,6 +38,7 @@ df_filtrat['extensio'] = (
 )
 
 df_filtrat['numero'] = df_filtrat['numero'].astype(str).str.replace('.0', '', regex=False)
+df_filtrat['numero'] = df_filtrat['numero'].replace(['N/A', 'n/a', 'NA', 'na'], '973257098')
 
 ordre_columnes = ['nom', 'extensio', 'numero', 'departament']
 df_filtrat = df_filtrat[[col for col in ordre_columnes if col in df_filtrat.columns]]
