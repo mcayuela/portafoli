@@ -20,22 +20,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
 
 // SVGs per a portàtil i sobretaula
-const iconaPortatil = `
-    <svg width="300" height="300" viewBox="0 0 64 64" fill="none">
-        <rect x="8" y="14" width="48" height="28" rx="3" fill="#2596be" stroke="#217aa3" stroke-width="2"/>
-        <rect x="4" y="50" width="56" height="4" rx="2" fill="#b3d6e6" stroke="#217aa3" stroke-width="2"/>
-        <rect x="20" y="50" width="24" height="2" rx="1" fill="#217aa3"/>
-    </svg>
-`;
-const iconaSobretaula = `
-    <svg width="300" height="300" viewBox="0 0 64 64" fill="none">
-        <rect x="6" y="14" width="36" height="28" rx="3" fill="#2596be" stroke="#217aa3" stroke-width="2"/>
-        <rect x="12" y="46" width="24" height="4" rx="2" fill="#b3d6e6" stroke="#217aa3" stroke-width="2"/>
-        <rect x="46" y="18" width="10" height="28" rx="2" fill="#b3d6e6" stroke="#217aa3" stroke-width="2"/>
-        <circle cx="51" cy="24" r="1.5" fill="#2596be"/>
-        <rect x="49" y="32" width="4" height="8" rx="1" fill="#2596be"/>
-    </svg>
-`;
 const iconaMonitor = `
     <svg width="300" height="300" viewBox="0 0 64 64" fill="none">
         <rect x="8" y="14" width="48" height="36" rx="3" fill="#2596be" stroke="#217aa3" stroke-width="2"/>
@@ -75,9 +59,6 @@ function renderBuscador() {
     const buscadorHtml = `
         <div id="buscador-container" class="buscador-container">
             <input type="text" id="buscador" class="buscador-input" placeholder="Cerca per ID o FQDN..." autocomplete="off">
-            <span class="buscador-icona">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <circle cx="9" cy="9" r="7" stroke="#2596be" stroke-width="2"/>
                     <line x1="14.2" y1="14.2" x2="18" y2="18" stroke="#2596be" stroke-width="2" stroke-linecap="round"/>
                 </svg>
             </span>
@@ -158,8 +139,9 @@ function renderBuscador() {
     async function obtenirProximID() {
         const snapshot = await getDocs(collection(db, "pcs"));
         const ids = snapshot.docs.map(doc => parseInt(doc.id, 10)).filter(n => !isNaN(n));
-        if (ids.length === 0) return 1;
+        if (ids.length === 0) return 3011;
         const maxId = Math.max(...ids);
+        if (maxId < 3011) return maxId + 1;
         return maxId + 1;
     }
 
@@ -560,21 +542,21 @@ function renderReparacions(reparacions = [], pcId) {
                     </div>
                 </div>
                 <div class="reparacio-body">
-                    <strong>${r.descripcio}</strong>
-                    ${r.imatges && r.imatges.length > 0 ? `
-                        <div class="reparacio-imgs" style="margin-top:10px;">
-                            ${r.imatges.map((img, imgIdx) => `<img src="${img}" alt="Imatge reparació" class="reparacio-img" data-img="${img}" data-idx="${imgIdx}" style="cursor:pointer;">`).join('')}
-                        </div>
-                    ` : ''}
-                </div>
+                <strong>${r.descripcio}</strong>
+                ${r.imatges && r.imatges.length > 0 ? `
+                    <div class="reparacio-imgs" style="margin-top:10px;">
+                        ${r.imatges.map((img, imgIdx) => `<img src="${img}" alt="Imatge reparació" class="reparacio-img" data-img="${img}" data-idx="${imgIdx}" style="cursor:pointer;">`).join('')}
+                    </div>
+                ` : ''}
             </div>
-        `).join('');
-    } else {
-        html += `<p>No hi ha reparacions/canvis registrats.</p>`;
-    }
-    html += `<button id="btn-afegir-reparacio" class="btn-afegir">+ Afegir reparació/canvi</button></div>`;
+        </div>
+    `).join('');
+} else {
+    html += `<p>No hi ha reparacions/canvis registrats.</p>`;
+}
+html += `<button id="btn-afegir-reparacio" class="btn-afegir">+ Afegir reparació/canvi</button></div>`;
 
-    html += `
+html += `
         <div id="modal-reparacio" class="modal-reparacio" style="display:none;">
             <div class="modal-content">
                 <span class="modal-close" id="modal-close">&times;</span>
@@ -663,6 +645,7 @@ async function main() {
                             ${getIconaDispositiu(pc.tipus || [])}
                         </div>
                     </div>
+                    <div id="qr-pc-container"></div>
                 `;
                 // --- Afegir reparació (modal) ---
                 document.getElementById('btn-afegir-reparacio').onclick = () => {
@@ -815,4 +798,104 @@ function getIconaDispositiu(tipusArray) {
     return '';
 }
 
+// --- QR: utilitats ---
+function formatDataAdqMMYY(iso) {
+    if (!iso) return '0000';
+    const d = new Date(iso);
+    if (isNaN(d)) return '0000';
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yy = String(d.getFullYear()).slice(-2);
+    return mm + yy;
+}
+
+const qrLogoImg = new Image();
+qrLogoImg.src = 'logotmi-horitzontal.jpg'; // ajusta ruta si cal
+
+function generaQRDispositiu(pc, destEl) {
+    destEl.innerHTML = '';
+    const id = pc.id;
+    const mmYY = formatDataAdqMMYY(pc.dataAdquisicio);
+    const textVisual = `${id}/${mmYY}`;
+    const url = `https://mcayuela.com/tmi/inventari-dispositius/?id=${id}`;
+
+    const tmpDiv = document.createElement('div');
+    new QRCode(tmpDiv, {
+        text: url,
+        width: 240,
+        height: 240,
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    setTimeout(() => {
+        const qrImg = tmpDiv.querySelector('img') || tmpDiv.querySelector('canvas');
+        const qrSize = 240;
+        const pad = 20;
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Logo dimensions
+        let logoWidth = qrSize;
+        let logoHeight = 60;
+        if (qrLogoImg.complete && qrLogoImg.naturalWidth) {
+            logoHeight = Math.round(logoWidth * (qrLogoImg.naturalHeight / qrLogoImg.naturalWidth));
+        }
+
+        // Text metrics
+        const font = 'bold 32px Arial';
+        ctx.font = font;
+        const tw = ctx.measureText(textVisual).width;
+        const th = 40;
+
+        const totalW = qrSize + pad * 2;
+        const totalH = (qrSize + pad * 2) + th + logoHeight + pad;
+        canvas.width = totalW;
+        canvas.height = totalH;
+
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0,0,totalW,totalH);
+
+        // Draw QR
+        if (qrImg.tagName === 'IMG') {
+            ctx.drawImage(qrImg, pad, pad, qrSize, qrSize);
+        } else {
+            ctx.drawImage(qrImg, pad, pad);
+        }
+
+        // Text
+        ctx.font = font;
+        ctx.fillStyle = '#000';
+        const tx = (totalW - tw)/2;
+        const ty = qrSize + pad;
+        ctx.fillText(textVisual, tx, ty);
+
+        // Logo
+        const ly = ty + th;
+        if (qrLogoImg.complete && qrLogoImg.naturalWidth) {
+            ctx.drawImage(qrLogoImg, pad, ly, logoWidth, logoHeight);
+        } else {
+            ctx.fillStyle = '#2596be';
+            ctx.fillRect(pad, ly, logoWidth, logoHeight);
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'qr-dispositiu-wrapper';
+        wrapper.appendChild(canvas);
+
+        destEl.appendChild(wrapper);
+    },50);
+}
+
+// Exemples de modificació dins de renderDetall (afegeix crida):
+// function renderDetall(pc) {
+//     // ...existing code...
+//     let qrContainer = document.getElementById('qr-pc-container');
+//     if (!qrContainer) {
+//         qrContainer = document.createElement('div');
+//         qrContainer.id = 'qr-pc-container';
+//         document.getElementById('detall-pc').appendChild(qrContainer); // ajusta id contenidor
+//     }
+//     generaQRDispositiu(pc, qrContainer);
+//     // ...existing code...
+// }
 main();
