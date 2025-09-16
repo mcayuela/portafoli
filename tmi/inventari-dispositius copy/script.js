@@ -13,13 +13,25 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Amaga loader i mostra login/contenidor segons estat d'autenticació
 firebase.auth().onAuthStateChanged(function(user) {
+    const loader = document.querySelector('.contenidor-loader');
+    if (loader) loader.style.display = 'none';
+    const loginOverlay = document.getElementById('login-overlay');
+    const mainContent = document.getElementById('main-content');
+    const loginContainer = document.getElementById('login-container');
     if (user) {
+        // Usuari autenticat: amaga login, mostra contingut, amaga loader
+        if (loginOverlay) loginOverlay.style.display = 'none';
+        if (mainContent) mainContent.style.display = '';
         document.body.classList.remove('login-mode');
-        // Aquí crida la teva funció principal (ex: renderCalendar, carregar dades, etc.)
-        if (typeof carregarApp === 'function') carregarApp();
+        // Aquí pots cridar la teva funció principal (ex: carregarApp())
     } else {
+        // No autenticat: mostra login, amaga contingut, amaga loader
+        if (loginOverlay) loginOverlay.style.display = 'flex';
+        if (mainContent) mainContent.style.display = 'none';
         document.body.classList.add('login-mode');
+        loginContainer.style.display = "none";
     }
 });
 
@@ -1351,7 +1363,7 @@ function openTaskModal() {
           <button id="set-repeat-end" style="margin-left:8px;background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">OK</button>
         `;
         calendarPopup.style.left = calendarBtn.getBoundingClientRect().left + window.scrollX + "px";
-        calendarPopup.style.top = calendarBtn.getBoundingClientRect().bottom + window.scrollY + "px";
+        calendarPopup.style.top = calendarBtn.getBoundingClientRect().bottom + window.scrollY + 2 + "px";
 
         calendarPopup.querySelector("#set-repeat-end").onclick = function() {
           const val = calendarPopup.querySelector("#repeat-end-date").value;

@@ -22,13 +22,25 @@
         <div class="loader-text">Carregant...</div>
     </div>
     <!-- LOGIN -->
-    <div id="login-container" style="display:none;">
-        <h2>Inicia sessió</h2>
-        <input type="email" id="email" placeholder="Correu electrònic">
-        <input type="password" id="password" placeholder="Contrasenya">
-        <button id="loginBtn">Login</button>
-        <button id="logoutBtn" style="display:none;">Logout</button>
-        <p id="msg"></p>
+    <div id="login-overlay">
+      <div id="login-container" style="display:none;">
+          <div id="auth-loader"></div>
+          <h2>Inicia sessió</h2>
+
+          <div class="float-field">
+              <input type="email" id="email" class="float-input" placeholder=" " autocomplete="username">
+              <label for="email" class="float-label">Correu electrònic</label>
+          </div>
+
+          <div class="float-field">
+              <input type="password" id="password" class="float-input" placeholder=" " autocomplete="current-password">
+              <label for="password" class="float-label">Contrasenya</label>
+          </div>
+
+          <button id="loginBtn">Login</button>
+          <button id="logoutBtn" style="display:none;">Logout</button>
+          <p id="msg"></p>
+      </div>
     </div>
     <!-- CONTINGUT PRINCIPAL -->
     <div id="main-content" style="display:none;">
@@ -41,6 +53,10 @@
                         <line x1="14.2" y1="14.2" x2="18" y2="18" stroke="#2596be" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                 </span>
+            </div>
+            <div class="botons-container">
+              <button class="btn-afegir-pc">+ Afegir PC</button>
+              <button class="btn-afegir-dispositiu">+ Afegir dispositiu</button>
             </div>
         </div>
     </div>

@@ -879,3 +879,179 @@ button#add-task:hover {
   padding: 4px 12px;
   cursor: pointer;
 }
+
+/* LOGIN (targeted styles added at end for higher specificity) */
+#login-overlay {
+    position: fixed;
+    z-index: 9999;
+    inset: 0;
+    background: rgba(240,248,255,0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#login-container {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(37,150,190,0.18);
+    padding: 44px 46px 54px;
+    min-width: 320px;
+    max-width: 95vw;
+    animation: loginFade .55s ease;
+}
+@keyframes loginFade {
+    from { opacity: 0; transform: translateY(18px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#login-container h2 {
+    margin-top: 0;
+    text-align: center;
+    letter-spacing: .5px;
+    font-weight: 600;
+    color: #217aa3;
+}
+
+#login-container input[type="email"],
+#login-container input[type="password"] {
+    background: #f7fbfe;
+    border: 1.5px solid #c5e2ef;
+    transition: border .2s, box-shadow .2s, background .2s;
+    margin-top: 6px;
+}
+
+#login-container input[type="email"]:focus,
+#login-container input[type="password"]:focus {
+    border-color: #2596be;
+    box-shadow: 0 0 0 3px rgba(37,150,190,.18);
+    background: #ffffff;
+}
+
+#login-container button {
+    width: 100%;
+    margin-top: 6px;
+    letter-spacing: .4px;
+    font-size: 0.95rem;
+}
+
+#login-container #logoutBtn {
+    background: #c0392b;
+    background: linear-gradient(90deg,#c0392b 0%,#b02d21 100%);
+}
+#login-container #logoutBtn:hover {
+    background:#af2e22;
+}
+
+#msg {
+    margin-top: 14px;
+    font-size: .85rem;
+    min-height: 18px;
+    text-align: center;
+    color: #217aa3;
+    font-weight: 500;
+}
+
+#auth-loader {
+    display: none;
+    width: 54px;
+    height: 54px;
+    border: 6px solid #eaf4fa;
+    border-top: 6px solid #2596be;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    position: absolute;
+    top: -25px;
+    right: -25px;
+    background: #fff;
+}
+
+@keyframes loginFade {
+    from { opacity: 0; transform: translateY(18px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Millor feedback d'error */
+#msg.error {
+    color: #c0392b;
+}
+#msg.success {
+    color: #1d8656;
+}
+
+/* Placeholder flotant inputs login */
+.float-field {
+    position: relative;
+    margin: 26px 0 10px;
+    font-size: 0.95rem;
+}
+.float-input {
+    width: 100%;
+    padding: 20px 14px 10px;
+    border: 1.5px solid #ffffff;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    background: #ffffff;
+    transition: border .25s, background .25s;
+    box-sizing: border-box;
+}
+.float-input:focus {
+    outline: none;
+    border-color: #2596be;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37,150,190,.18);
+}
+.float-input::placeholder {
+    color: transparent; /* amaga placeholder real */
+}
+.float-label {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    line-height: 1;
+    font-size: 0.95rem;
+    color: #217aa3;
+    pointer-events: none;
+    background: linear-gradient(145deg,#ffffff 0%,#ffffff 70%,#ffffff 100%);
+    padding: 4px 6px;
+    border-radius: 8px;
+    transition: 
+        transform .28s ease,
+        font-size .28s ease,
+        top .28s ease,
+        opacity .25s ease,
+        color .28s ease;
+    transform-origin: left top;
+    opacity: .78;
+}
+.float-input:focus + .float-label {
+    color: #2596be;
+}
+.float-input:focus + .float-label,
+.float-input:not(:placeholder-shown) + .float-label,
+.float-input.filled + .float-label {
+    top: -8px;
+    font-size: 0.68rem;
+    opacity: 1;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(37,150,190,0.08);
+}
+.float-input:-webkit-autofill + .float-label {
+    top: -8px;
+    font-size: 0.68rem;
+    opacity: 1;
+}
+
+/* Suau aparició inicial */
+.float-field { animation: ffade .4s ease; }
+@keyframes ffade {
+    from { opacity:0; transform: translateY(6px); }
+    to { opacity:1; transform: translateY(0); }
+}
+
+input[type="email"] {
+    margin-bottom: 0px;
+}
+
+#loginBtn {
+    height: 40px;
+}

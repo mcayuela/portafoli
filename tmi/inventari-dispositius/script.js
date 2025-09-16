@@ -898,4 +898,15 @@ function generaQRDispositiu(pc, destEl) {
 //     generaQRDispositiu(pc, qrContainer);
 //     // ...existing code...
 // }
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.float-input').forEach(inp => {
+        const toggle = () => {
+            inp.classList.toggle('filled', inp.value.trim() !== '');
+        };
+        inp.addEventListener('input', toggle);
+        inp.addEventListener('blur', toggle);
+        // Inicial (autofill)
+        toggle();
+    });
+});
 main();
