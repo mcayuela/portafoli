@@ -2,7 +2,7 @@
 // Configuració de Firebase
 // ==============================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Configuració Firebase CALENDARI
 const calendarConfig = {
@@ -204,8 +204,8 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
       duplicateBtn.textContent = "📋";
       duplicateBtn.title = "Duplicar";
       duplicateBtn.onclick = async () => {
-        const docSnap = await db.collection("tasques").doc(UNASSIGNED_ID).get();
-        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const docSnap = await getDoc(doc(db, "tasques", UNASSIGNED_ID));
+        const tasques = docSnap.exists() ? docSnap.data().tasques : [];
         const idx = tasques.findIndex(t => t.id === tasca.id);
         if (idx >= 0) {
           const copia = {
@@ -215,7 +215,7 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
           };
           tasques.splice(idx + 1, 0, copia);
           pushUndo({ type: "add", day: UNASSIGNED_ID, id: copia.id, task: copia });
-          await guardarTasques(UNASSIGNED_ID, tasques);
+          await setDoc(doc(db, "tasques", UNASSIGNED_ID), { tasques });
         }
       };
 
@@ -224,14 +224,14 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
       deleteBtn.textContent = "🗑️";
       deleteBtn.title = "Eliminar";
       deleteBtn.onclick = async () => {
-        const docSnap = await db.collection("tasques").doc(UNASSIGNED_ID).get();
-        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const docSnap = await getDoc(doc(db, "tasques", UNASSIGNED_ID));
+        const tasques = docSnap.exists() ? docSnap.data().tasques : [];
         const idx = tasques.findIndex(t => t.id === tasca.id);
         if (idx >= 0) {
           const eliminada = tasques.splice(idx, 1)[0];
           pushUndo({ type: "delete", day: UNASSIGNED_ID, task: eliminada, position: idx });
           tasquesEliminades.push({ ...eliminada, from: UNASSIGNED_ID, deletedAt: Date.now() });
-          await guardarTasques(UNASSIGNED_ID, tasques);
+          await setDoc(doc(db, "tasques", UNASSIGNED_ID), { tasques });
         }
       };
 
@@ -242,20 +242,20 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
       doneBtn.onclick = async (e) => {
         e.stopPropagation();
         // Treure de "sense dia"
-        const docSnap = await db.collection("tasques").doc(UNASSIGNED_ID).get();
-        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const docSnap = await getDoc(doc(db, "tasques", UNASSIGNED_ID));
+        const tasques = docSnap.exists() ? docSnap.data().tasques : [];
         const idx = tasques.findIndex(t => t.id === tasca.id);
         if (idx >= 0) {
           const movedTask = tasques.splice(idx, 1)[0];
-          await guardarTasques(UNASSIGNED_ID, tasques);
+          await setDoc(doc(db, "tasques", UNASSIGNED_ID), { tasques });
 
           // Afegir al dia actual i marcar amb a feta
           const avuiISO = obtenirDataISO(new Date());
-          const diaSnap = await db.collection("tasques").doc(avuiISO).get();
-          const diaTasques = diaSnap.exists ? diaSnap.data().tasques : [];
+          const diaSnap = await getDoc(doc(db, "tasques", avuiISO));
+          const diaTasques = diaSnap.exists() ? diaSnap.data().tasques : [];
           movedTask.done = true;
           diaTasques.push(movedTask);
-          await guardarTasques(avuiISO, diaTasques);
+          await setDoc(doc(db, "tasques", avuiISO), { tasques: diaTasques });
 
           pushUndo({
             type: "move",
@@ -353,8 +353,8 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
       duplicateBtn.title = "Duplicar";
       duplicateBtn.onclick = async () => {
         const docId = selectedDate ?? UNASSIGNED_ID;
-        const docSnap = await db.collection("tasques").doc(docId).get();
-        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const docSnap = await getDoc(doc(db, "tasques", docId));
+        const tasques = docSnap.exists() ? docSnap.data().tasques : [];
         const idx = tasques.findIndex(t => t.id === tasca.id);
         if (idx >= 0) {
           const copia = {
@@ -364,7 +364,7 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
           };
           tasques.splice(idx + 1, 0, copia);
           pushUndo({ type: "add", day: docId, id: copia.id, task: copia });
-          await guardarTasques(docId, tasques);
+          await setDoc(doc(db, "tasques", docId), { tasques });
         }
       };
 
@@ -374,14 +374,14 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
       deleteBtn.title = "Eliminar";
       deleteBtn.onclick = async () => {
         const docId = selectedDate ?? UNASSIGNED_ID;
-        const docSnap = await db.collection("tasques").doc(docId).get();
-        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const docSnap = await getDoc(doc(db, "tasques", docId));
+        const tasques = docSnap.exists() ? docSnap.data().tasques : [];
         const idx = tasques.findIndex(t => t.id === tasca.id);
         if (idx >= 0) {
           const eliminada = tasques.splice(idx, 1)[0];
           pushUndo({ type: "delete", day: docId, task: eliminada, position: idx });
           tasquesEliminades.push({ ...eliminada, from: docId, deletedAt: Date.now() });
-          await guardarTasques(docId, tasques);
+          await setDoc(doc(db, "tasques", docId), { tasques });
         }
       };
 
@@ -394,14 +394,14 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
       doneBtn.onclick = async (e) => {
         e.stopPropagation();
         const docId = selectedDate ?? UNASSIGNED_ID;
-        const docSnap = await db.collection("tasques").doc(docId).get();
-        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const docSnap = await getDoc(doc(db, "tasques", docId));
+        const tasques = docSnap.exists() ? docSnap.data().tasques : [];
         const idx = tasques.findIndex(t => t.id === tasca.id);
         if (idx >= 0) {
           const previousDone = tasques[idx].done;
           tasques[idx].done = !tasques[idx].done;
           pushUndo({ type: "toggle", day: docId, id: tasca.id, previousDone });
-          await guardarTasques(docId, tasques);
+          await setDoc(doc(db, "tasques", docId), { tasques });
         }
       };
 
@@ -412,18 +412,18 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
         toNoDateBtn.onclick = async () => {
           // Treu la tasca del dia actual
           const docId = selectedDate ?? UNASSIGNED_ID;
-          const docSnap = await db.collection("tasques").doc(docId).get();
-          let tasques = docSnap.exists ? docSnap.data().tasques : [];
+          const docSnap = await getDoc(doc(db, "tasques", docId));
+          let tasques = docSnap.exists() ? docSnap.data().tasques : [];
           const idx = tasques.findIndex(t => t.id === tasca.id);
           if (idx >= 0) {
             const movedTask = tasques.splice(idx, 1)[0];
-            await guardarTasques(docId, tasques);
+            await setDoc(doc(db, "tasques", docId), { tasques });
 
             // Afegeix la tasca a "sense dia"
-            const noDateSnap = await db.collection("tasques").doc(UNASSIGNED_ID).get();
-            const noDateTasks = noDateSnap.exists ? noDateSnap.data().tasques : [];
+            const noDateSnap = await getDoc(doc(db, "tasques", UNASSIGNED_ID));
+            const noDateTasks = noDateSnap.exists() ? noDateSnap.data().tasques : [];
             noDateTasks.push(movedTask);
-            await guardarTasques(UNASSIGNED_ID, noDateTasks);
+            await setDoc(doc(db, "tasques", UNASSIGNED_ID), { tasques: noDateTasks });
 
             pushUndo({
               type: "move",
@@ -509,8 +509,9 @@ function openEditModal(tasca) {
           let docId = selectedDate ?? UNASSIGNED_ID;
           // Si la tasca té la propietat data, usa-la
           if (tasca.data) docId = tasca.data;
-          const docSnap = await db.collection("tasques").doc(docId).get();
-          const tasques = docSnap.exists ? docSnap.data().tasques : [];
+          const docRef = doc(db, "tasques", docId);
+          const docSnap = await getDoc(docRef);
+          const tasques = docSnap.exists() ? docSnap.data().tasques : [];
           const idx = tasques.findIndex(t => t.id === tasca.id);
           if (idx >= 0) {
             const previous = {
@@ -527,7 +528,7 @@ function openEditModal(tasca) {
             };
             pushUndo({ type: "edit", day: docId, id: tasca.id, previous, next });
             tasques[idx] = { ...tasques[idx], ...next };
-            await guardarTasques(docId, tasques);
+            await setDoc(docRef, { tasques });
             escoltarTasques(docId); // Actualitza la llista
           }
           return false;
@@ -581,8 +582,8 @@ function openTrashModal() {
       restore.textContent = "♻️";
       restore.title = "Restaurar";
       restore.onclick = async () => {
-        const docSnap = await db.collection("tasques").doc(tasca.from).get();
-        const tasques = docSnap.exists ? docSnap.data().tasques : [];
+        const docSnap = await getDoc(doc(db, "tasques", tasca.from));
+        const tasques = docSnap.exists() ? docSnap.data().tasques : [];
         const restored = {
           id: tasca.id ?? crearId(),
           text: tasca.text,
@@ -591,7 +592,7 @@ function openTrashModal() {
           priority: tasca.priority ?? 3
         };
         tasques.push(restored);
-        await guardarTasques(tasca.from, tasques);
+        await setDoc(doc(db, "tasques", tasca.from), { tasques });
         pushUndo({ type: "add", day: tasca.from, id: restored.id, task: restored });
         tasquesEliminades.splice(i, 1);
         render();
@@ -631,12 +632,12 @@ function openTrashModal() {
 // Comptadors per al calendari
 // ==============================
 async function getTasques() {
-  const snapshot = await db.collection("tasques").get();
+  const snapshot = await getDocs(collection(db, "tasques"));
   const totals = [];
-  snapshot.forEach((doc) => {
-    const id = doc.id;
+  snapshot.forEach((docu) => {
+    const id = docu.id;
     if (id === UNASSIGNED_ID) return; // “sense dia” no es compta al calendari
-    const data = doc.data();
+    const data = docu.data();
     (data.tasques || []).forEach((t) => totals.push({ ...t, data: id }));
   });
   comptadorTasques = totals;
@@ -860,9 +861,9 @@ function mostrarTasquesPendentsSenseDia() {
 // ==============================
 function escoltarTasques(docId) {
   if (unsubscribeTasques) unsubscribeTasques();
-  const ref = db.collection("tasques").doc(docId);
-  unsubscribeTasques = ref.onSnapshot((docSnap) => {
-    const tasques = docSnap.exists ? (docSnap.data().tasques || []) : [];
+  const ref = doc(db, "tasques", docId);
+  unsubscribeTasques = onSnapshot(ref, (docSnap) => {
+    const tasques = docSnap.exists() ? (docSnap.data().tasques || []) : [];
     // Migració suau a IDs i camps
     let needsSave = false;
     tasques.forEach((t) => {
@@ -871,7 +872,7 @@ function escoltarTasques(docId) {
       if (t.description  === undefined) t.description  = "";
       if (t.done         === undefined) t.done         = false;
     });
-    if (needsSave) db.collection("tasques").doc(docId).set({ tasques });
+    if (needsSave) setDoc(ref, { tasques });
     renderitzarTasquesAmbLlista(tasques);
     renderCalendar();
   });
@@ -881,7 +882,7 @@ function escoltarTasques(docId) {
 // CRUD helpers
 // ==============================
 async function guardarTasques(docId, tasques) {
-  await db.collection("tasques").doc(docId).set({ tasques });
+  await setDoc(doc(db, "tasques", docId), { tasques });
 }
 
 async function assignarTascaADia(taskData, nouDia) {
@@ -889,19 +890,19 @@ async function assignarTascaADia(taskData, nouDia) {
 
   if (from) {
     // treure de l'origen
-    const fromSnap = await db.collection("tasques").doc(from).get();
-    let fromTasks  = fromSnap.exists ? fromSnap.data().tasques : [];
+    const fromSnap = await getDoc(doc(db, "tasques", from));
+    let fromTasks  = fromSnap.exists() ? fromSnap.data().tasques : [];
     const idx      = fromTasks.findIndex((t) => t.id === id);
     let movedTask  = null;
 
     if (idx >= 0) {
       movedTask = fromTasks.splice(idx, 1)[0];
-      await guardarTasques(from, fromTasks);
+      await setDoc(doc(db, "tasques", from), { tasques: fromTasks });
     }
 
     // afegir al destí
-    const toSnap   = await db.collection("tasques").doc(nouDia).get();
-    const toTasks  = toSnap.exists ? toSnap.data().tasques : [];
+    const toSnap   = await getDoc(doc(db, "tasques", nouDia));
+    const toTasks  = toSnap.exists() ? toSnap.data().tasques : [];
     const toInsert = movedTask ?? {
       id: id ?? crearId(),
       text: taskData.text,
@@ -911,7 +912,7 @@ async function assignarTascaADia(taskData, nouDia) {
     };
     const destPosition = toTasks.length;
     toTasks.push(toInsert);
-    await guardarTasques(nouDia, toTasks);
+    await setDoc(doc(db, "tasques", nouDia), { tasques: toTasks });
 
     pushUndo({
       type: "move",
@@ -923,8 +924,8 @@ async function assignarTascaADia(taskData, nouDia) {
     });
   } else {
     // afegir directe
-    const toSnap  = await db.collection("tasques").doc(nouDia).get();
-    const toTasks = toSnap.exists ? toSnap.data().tasques : [];
+    const toSnap  = await getDoc(doc(db, "tasques", nouDia));
+    const toTasks = toSnap.exists() ? toSnap.data().tasques : [];
     const newId   = id ?? crearId();
     const nova    = {
       id: newId,
@@ -934,7 +935,7 @@ async function assignarTascaADia(taskData, nouDia) {
       priority: taskData.priority ?? 3
     };
     toTasks.push(nova);
-    await guardarTasques(nouDia, toTasks);
+    await setDoc(doc(db, "tasques", nouDia), { tasques });
     pushUndo({ type: "add", day: nouDia, id: newId, task: nova });
   }
 
@@ -952,21 +953,21 @@ async function doUndo() {
   switch (action.type) {
     case "toggle": {
       const { day, id, previousDone } = action;
-      const docSnap = await db.collection("tasques").doc(day).get();
-      const tasques = docSnap.exists ? docSnap.data().tasques : [];
+      const docSnap = await getDoc(doc(db, "tasques", day));
+      const tasques = docSnap.exists() ? docSnap.data().tasques : [];
       const idx = tasques.findIndex((t) => t.id === id);
       if (idx >= 0) {
         const current = tasques[idx].done;
         tasques[idx].done = previousDone;
-        await guardarTasques(day, tasques);
+        await setDoc(doc(db, "tasques", day), { tasques });
         redoAction = { type: "toggle", day, id, previousDone: current };
       }
       break;
     }
     case "edit": {
       const { day, id, previous, next } = action;
-      const docSnap = await db.collection("tasques").doc(day).get();
-      const tasques = docSnap.exists ? docSnap.data().tasques : [];
+      const docSnap = await getDoc(doc(db, "tasques", day));
+      const tasques = docSnap.exists() ? docSnap.data().tasques : [];
       const idx = tasques.findIndex((t) => t.id === id);
       if (idx >= 0) {
         const current = {
@@ -976,46 +977,46 @@ async function doUndo() {
           done: tasques[idx].done
         };
         tasques[idx] = { ...tasques[idx], ...previous };
-        await guardarTasques(day, tasques);
+        await setDoc(doc(db, "tasques", day), { tasques });
         redoAction = { type: "edit", day, id, previous: next, next: previous ?? current };
       }
       break;
     }
     case "add": {
       const { day, id } = action;
-      const docSnap = await db.collection("tasques").doc(day).get();
-      let tasques = docSnap.exists ? docSnap.data().tasques : [];
+      const docSnap = await getDoc(doc(db, "tasques", day));
+      let tasques = docSnap.exists() ? docSnap.data().tasques : [];
       tasques = tasques.filter((t) => t.id !== id);
-      await guardarTasques(day, tasques);
+      await setDoc(doc(db, "tasques", day), { tasques });
       redoAction = { type: "reAdd", day, task: action.task };
       break;
     }
     case "delete": {
       const { day, task, position } = action;
-      const docSnap = await db.collection("tasques").doc(day).get();
-      const tasques = docSnap.exists ? docSnap.data().tasques : [];
+      const docSnap = await getDoc(doc(db, "tasques", day));
+      const tasques = docSnap.exists() ? docSnap.data().tasques : [];
       const pos = Number.isInteger(position) ? Math.max(0, Math.min(position, tasques.length)) : tasques.length;
       tasques.splice(pos, 0, task);
-      await guardarTasques(day, tasques);
+      await setDoc(doc(db, "tasques", day), { tasques });
       redoAction = { type: "deleteAgain", day, id: task.id };
       break;
     }
     case "move": {
       const { from, to, id, originalPosition, destPosition } = action;
-      const fromSnap = await db.collection("tasques").doc(from).get();
-      let fromTasks  = fromSnap.exists ? fromSnap.data().tasques : [];
+      const fromSnap = await getDoc(doc(db, "tasques", from));
+      let fromTasks  = fromSnap.exists() ? fromSnap.data().tasques : [];
       const moved    = fromTasks.find((t) => t.id === id);
       fromTasks      = fromTasks.filter((t) => t.id !== id);
-      await guardarTasques(from, fromTasks);
+      await setDoc(doc(db, "tasques", from), { tasques: fromTasks });
 
       if (moved) {
-        const toSnap  = await db.collection("tasques").doc(to).get();
-        const toTasks = toSnap.exists ? toSnap.data().tasques : [];
+        const toSnap  = await getDoc(doc(db, "tasques", to));
+        const toTasks = toSnap.exists() ? toSnap.data().tasques : [];
         const pos = Number.isInteger(originalPosition)
           ? Math.max(0, Math.min(originalPosition, toTasks.length))
           : toTasks.length;
         toTasks.splice(pos, 0, moved);
-        await guardarTasques(to, toTasks);
+        await setDoc(doc(db, "tasques", to), { tasques: toTasks });
       }
       redoAction = { type: "moveAgain", src: to, dst: from, id, dstPosition: destPosition };
       break;
@@ -1041,21 +1042,21 @@ async function doRedo() {
   switch (action.type) {
     case "toggle": {
       const { day, id, previousDone } = action;
-      const docSnap = await db.collection("tasques").doc(day).get();
-      const tasques = docSnap.exists ? docSnap.data().tasques : [];
+      const docSnap = await getDoc(doc(db, "tasques", day));
+      const tasques = docSnap.exists() ? docSnap.data().tasques : [];
       const idx = tasques.findIndex((t) => t.id === id);
       if (idx >= 0) {
         const before = tasques[idx].done;
         tasques[idx].done = previousDone;
-        await guardarTasques(day, tasques);
+        await setDoc(doc(db, "tasques", day), { tasques });
         undoAction = { type: "toggle", day, id, previousDone: before };
       }
       break;
     }
     case "edit": {
       const { day, id, previous } = action;
-      const docSnap = await db.collection("tasques").doc(day).get();
-      const tasques = docSnap.exists ? docSnap.data().tasques : [];
+      const docSnap = await getDoc(doc(db, "tasques", day));
+      const tasques = docSnap.exists() ? docSnap.data().tasques : [];
       const idx = tasques.findIndex((t) => t.id === id);
       if (idx >= 0) {
         const before = {
@@ -1065,48 +1066,48 @@ async function doRedo() {
           done: tasques[idx].done
         };
         tasques[idx] = { ...tasques[idx], ...previous };
-        await guardarTasques(day, tasques);
+        await setDoc(doc(db, "tasques", day), { tasques });
         undoAction = { type: "edit", day, id, previous: before, next: previous };
       }
       break;
     }
     case "reAdd": {
       const { day, task } = action;
-      const docSnap = await db.collection("tasques").doc(day).get();
-      const tasques = docSnap.exists ? docSnap.data().tasques : [];
+      const docSnap = await getDoc(doc(db, "tasques", day));
+      const tasques = docSnap.exists() ? docSnap.data().tasques : [];
       tasques.push(task);
-      await guardarTasques(day, tasques);
+      await setDoc(doc(db, "tasques", day), { tasques });
       undoAction = { type: "add", day, id: task.id, task };
       break;
     }
     case "deleteAgain": {
       const { day, id } = action;
-      const docSnap = await db.collection("tasques").doc(day).get();
-      let tasques = docSnap.exists ? docSnap.data().tasques : [];
+      const docSnap = await getDoc(doc(db, "tasques", day));
+      let tasques = docSnap.exists() ? docSnap.data().tasques : [];
       const idx = tasques.findIndex((t) => t.id === id);
       if (idx >= 0) {
         const removed = tasques.splice(idx, 1)[0];
-        await guardarTasques(day, tasques);
+        await setDoc(doc(db, "tasques", day), { tasques });
         undoAction = { type: "delete", day, task: removed, position: idx };
       }
       break;
     }
     case "moveAgain": {
       const { src, dst, id, dstPosition } = action;
-      const srcSnap = await db.collection("tasques").doc(src).get();
-      let srcTasks  = srcSnap.exists ? srcSnap.data().tasques : [];
+      const srcSnap = await getDoc(doc(db, "tasques", src));
+      let srcTasks  = srcSnap.exists() ? srcSnap.data().tasques : [];
       const moved   = srcTasks.find((t) => t.id === id);
       srcTasks      = srcTasks.filter((t) => t.id !== id);
-      await guardarTasques(src, srcTasks);
+      await setDoc(doc(db, "tasques", src), { tasques: srcTasks });
 
       if (moved) {
-        const dstSnap  = await db.collection("tasques").doc(dst).get();
-        const dstTasks = dstSnap.exists ? dstSnap.data().tasques : [];
+        const dstSnap  = await getDoc(doc(db, "tasques", dst));
+        const dstTasks = dstSnap.exists() ? dstSnap.data().tasques : [];
         const pos = Number.isInteger(dstPosition)
           ? Math.max(0, Math.min(dstPosition, dstTasks.length))
           : dstTasks.length;
         dstTasks.splice(pos, 0, moved);
-        await guardarTasques(dst, dstTasks);
+        await setDoc(doc(db, "tasques", dst), { tasques: dstTasks });
         undoAction = { type: "move", from: dst, to: src, id, originalPosition: pos, destPosition: srcTasks.length };
       }
       break;
@@ -1160,7 +1161,7 @@ document.getElementById("search-input").oninput = function() {
     }
 
     // Cerca a tots els dies, evita duplicats per id
-    const snapshot = await db.collection("tasques").get();
+    const snapshot = await getDocs(collection(db, "tasques"));
     const seenIds = new Set();
     const results = [];
     snapshot.forEach(doc => {
@@ -1226,6 +1227,153 @@ document.getElementById("search-input").oninput = function() {
   }, 300); // 300ms de debounce
 };
 
+// --- MODAL DE CERCA DE TASQUES AMB PAGINACIÓ ---
+
+const searchBtn = document.querySelector('button.pill[style*="🔍"]') || document.getElementById('search-btn');
+const searchModal = document.getElementById('search-modal');
+const closeSearchModal = document.getElementById('close-search-modal');
+const searchInput = document.getElementById('search-modal-input');
+const resultsList = document.getElementById('search-modal-results');
+const paginationDiv = document.getElementById('search-modal-pagination');
+
+let lastSearchTerm = "";
+let lastResults = [];
+let currentPage = 1;
+const PAGE_SIZE = 10;
+
+// Obrir el modal
+searchBtn.onclick = () => {
+  searchModal.style.display = "";
+  searchInput.value = lastSearchTerm;
+  searchInput.focus();
+  if (lastSearchTerm) doSearch(lastSearchTerm, currentPage);
+  else doSearch("", 1);
+};
+
+// Tancar el modal
+closeSearchModal.onclick = () => {
+  searchModal.style.display = "none";
+};
+
+// Tancar amb ESC
+searchModal.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") searchModal.style.display = "none";
+});
+
+// Cerca reactiva
+searchInput.oninput = function() {
+  lastSearchTerm = this.value;
+  currentPage = 1;
+  doSearch(lastSearchTerm, currentPage);
+};
+
+// Paginació
+function renderPagination(total, page) {
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  paginationDiv.innerHTML = "";
+  if (totalPages <= 1) return;
+  const prev = document.createElement("button");
+  prev.textContent = "Anterior";
+  prev.disabled = page <= 1;
+  prev.onclick = () => {
+    if (currentPage > 1) {
+      currentPage--;
+      doSearch(lastSearchTerm, currentPage);
+    }
+  };
+  const next = document.createElement("button");
+  next.textContent = "Següent";
+  next.disabled = page >= totalPages;
+  next.onclick = () => {
+    if (currentPage < totalPages) {
+      currentPage++;
+      doSearch(lastSearchTerm, currentPage);
+    }
+  };
+  const info = document.createElement("span");
+  info.textContent = `Pàgina ${page} de ${totalPages}`;
+  paginationDiv.appendChild(prev);
+  paginationDiv.appendChild(info);
+  paginationDiv.appendChild(next);
+}
+
+// Cerca i renderitza
+async function doSearch(term, page) {
+  resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cercant...</li>";
+  const snapshot = await getDocs(collection(db, "tasques"));
+  const seenIds = new Set();
+  let results = [];
+  term = (term || "").toLowerCase();
+  snapshot.forEach(docu => {
+    const docId = docu.id;
+    const tasques = docu.data().tasques || [];
+    tasques.forEach(t => {
+      if (
+        (!term || t.text?.toLowerCase().includes(term) || (t.description ?? "").toLowerCase().includes(term))
+        && !seenIds.has(t.id)
+      ) {
+        seenIds.add(t.id);
+        results.push({ ...t, docId });
+      }
+    });
+  });
+  lastResults = results;
+  // Paginació
+  const total = results.length;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const start = (page - 1) * PAGE_SIZE;
+  const end = start + PAGE_SIZE;
+  const pageResults = results.slice(start, end);
+
+  resultsList.innerHTML = "";
+  if (!pageResults.length) {
+    resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cap resultat</li>";
+  } else {
+    pageResults.forEach(tasca => {
+      const li = document.createElement("li");
+      li.className = "search-result-item";
+      const title = document.createElement("span");
+      title.className = "search-result-title";
+      title.textContent = tasca.text;
+      title.onclick = () => {
+        searchModal.style.display = "none";
+        if (tasca.docId === UNASSIGNED_ID) {
+          mostrarTasquesPendentsSenseDia();
+        } else {
+          const parts = tasca.docId.split("-");
+          if (parts.length === 3) {
+            const data = new Date(parts[0], parts[1] - 1, parts[2]);
+            mostrarTasquesDelDia(data);
+          }
+        }
+      };
+      const date = document.createElement("span");
+      date.className = "search-result-date";
+      if (tasca.docId === UNASSIGNED_ID) {
+        date.textContent = "Sense dia";
+      } else {
+        const parts = tasca.docId.split("-");
+        if (parts.length === 3) {
+          date.textContent = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        } else {
+          date.textContent = tasca.docId;
+        }
+      }
+      li.appendChild(title);
+      li.appendChild(date);
+      li.onclick = () => title.onclick();
+      resultsList.appendChild(li);
+    });
+  }
+  renderPagination(total, page);
+}
+
+// Manté la cerca si tornes a clicar la lupa
+if (searchModal) {
+  searchModal.addEventListener("click", function(e) {
+    if (e.target === searchModal) searchModal.style.display = "none";
+  });
+}
 
 // ==============================
 // Inici
@@ -1380,8 +1528,8 @@ function openTaskModal() {
           const text = wrap.querySelector("#edit-task-title").value.trim();
           if (!text) return true;
           const docId = selectedDate ?? UNASSIGNED_ID;
-          const docSnap = await db.collection("tasques").doc(docId).get();
-          const tasques = docSnap.exists ? docSnap.data().tasques : [];
+          const docSnap = await getDoc(doc(db, "tasques", docId));
+          const tasques = docSnap.exists() ? docSnap.data().tasques : [];
           // Recull la repetició
           const repeatTypeVal = repeatType.value;
           let repeat = null;
@@ -1406,8 +1554,8 @@ function openTaskModal() {
             }
             // Guarda la tasca a cada dia calculat
             for (const iso of dates) {
-              const docSnap = await db.collection("tasques").doc(iso).get();
-              const tasques = docSnap.exists ? docSnap.data().tasques : [];
+              const docSnap = await getDoc(doc(db, "tasques", iso));
+              const tasques = docSnap.exists() ? docSnap.data().tasques : [];
               tasques.push({
                 id: crearId(),
                 text,
@@ -1416,13 +1564,13 @@ function openTaskModal() {
                 done: wrap.querySelector("#edit-task-done").value === "true",
                 repeat: null
               });
-              await guardarTasques(iso, tasques);
+              await setDoc(doc(db, "tasques", iso), { tasques });
             }
           } else {
             // Tasca normal o setmanal/mensual
             const docId = selectedDate ?? UNASSIGNED_ID;
-            const docSnap = await db.collection("tasques").doc(docId).get();
-            const tasques = docSnap.exists ? docSnap.data().tasques : [];
+            const docSnap = await getDoc(doc(db, "tasques", docId));
+            const tasques = docSnap.exists() ? docSnap.data().tasques : [];
             tasques.push({
               id: crearId(),
               text,
@@ -1431,7 +1579,7 @@ function openTaskModal() {
               done: wrap.querySelector("#edit-task-done").value === "true",
               repeat
             });
-            await guardarTasques(docId, tasques);
+            await setDoc(doc(db, "tasques", docId), { tasques });
           }
           escoltarTasques(selectedDate ?? UNASSIGNED_ID);
           return false;
@@ -1489,10 +1637,10 @@ function openDayContextMenu(dayDiv, iso) {
   menu.querySelector("#toggle-special-day").onclick = async () => {
     menu.remove();
     if (especial) {
-      const docSnap = await db.collection("tasques").doc(iso).get();
-      let tasques = docSnap.exists ? docSnap.data().tasques : [];
+      const docSnap = await getDoc(doc(db, "tasques", iso));
+      let tasques = docSnap.exists() ? docSnap.data().tasques : [];
       tasques = tasques.filter(t => !t.specialDay);
-      await guardarTasques(iso, tasques);
+      await setDoc(doc(db, "tasques", iso), { tasques });
       escoltarTasques(iso);
     } else {
       openSpecialDayModal(iso);
@@ -1506,7 +1654,7 @@ function openDayContextMenu(dayDiv, iso) {
 
   menu.querySelector("#delete-all-tasks").onclick = async () => {
     menu.remove();
-    await guardarTasques(iso, []);
+    await setDoc(doc(db, "tasques", iso), { tasques: [] });
     escoltarTasques(iso);
   };
 }
@@ -1531,8 +1679,8 @@ function openSpecialDayModal(iso) {
         onClick: async () => {
           const motiu = wrap.querySelector("#special-day-motiu").value.trim();
           // Guarda el dia especial a Firestore
-          const docSnap = await db.collection("tasques").doc(iso).get();
-          const tasques = docSnap.exists ? docSnap.data().tasques : [];
+          const docSnap = await getDoc(doc(db, "tasques", iso));
+          const tasques = docSnap.exists() ? docSnap.data().tasques : [];
           // Marca el dia especial (guardem com una tasca especial invisible)
           let found = tasques.find(t => t.specialDay);
           if (found) {
@@ -1545,7 +1693,7 @@ function openSpecialDayModal(iso) {
               specialMotiu: motiu
             });
           }
-          await guardarTasques(iso, tasques);
+          await setDoc(doc(db, "tasques", iso), { tasques });
           escoltarTasques(iso);
           return false;
         }
@@ -1574,8 +1722,8 @@ function openFestaDayModal(iso) {
         onClick: async () => {
           const motiu = wrap.querySelector("#festa-day-motiu").value.trim();
           // Guarda el dia de festa a Firestore
-          const docSnap = await db.collection("tasques").doc(iso).get();
-          const tasques = docSnap.exists ? docSnap.data().tasques : [];
+          const docSnap = await getDoc(doc(db, "tasques", iso));
+          const tasques = docSnap.exists() ? docSnap.data().tasques : [];
           // Marca el dia de festa (guardem com una tasca especial invisible)
           let found = tasques.find(t => t.festaDay);
           if (found) {
@@ -1588,7 +1736,7 @@ function openFestaDayModal(iso) {
               festaMotiu: motiu
             });
           }
-          await guardarTasques(iso, tasques);
+          await setDoc(doc(db, "tasques", iso), { tasques });
           escoltarTasques(iso);
           return false;
         }
@@ -1596,3 +1744,7 @@ function openFestaDayModal(iso) {
     ]
   });
 }
+
+window.renderCalendar = renderCalendar;
+window.mostrarTasquesPendentsSenseDia = mostrarTasquesPendentsSenseDia;
+window.setUndoRedoDisabled = setUndoRedoDisabled;

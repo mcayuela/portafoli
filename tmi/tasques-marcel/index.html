@@ -15,10 +15,12 @@
       <img src="images/logo_tmi_sensefons.png" alt="Logo dreta">
     </header>
 
+    <div id="auth-loader-overlay" style="display:none;">
+      <div id="auth-loader"></div>
+    </div>
+
     <div id="login-overlay">
       <div id="login-container">
-        <!-- Inputs i botons del login aquí -->
-        <div id="auth-loader"></div>
         <h2>Inicia sessió</h2>
         <div class="float-field">
           <input type="email" id="email" class="float-input" placeholder=" " autocomplete="username">
@@ -28,14 +30,74 @@
           <input type="password" id="password" class="float-input" placeholder=" " autocomplete="current-password">
           <label for="password" class="float-label">Contrasenya</label>
         </div>
-        <button id="loginBtn">Entrar-hi</button>
+        <button id="loginBtn">Login</button>
         <button id="logoutBtn" style="display:none;">Logout</button>
+        
+        <!-- Loader overlay per autenticació -->
+        <div id="auth-loader-overlay" style="display:none;">
+          <div id="auth-loader"></div>
+        </div>
+        
         <p id="msg"></p>
       </div>
     </div>
 
+    <!-- Afegit: contenidor principal ocult per defecte -->
     <div id="main-content" style="display:none;">
+      <div id="calendar-container">
+
+        <!-- Columna esquerra: Calendari -->
+        <div class="calendar-box">
+          <div id="calendar-controls">
+            <button id="prev-month">Anterior</button>
+            <span id="month-year"></span>
+            <button id="next-month">Següent</button>
+          </div>
+          <div id="calendar"></div>
+        </div>
+
+        <!-- Columna dreta: accions + panell dia -->
+        <div id="right-col">
+          <!-- Requadre separat: Accions (NO sticky) -->
+          <div id="actions-card" class="card">
+            <button id="undo-btn" class="pill" disabled style="max-width: 60px;">↶</button>
+            <button id="redo-btn" class="pill" disabled style="max-width: 60px;">↷</button>
+            <button id="show-trash" class="pill" style="max-width: 60px;">🔍</button>
+            <button id="show-trash" class="pill">🗑️ Paperera</button>
+          </div>
+          
+          <!-- Panell del dia / sense dia -->
+          <div id="task-panel" class="task-box">
+            <div id="task-panel-header">
+              <h2 id="day-title">Tasques pendents (sense dia)</h2>
+              <button id="close-day" class="panel-close" title="Tancar dia seleccionat">✕</button>
+            </div>
+
+            <ul id="task-list"></ul>
+
+            <div class="task-input-container">
+              <button id="add-task-modal">Afegir tasca</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de cerca de tasques -->
+      <div id="search-modal" class="modal-backdrop" style="display:none;">
+        <div class="modal-card" style="max-width:600px;">
+          <div class="modal-header">
+            <span>Cerca de tasques</span>
+            <button class="btn-icon" id="close-search-modal" title="Tancar">✕</button>
+          </div>
+          <div class="modal-body" style="padding-bottom:0;">
+            <input type="text" id="search-modal-input" placeholder="Cerca per títol o descripció..." style="width:100%;margin-bottom:12px;">
+            <ul id="search-modal-results" class="search-results"></ul>
+            <div id="search-modal-pagination" style="display:flex;justify-content:center;align-items:center;gap:16px;margin:18px 0 0 0;"></div>
+          </div>
+        </div>
+      </div>
     </div>
+
     <script type="module" src="login.js"></script>
     <script type="module" src="script.js"></script>
   </body>

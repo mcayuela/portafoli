@@ -24,12 +24,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const msg = document.getElementById("msg");
   const loginOverlay = document.getElementById("login-overlay");
   const mainContent = document.getElementById("main-content");
-  const authLoader = document.getElementById("auth-loader");
+  const authLoaderOverlay = document.getElementById("auth-loader-overlay");
 
   // LOGIN
   loginBtn.onclick = async () => {
     msg.textContent = "";
-    authLoader.style.display = "block";
+    authLoaderOverlay.style.display = "flex";
+    document.body.classList.add("loading");
     try {
       await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
       msg.textContent = "Sessió iniciada!";
@@ -38,28 +39,40 @@ document.addEventListener("DOMContentLoaded", () => {
       msg.textContent = "Error: " + error.message;
       msg.className = "error";
     }
-    authLoader.style.display = "none";
+    authLoaderOverlay.style.display = "none";
+    document.body.classList.remove("loading");
   };
 
   // LOGOUT
   logoutBtn.onclick = async () => {
+    authLoaderOverlay.style.display = "flex";
+    document.body.classList.add("loading");
     await signOut(auth);
     msg.textContent = "Sessió tancada";
     msg.className = "";
+    authLoaderOverlay.style.display = "none";
+    document.body.classList.remove("loading");
   };
 
   // CONTROL D'ESTAT DE SESSIÓ
   onAuthStateChanged(auth, (user) => {
-    if (authLoader) authLoader.style.display = "none";
+    const loginOverlay = document.getElementById("login-overlay");
+    const mainContent = document.getElementById("main-content");
     if (user) {
       loginOverlay.style.display = "none";
       mainContent.style.display = "";
       document.body.classList.remove("login-mode");
+      // INICIALITZA el calendari i les tasques aquí:
+      window.renderCalendar();
+      window.mostrarTasquesPendentsSenseDia();
+      window.setUndoRedoDisabled();
     } else {
       loginOverlay.style.display = "flex";
       mainContent.style.display = "none";
       document.body.classList.add("login-mode");
     }
+    authLoaderOverlay.style.display = "none";
+    document.body.classList.remove("loading");
   });
 
   // Placeholder flotant robust

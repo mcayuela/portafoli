@@ -30,7 +30,8 @@ body {
 }
 
 #site-header {
-    height: var(--header-h, 80px);
+    width: auto;
+    height: 80px !important;
     padding: 0 16px;
     position: sticky;
     top: 0;
@@ -179,12 +180,17 @@ a:hover {
   border: 1px solid #cfe0ea;
   background: #fff;
   color: var(--brand);
-  font-weight: 800;
-  padding: 6px 10px;
-  height: 34px;
-  border-radius: 999px;
+  font-weight: 700;
+  padding: 6px;
+  max-width: 250px;
+  width: 200px;
+  height: 35px;
+  border-radius: 10px;
   cursor: pointer;
   transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #actions-card .pill:hover:not(:disabled) {
@@ -637,7 +643,8 @@ button#add-task:hover {
   resize: vertical;
 }
 
-/* Paperera */
+/* =================== Paperera =================== */
+
 .trash-list {
   list-style: none;
   margin: 0;
@@ -1026,7 +1033,6 @@ button, .btn {
     font-size: 1.05rem;
     font-weight: 500;
     cursor: pointer;
-    margin: 10px 0;
     box-shadow: 0 2px 8px rgba(37,150,190,0.10);
 }
 
@@ -1058,7 +1064,6 @@ input:focus, select:focus, textarea:focus {
     border-radius: 14px;
     box-shadow: 0 4px 24px rgba(37,150,190,0.13);
     padding: 32px 28px;
-    margin: 32px auto;
     max-width: 700px;
     transition: box-shadow 0.2s;
 }
@@ -1366,7 +1371,7 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin;
-    scrollbar-color: #2596be #eaf4fa;
+    scrollbar-color: #2596be #eaf6fa;
 }
 
 /* Separador visual a la dreta del contingut, abans de l’scrollbar */
@@ -1403,7 +1408,7 @@ body {
 #modal-content-dispositiu,
 #modal-content-altredispositiu {
     scrollbar-width: thin;
-    scrollbar-color: #2596be #eaf4fa;
+    scrollbar-color: #2596be #eaf6fa;
 }
 
 /* Botó tancar modal (creueta corporativa) */
@@ -1607,15 +1612,10 @@ body {
     width: 100%;
 }
 
-body.login-mode {
-    justify-content: center;
-    align-items: flex-start;
-}
-
 #login-container {
     position: relative;
     margin: 90px auto 60px;
-    width: clamp(320px, 90vw, 430px);
+    width: 524px !important;
     padding: 44px 46px 54px;
     background: linear-gradient(145deg, #ffffff 0%, #f4fafc 60%, #e9f4f9 100%);
     border: 1px solid rgba(37,150,190,0.18);
@@ -1629,11 +1629,13 @@ body.login-mode {
 }
 
 #login-container h2 {
+    padding-left: 0px;
     margin-top: 0;
     text-align: center;
     letter-spacing: .5px;
     font-weight: 600;
     color: #217aa3;
+    font-size: 24px !important;
 }
 
 #login-container input[type="email"],
@@ -1784,4 +1786,123 @@ input[type="email"] {
     gap: 12px;
     flex-direction: row;
     align-items: center;
+}
+
+/* Layout principal */
+.main-container {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 32px auto;
+  max-width: 1400px;
+}
+
+/* Calendari */
+.calendar-panel {
+  background: #eaf8fd;
+  border: 3px solid #8ed0e6;
+  border-radius: 18px;
+  padding: 24px 24px 24px 24px;
+  min-width: 600px;
+}
+
+/* Panell lateral dret */
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 380px;
+  max-width: 420px;
+}
+
+/* Bloc superior: botons */
+.sidebar-actions {
+  background: #f7fbfc;
+  border: 2px solid #b8e0ef;
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Bloc cerca */
+.sidebar-search {
+  background: #f7fbfc;
+  border: 2px solid #b8e0ef;
+  border-radius: 12px;
+  padding: 18px 16px;
+  margin-bottom: 0;
+}
+
+/* Bloc tasques del dia */
+.sidebar-tasks {
+  background: #fff;
+  border: 2px solid #b8e0ef;
+  border-radius: 12px;
+  padding: 0;
+  min-height: 300px;
+  margin-top: 0;
+}
+
+/* Ajustos addicionals */
+#calendar {
+  margin-bottom: 0;
+}
+#search-modal .modal-card {
+  width: min(96vw, 600px);
+  max-width: 600px;
+}
+#search-modal-results {
+  min-height: 180px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+#search-modal-pagination button {
+  background: #eaf6fa;
+  color: #2596be;
+  border: 1px solid #b8e0ef;
+  border-radius: 8px;
+  padding: 6px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1rem;
+}
+#search-modal-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loader overlay */
+#auth-loader-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #f6fafc; /* mateix color de fons que la pàgina */
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+#auth-loader {
+  width: 64px;
+  height: 64px;
+  border: 7px solid #e3eef5;
+  border-top: 7px solid #2596be;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  background: transparent;
+}
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+body.loading #main-content,
+body.loading #login-overlay {
+  filter: blur(4px) grayscale(0.2);
+  pointer-events: none;
+  user-select: none;
 }

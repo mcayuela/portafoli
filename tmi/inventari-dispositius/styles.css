@@ -10,18 +10,20 @@ body {
 }
 
 #site-header {
-    height: var(--header-h, 80px);
+    width: auto;
+    height: 80px !important;
     padding: 0 16px;
     position: sticky;
     top: 0;
     z-index: 20;
-    background: rgba(244, 247, 249, 0.55);
+    background: rgb(255, 255, 255);
     backdrop-filter: blur(15px);
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid rgba(37, 150, 190, 0.15);
 }
+
 
 #site-header img {
     height: 60px;
