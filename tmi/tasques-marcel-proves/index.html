@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventari de Dispositius - TMI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" href="images/logo_tmi_sensefons.png" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header id="site-header">
+        <div class="logo-esquerra">
+            <img src="images/logo_tmi_sensefons.png" alt="Logo esquerra" />
+        </div>
+        <a class="titol-principal" href="index.html">Inventari de Dispositius</a>
+        <div class="logo-dreta">
+            <img src="images/logo_tmi_sensefons.png" alt="Logo dreta" />
+        </div>
+    </header>
+    <!-- LOADER -->
+    <div class="contenidor-loader">
+        <div class="loader"></div>
+        <div class="loader-text">Carregant...</div>
+    </div>
+    <!-- LOGIN -->
+    <div id="login-overlay">
+      <div id="login-container" style="display:none;">
+          <div id="auth-loader"></div>
+          <h2>Inicia sessió</h2>
+
+          <div class="float-field">
+              <input type="email" id="email" class="float-input" placeholder=" " autocomplete="username">
+              <label for="email" class="float-label">Correu electrònic</label>
+          </div>
+
+          <div class="float-field">
+              <input type="password" id="password" class="float-input" placeholder=" " autocomplete="current-password">
+              <label for="password" class="float-label">Contrasenya</label>
+          </div>
+
+          <button id="loginBtn">Login</button>
+          <button id="logoutBtn" style="display:none;">Logout</button>
+          <p id="msg"></p>
+      </div>
+    </div>
+    <!-- CONTINGUT PRINCIPAL -->
+    <div id="main-content" style="display:none;">
+        <div id="content">
+            <div id="buscador-container">
+                <input type="text" id="buscador" placeholder="Cerca per ID o FQDN..." autocomplete="off">
+                <span class="buscador-icona">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="9" cy="9" r="7" stroke="#2596be" stroke-width="2"/>
+                        <line x1="14.2" y1="14.2" x2="18" y2="18" stroke="#2596be" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="botons-container">
+              <button class="btn-afegir-pc">+ Afegir PC</button>
+              <button class="btn-afegir-dispositiu">+ Afegir dispositiu</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script type="module" src="login.js"></script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

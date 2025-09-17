@@ -416,7 +416,6 @@ body {
 /* Botó afegir dispositiu */
 .btn-afegir-dispositiu {
     height: 38px;
-    width: 1000px;
     max-width: 150px;
     padding: 0 15px;
     border-radius: 6px;
@@ -434,7 +433,21 @@ body {
 }
 
 .btn-afegir-pc {
-    max-width: 10px;
+    height: 38px;
+    max-width: 150px;
+    padding: 0 15px;
+    border-radius: 6px;
+    border: none;
+    background: #2596be;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 0px 0px 10px 0px;
 }
 
 .btn-afegir-dispositiu:hover {
@@ -884,28 +897,9 @@ input[type="email"] {
 #loginBtn {
     height: 40px;
 }
-
-body.login-mode #main-content,
-body.login-mode .contenidor-loader {
-    display: none !important;
-}
-body.login-mode #login-overlay {
-    display: flex !important;
-}
-body:not(.login-mode) #login-overlay {
-    display: none !important;
-}
-body:not(.login-mode) #main-content {
-    display: block !important;
-}
-
 .botons-container {
     display: flex;
     gap: 12px;
     flex-direction: row;
     align-items: center;
-}
-.botons-container button {
-    width: auto;
-    min-width: 120px;
 }

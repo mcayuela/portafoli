@@ -1,7 +1,11 @@
 // ==============================
 // Configuració de Firebase
 // ==============================
-const firebaseConfig = {
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+// Configuració Firebase CALENDARI
+const calendarConfig = {
   apiKey: "AIzaSyCam7ES3CavgOsdEwv2Dznwesds72FyJnY",
   authDomain: "calendarimarcel.firebaseapp.com",
   projectId: "calendarimarcel",
@@ -10,18 +14,8 @@ const firebaseConfig = {
   appId: "1:63306452640:web:4aded0ffccbfc8d09c83c5",
   measurementId: "G-4SFP070VFS"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-        document.body.classList.remove('login-mode');
-        // Aquí crida la teva funció principal (ex: renderCalendar, carregar dades, etc.)
-        if (typeof carregarApp === 'function') carregarApp();
-    } else {
-        document.body.classList.add('login-mode');
-    }
-});
+const calendarApp = initializeApp(calendarConfig, "calendarApp");
+export const db = getFirestore(calendarApp);
 
 // ==============================
 // Helpers & constants
@@ -1602,25 +1596,3 @@ function openFestaDayModal(iso) {
     ]
   });
 }
-
-// Login
-document.getElementById('loginBtn').onclick = async function() {
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const msg = document.getElementById('msg');
-    msg.textContent = '';
-    document.getElementById('auth-loader').style.display = 'block';
-    try {
-        await firebase.auth().signInWithEmailAndPassword(email, password);
-        msg.textContent = 'Sessió iniciada!';
-        msg.className = 'success';
-    } catch (err) {
-        msg.textContent = 'Error: ' + (err.message || 'No s\'ha pogut iniciar sessió');
-        msg.className = 'error';
-    }
-    document.getElementById('auth-loader').style.display = 'none';
-};
-
-document.getElementById('logoutBtn').onclick = function() {
-    firebase.auth().signOut();
-};
