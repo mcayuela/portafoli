@@ -50,7 +50,11 @@
         <div class="calendar-box">
           <div id="calendar-controls">
             <button id="prev-month">Anterior</button>
-            <span id="month-year"></span>
+            <div id="month-header" style="display:flex;align-items:center;gap:18px;flex:1;justify-content:center;">
+              <span id="month-year" style="font-size:1.25em;font-weight:700;"></span>
+              <span id="month-finished" class="month-counter finished"></span>
+              <span id="month-pending" class="month-counter pending"></span>
+            </div>
             <button id="next-month">Següent</button>
           </div>
           <div id="calendar"></div>
@@ -62,7 +66,7 @@
           <div id="actions-card" class="card">
             <button id="undo-btn" class="pill" disabled style="max-width: 60px;">↶</button>
             <button id="redo-btn" class="pill" disabled style="max-width: 60px;">↷</button>
-            <button id="show-trash" class="pill" style="max-width: 60px;">🔍</button>
+            <button id="search-btn" class="pill" style="max-width: 60px;">🔍</button>
             <button id="show-trash" class="pill">🗑️ Paperera</button>
           </div>
           
@@ -89,10 +93,9 @@
             <span>Cerca de tasques</span>
             <button class="btn-icon" id="close-search-modal" title="Tancar">✕</button>
           </div>
-          <div class="modal-body" style="padding-bottom:0;">
+          <div class="modal-body">
             <input type="text" id="search-modal-input" placeholder="Cerca per títol o descripció..." style="width:100%;margin-bottom:12px;">
             <ul id="search-modal-results" class="search-results"></ul>
-            <div id="search-modal-pagination" style="display:flex;justify-content:center;align-items:center;gap:16px;margin:18px 0 0 0;"></div>
           </div>
         </div>
       </div>

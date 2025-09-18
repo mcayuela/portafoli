@@ -158,6 +158,20 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
 
       const li = document.createElement("li");
       li.draggable = true;
+      li.ondragstart = (e) => {
+        e.dataTransfer.setData(
+          "application/json",
+          JSON.stringify({
+            id: tasca.id,
+            from: UNASSIGNED_ID,
+            text: tasca.text,
+            done: tasca.done,
+            description: tasca.description,
+            priority: tasca.priority
+          })
+        );
+        e.dataTransfer.effectAllowed = "move";
+      };
       li.classList.add(`priority-${tasca.priority ?? 3}`);
 
       const priorityIndicator = document.createElement("span");
@@ -305,6 +319,21 @@ function renderitzarTasquesAmbLlista(tasquesOriginals) {
 
       const li = document.createElement("li");
       li.draggable = true;
+      li.ondragstart = (e) => {
+        e.dataTransfer.setData(
+          "application/json",
+          JSON.stringify({
+            id: tasca.id,
+            from: selectedDate ?? UNASSIGNED_ID,
+            text: tasca.text,
+            done: tasca.done,
+            description: tasca.description,
+            priority: tasca.priority
+          })
+        );
+        // Opcional: efecte visual
+        e.dataTransfer.effectAllowed = "move";
+      };
       li.classList.add(`priority-${tasca.priority ?? 3}`);
 
       const priorityIndicator = document.createElement("span");
@@ -652,6 +681,30 @@ async function renderCalendar() {
 
   const year     = currentDate.getFullYear();
   const month    = currentDate.getMonth();
+
+  // Calcula totals mensuals
+  const monthStr = String(month + 1).padStart(2, "0");
+  const finished = comptadorTasques.filter(t =>
+    t.data &&
+    t.data.startsWith(`${year}-${monthStr}`) &&
+    t.done &&
+    !t.specialDay &&
+    !t.festaDay
+  ).length;
+  const pending = comptadorTasques.filter(t =>
+    t.data &&
+    t.data.startsWith(`${year}-${monthStr}`) &&
+    !t.done &&
+    !t.specialDay &&
+    !t.festaDay
+  ).length;
+
+  // Mostra els comptadors
+  const finishedSpan = document.getElementById("month-finished");
+  const pendingSpan = document.getElementById("month-pending");
+  if (finishedSpan) finishedSpan.textContent = `${finished} acabades`;
+  if (pendingSpan) pendingSpan.textContent = `${pending} pendents`;
+
   const firstDay = new Date(year, month, 1);
   const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
   const daysIn   = new Date(year, month + 1, 0).getDate();
@@ -710,10 +763,10 @@ async function renderCalendar() {
     };
 
     const pendents = comptadorTasques.filter(
-      t => t.data === iso && !t.done && (!t.specialDay || t.text) && (!t.festaDay || t.text)
+      t => t.data === iso && !t.done && (!t.specialDay && !t.festaDay)
     ).length;
     const fetes = comptadorTasques.filter(
-      t => t.data === iso && t.done && (!t.specialDay || t.text) && (!t.festaDay || t.text)
+      t => t.data === iso && t.done && (!t.specialDay && !t.festaDay)
     ).length;
 
     let tasquesHtml = "";
@@ -1128,70 +1181,119 @@ async function doRedo() {
 // ==============================
 // Accions UI
 // ==============================
-showTrashBtn.onclick = () => openTrashModal();
-undoBtn.onclick      = () => doUndo();
-redoBtn.onclick      = () => doRedo();
-closeDayBtn.onclick  = () => mostrarTasquesPendentsSenseDia();
-document.getElementById('add-task-modal').addEventListener('click', function() {
-  openTaskModal(); // Debes tenir una funció que abra el modal de edició/creació
+if (showTrashBtn) showTrashBtn.onclick = () => openTrashModal();
+if (undoBtn)      undoBtn.onclick      = () => doUndo();
+if (redoBtn)      redoBtn.onclick      = () => doRedo();
+if (closeDayBtn)  closeDayBtn.onclick  = () => mostrarTasquesPendentsSenseDia();
+const addTaskModalBtn = document.getElementById('add-task-modal');
+if (addTaskModalBtn) addTaskModalBtn.addEventListener('click', function() {
+  openTaskModal();
 });
 
-document.getElementById("prev-month").onclick = () => {
+const prevMonthBtn = document.getElementById("prev-month");
+if (prevMonthBtn) prevMonthBtn.onclick = () => {
   currentDate.setMonth(currentDate.getMonth() - 1);
   renderCalendar();
 };
-document.getElementById("next-month").onclick = () => {
+const nextMonthBtn = document.getElementById("next-month");
+if (nextMonthBtn) nextMonthBtn.onclick = () => {
   currentDate.setMonth(currentDate.getMonth() + 1);
   renderCalendar();
 };
 
+// --- MODAL DE CERCA DE TASQUES EN TEMPS REAL ---
+const searchBtn = document.getElementById('search-btn');
+const searchModal = document.getElementById('search-modal');
+const closeSearchModal = document.getElementById('close-search-modal');
+const searchInput = document.getElementById('search-modal-input');
+const resultsList = document.getElementById('search-modal-results');
+
+let lastSearchTerm = "";
 let searchTimeout = null;
-document.getElementById("search-input").oninput = function() {
-  const resultsList = document.getElementById("search-results");
-  // Animació: esvaeix la llista
-  resultsList.classList.add("fade-out");
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(async () => {
-    const term = this.value.trim().toLowerCase();
-    resultsList.innerHTML = "";
 
-    if (!term) {
-      resultsList.classList.remove("fade-out");
-      return;
-    }
+if (
+  typeof UNASSIGNED_ID !== "undefined" &&
+  typeof mostrarTasquesPendentsSenseDia === "function" &&
+  typeof mostrarTasquesDelDia === "function" &&
+  searchBtn && searchModal && closeSearchModal && searchInput && resultsList
+) {
+  searchBtn.onclick = () => {
+    searchModal.style.display = "";
+    searchInput.value = lastSearchTerm;
+    searchInput.focus();
+    doSearch(searchInput.value);
+  };
+  closeSearchModal.onclick = () => {
+    searchModal.style.display = "none";
+  };
+  searchModal.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") searchModal.style.display = "none";
+  });
 
-    // Cerca a tots els dies, evita duplicats per id
+  searchInput.oninput = function() {
+    lastSearchTerm = this.value;
+    if (searchTimeout) clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      doSearch(lastSearchTerm);
+    }, 300);
+  };
+
+  async function doSearch(term) {
+    resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cercant...</li>";
     const snapshot = await getDocs(collection(db, "tasques"));
     const seenIds = new Set();
-    const results = [];
-    snapshot.forEach(doc => {
-      const docId = doc.id;
-      const tasques = doc.data().tasques || [];
+    let results = [];
+    term = (term || "").toLowerCase();
+    snapshot.forEach(docu => {
+      const docId = docu.id;
+      const tasques = docu.data().tasques || [];
       tasques.forEach(t => {
         if (
-          (t.text.toLowerCase().includes(term) ||
-          (t.description ?? "").toLowerCase().includes(term))
+          (!term || t.text?.toLowerCase().includes(term) || (t.description ?? "").toLowerCase().includes(term))
           && !seenIds.has(t.id)
         ) {
           seenIds.add(t.id);
-          results.push({
-            ...t,
-            docId,
-          });
+          results.push({ ...t, docId });
         }
       });
     });
 
+    resultsList.innerHTML = "";
     if (!results.length) {
       resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cap resultat</li>";
     } else {
       results.forEach(tasca => {
         const li = document.createElement("li");
         li.className = "search-result-item";
+        if (tasca.done) li.classList.add("done");
+        // Títol
         const title = document.createElement("span");
         title.className = "search-result-title";
         title.textContent = tasca.text;
+        // Data
+        const date = document.createElement("span");
+        date.className = "search-result-date";
+        let dateText = "";
+        if (tasca.docId === UNASSIGNED_ID) {
+          dateText = "Sense dia";
+        } else {
+          const parts = tasca.docId.split("-");
+          if (parts.length === 3) {
+            dateText = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          } else {
+            dateText = tasca.docId;
+          }
+        }
+        date.textContent = dateText;
+        // Dificultat
+        const diff = document.createElement("span");
+        diff.className = "search-result-difficulty";
+        const prio = tasca.priority ?? 3;
+        diff.textContent = ` ★${prio}`;
+        diff.classList.add(`diff-${prio}`);
+        // Click
         title.onclick = () => {
+          searchModal.style.display = "none";
           if (tasca.docId === UNASSIGNED_ID) {
             mostrarTasquesPendentsSenseDia();
           } else {
@@ -1202,174 +1304,15 @@ document.getElementById("search-input").oninput = function() {
             }
           }
         };
-        const date = document.createElement("span");
-        date.className = "search-result-date";
-        if (tasca.docId === UNASSIGNED_ID) {
-          date.textContent = "Sense dia";
-        } else {
-          const parts = tasca.docId.split("-");
-          if (parts.length === 3) {
-            date.textContent = `${parts[2]}-${parts[1]}-${parts[0]}`;
-          } else {
-            date.textContent = tasca.docId;
-          }
-        }
         li.appendChild(title);
         li.appendChild(date);
+        li.appendChild(diff);
         li.onclick = () => title.onclick();
         resultsList.appendChild(li);
       });
     }
-    // Animació: apareix la llista
-    resultsList.classList.remove("fade-out");
-    resultsList.classList.add("fade-in");
-    setTimeout(() => resultsList.classList.remove("fade-in"), 300);
-  }, 300); // 300ms de debounce
-};
-
-// --- MODAL DE CERCA DE TASQUES AMB PAGINACIÓ ---
-
-const searchBtn = document.querySelector('button.pill[style*="🔍"]') || document.getElementById('search-btn');
-const searchModal = document.getElementById('search-modal');
-const closeSearchModal = document.getElementById('close-search-modal');
-const searchInput = document.getElementById('search-modal-input');
-const resultsList = document.getElementById('search-modal-results');
-const paginationDiv = document.getElementById('search-modal-pagination');
-
-let lastSearchTerm = "";
-let lastResults = [];
-let currentPage = 1;
-const PAGE_SIZE = 10;
-
-// Obrir el modal
-searchBtn.onclick = () => {
-  searchModal.style.display = "";
-  searchInput.value = lastSearchTerm;
-  searchInput.focus();
-  if (lastSearchTerm) doSearch(lastSearchTerm, currentPage);
-  else doSearch("", 1);
-};
-
-// Tancar el modal
-closeSearchModal.onclick = () => {
-  searchModal.style.display = "none";
-};
-
-// Tancar amb ESC
-searchModal.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") searchModal.style.display = "none";
-});
-
-// Cerca reactiva
-searchInput.oninput = function() {
-  lastSearchTerm = this.value;
-  currentPage = 1;
-  doSearch(lastSearchTerm, currentPage);
-};
-
-// Paginació
-function renderPagination(total, page) {
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  paginationDiv.innerHTML = "";
-  if (totalPages <= 1) return;
-  const prev = document.createElement("button");
-  prev.textContent = "Anterior";
-  prev.disabled = page <= 1;
-  prev.onclick = () => {
-    if (currentPage > 1) {
-      currentPage--;
-      doSearch(lastSearchTerm, currentPage);
-    }
-  };
-  const next = document.createElement("button");
-  next.textContent = "Següent";
-  next.disabled = page >= totalPages;
-  next.onclick = () => {
-    if (currentPage < totalPages) {
-      currentPage++;
-      doSearch(lastSearchTerm, currentPage);
-    }
-  };
-  const info = document.createElement("span");
-  info.textContent = `Pàgina ${page} de ${totalPages}`;
-  paginationDiv.appendChild(prev);
-  paginationDiv.appendChild(info);
-  paginationDiv.appendChild(next);
-}
-
-// Cerca i renderitza
-async function doSearch(term, page) {
-  resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cercant...</li>";
-  const snapshot = await getDocs(collection(db, "tasques"));
-  const seenIds = new Set();
-  let results = [];
-  term = (term || "").toLowerCase();
-  snapshot.forEach(docu => {
-    const docId = docu.id;
-    const tasques = docu.data().tasques || [];
-    tasques.forEach(t => {
-      if (
-        (!term || t.text?.toLowerCase().includes(term) || (t.description ?? "").toLowerCase().includes(term))
-        && !seenIds.has(t.id)
-      ) {
-        seenIds.add(t.id);
-        results.push({ ...t, docId });
-      }
-    });
-  });
-  lastResults = results;
-  // Paginació
-  const total = results.length;
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  const start = (page - 1) * PAGE_SIZE;
-  const end = start + PAGE_SIZE;
-  const pageResults = results.slice(start, end);
-
-  resultsList.innerHTML = "";
-  if (!pageResults.length) {
-    resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cap resultat</li>";
-  } else {
-    pageResults.forEach(tasca => {
-      const li = document.createElement("li");
-      li.className = "search-result-item";
-      const title = document.createElement("span");
-      title.className = "search-result-title";
-      title.textContent = tasca.text;
-      title.onclick = () => {
-        searchModal.style.display = "none";
-        if (tasca.docId === UNASSIGNED_ID) {
-          mostrarTasquesPendentsSenseDia();
-        } else {
-          const parts = tasca.docId.split("-");
-          if (parts.length === 3) {
-            const data = new Date(parts[0], parts[1] - 1, parts[2]);
-            mostrarTasquesDelDia(data);
-          }
-        }
-      };
-      const date = document.createElement("span");
-      date.className = "search-result-date";
-      if (tasca.docId === UNASSIGNED_ID) {
-        date.textContent = "Sense dia";
-      } else {
-        const parts = tasca.docId.split("-");
-        if (parts.length === 3) {
-          date.textContent = `${parts[2]}-${parts[1]}-${parts[0]}`;
-        } else {
-          date.textContent = tasca.docId;
-        }
-      }
-      li.appendChild(title);
-      li.appendChild(date);
-      li.onclick = () => title.onclick();
-      resultsList.appendChild(li);
-    });
   }
-  renderPagination(total, page);
-}
 
-// Manté la cerca si tornes a clicar la lupa
-if (searchModal) {
   searchModal.addEventListener("click", function(e) {
     if (e.target === searchModal) searchModal.style.display = "none";
   });
@@ -1382,6 +1325,126 @@ window.addEventListener("DOMContentLoaded", () => {
   renderCalendar();
   mostrarTasquesPendentsSenseDia(); // arrenca amb “sense dia”
   setUndoRedoDisabled();
+
+  // --- MODAL DE CERCA DE TASQUES EN TEMPS REAL ---
+  const searchBtn = document.getElementById('search-btn');
+  const searchModal = document.getElementById('search-modal');
+  const closeSearchModal = document.getElementById('close-search-modal');
+  const searchInput = document.getElementById('search-modal-input');
+  const resultsList = document.getElementById('search-modal-results');
+
+  let lastSearchTerm = "";
+  let searchTimeout = null;
+
+  // Obrir el modal
+  searchBtn.onclick = () => {
+    searchModal.style.display = "";
+    searchInput.value = lastSearchTerm;
+    searchInput.focus();
+    doSearch(searchInput.value);
+  };
+
+  // Tancar el modal
+  closeSearchModal.onclick = () => {
+    searchModal.style.display = "none";
+  };
+
+  // Tancar amb ESC
+  searchModal.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") searchModal.style.display = "none";
+  });
+
+  searchInput.oninput = function() {
+    lastSearchTerm = this.value;
+    if (searchTimeout) clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      doSearch(lastSearchTerm);
+    }, 300);
+  };
+
+  async function doSearch(term) {
+    resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cercant...</li>";
+    const snapshot = await getDocs(collection(db, "tasques"));
+    const seenIds = new Set();
+    let results = [];
+    term = (term || "").toLowerCase();
+    snapshot.forEach(docu => {
+      const docId = docu.id;
+      const tasques = docu.data().tasques || [];
+      tasques.forEach(t => {
+        if (
+          (!term || t.text?.toLowerCase().includes(term) || (t.description ?? "").toLowerCase().includes(term))
+          && !seenIds.has(t.id)
+        ) {
+          seenIds.add(t.id);
+          results.push({ ...t, docId });
+        }
+      });
+    });
+
+    resultsList.innerHTML = "";
+    if (!results.length) {
+      resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cap resultat</li>";
+    } else {
+      results.forEach(tasca => {
+        const li = document.createElement("li");
+        li.className = "search-result-item";
+        if (tasca.done) li.classList.add("done");
+        // Títol
+        const title = document.createElement("span");
+        title.className = "search-result-title";
+        title.textContent = tasca.text;
+        // Data
+        const date = document.createElement("span");
+        date.className = "search-result-date";
+        let dateText = "";
+        if (tasca.docId === UNASSIGNED_ID) {
+          dateText = "Sense dia";
+        } else {
+          const parts = tasca.docId.split("-");
+          if (parts.length === 3) {
+            dateText = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          } else {
+            dateText = tasca.docId;
+          }
+        }
+        date.textContent = dateText;
+        // Dificultat
+        const diff = document.createElement("span");
+        diff.className = "search-result-difficulty";
+        diff.textContent = ` ★${tasca.priority ?? 3}`;
+        diff.style.color = "#f1b314";
+        // Estat
+        if (tasca.done) {
+          date.style.color = "#27ae60";
+          date.style.fontWeight = "bold";
+        }
+        // Click
+        title.onclick = () => {
+          searchModal.style.display = "none";
+          if (tasca.docId === UNASSIGNED_ID) {
+            mostrarTasquesPendentsSenseDia();
+          } else {
+            const parts = tasca.docId.split("-");
+            if (parts.length === 3) {
+              const data = new Date(parts[0], parts[1] - 1, parts[2]);
+              mostrarTasquesDelDia(data);
+            }
+          }
+        };
+        li.appendChild(title);
+        li.appendChild(date);
+        li.appendChild(diff);
+        li.onclick = () => title.onclick();
+        resultsList.appendChild(li);
+      });
+    }
+  };
+
+  // Tancar el modal fent clic fora
+  searchModal.addEventListener("click", function(e) {
+    if (e.target === searchModal) searchModal.style.display = "none";
+  });
 });
 
 function parseLinks(text) {

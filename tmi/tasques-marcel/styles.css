@@ -267,9 +267,13 @@ a:hover {
 
 #month-year {
   font-weight: 800;
-  font-size: 18px;
-  color: var(--brand);
+  font-size: 1.35em;
+  color: #217aa3;
   letter-spacing: 0.3px;
+  margin: 0 18px 0 0;
+  padding: 2px 18px;
+  background: #eaf6fa;
+  box-sizing: border-box;
 }
 
 /* =================== Calendari =================== */
@@ -543,7 +547,7 @@ button#add-task:hover {
 
 .modal-body {
   padding: 16px;
-  max-height: 70vh;
+  max-height: 100vh;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #2596be #eaf6fa;
@@ -735,40 +739,37 @@ button#add-task:hover {
 .search-result-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 9px 0;
-  border-bottom: 1px solid #e3eef3;
+  gap: 12px;
+  padding: 6px 0;
   cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s;
-  border-radius: 8px;
 }
 
-.search-result-item:hover {
-  background: #eaf6fa;
-  box-shadow: 0 2px 8px rgba(37,150,190,0.08);
+.search-result-item.done {
+  background: #e6fbe9;
+  color: #1d8656;
+}
+
+.search-result-item.done .search-result-title,
+.search-result-item.done .search-result-date,
+.search-result-item.done .search-result-difficulty {
+  color: #1d8656 !important;
+  font-weight: 600;
 }
 
 .search-result-title {
-  font-weight: 700;
-  color: var(--brand);
-  margin-right: 16px;
-  font-size: 1rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 60%;
+  flex: 1;
+  font-weight: 500;
 }
 
 .search-result-date {
-  font-size: 0.92em;
-  color: #1f82a5;
-  background: #eaf6fa;
-  border-radius: 8px;
-  padding: 2px 10px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
   min-width: 90px;
   text-align: right;
+}
+
+.search-result-difficulty {
+  min-width: 40px;
+  text-align: right;
+  font-size: 1.1em;
 }
 
 /* Selector de dies laborables (dilluns-divendres) estil corporatiu */
@@ -1852,12 +1853,14 @@ input[type="email"] {
   margin-bottom: 0;
 }
 #search-modal .modal-card {
-  width: min(96vw, 600px);
-  max-width: 600px;
+  width: min(100vw, 700px);
+  max-width: 800px;
+  width: 900px;
 }
 #search-modal-results {
   min-height: 180px;
-  max-height: 340px;
+  max-height: 500px;
+  max-width: 1000px;
   overflow-y: auto;
 }
 #search-modal-pagination button {
@@ -1905,4 +1908,35 @@ body.loading #login-overlay {
   filter: blur(4px) grayscale(0.2);
   pointer-events: none;
   user-select: none;
+}
+
+#month-header {
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+}
+
+.month-counter {
+  display: inline-block;
+  min-width: 60px;
+  padding: 6px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.8em;
+  text-align: center;
+  margin-left: 5px;
+  margin-right: 5px;
+  box-shadow: 0 2px 8px rgba(37,150,190,0.08);
+  border: 2px solid #eee;
+}
+.month-counter.finished {
+  background: #e6fbe9;
+  color: #1d8656;
+  border-color: #7be09b;
+}
+.month-counter.pending {
+  background: #fff6e6;
+  color: #e67e22;
+  border-color: #ffd699;
 }
