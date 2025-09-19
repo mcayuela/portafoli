@@ -1,6 +1,6 @@
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Configuració Firebase
 const firebaseConfig = {
@@ -20,27 +20,44 @@ const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
 
 // SVGs per a portàtil i sobretaula
-const iconaMonitor = `
-    <svg width="300" height="300" viewBox="0 0 64 64" fill="none">
-        <rect x="8" y="14" width="48" height="36" rx="3" fill="#2596be" stroke="#217aa3" stroke-width="2"/>
-        <rect x="4" y="54" width="56" height="4" rx="2" fill="#b3d6e6" stroke="#217aa3" stroke-width="2"/>
-        <rect x="20" y="54" width="24" height="2" rx="1" fill="#217aa3"/>
-    </svg>
+const iconaPC = `
+<svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+  <rect x="4" y="8" width="30" height="16" rx="3" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
+  <rect x="12" y="28" width="14" height="3" rx="1.5" fill="#2596be"/>
+  <rect x="16" y="32" width="6" height="2" rx="1" fill="#217aa3"/>
+</svg>
 `;
-const iconaImpresora = `
-    <svg width="300" height="300" viewBox="0 0 64 64" fill="none">
-        <rect x="8" y="14" width="48" height="28" rx="3" fill="#2596be" stroke="#217aa3" stroke-width="2"/>
-        <rect x="4" y="46" width="56" height="4" rx="2" fill="#b3d6e6" stroke="#217aa3" stroke-width="2"/>
-        <rect x="20" y="46" width="24" height="2" rx="1" fill="#217aa3"/>
-        <path d="M16 14V10C16 7.79086 17.7909 6 20 6H44C46.2091 6 48 7.79086 48 10V14" stroke="#217aa3" stroke-width="2" stroke-linecap="round"/>
-    </svg>
+
+const iconaPortatil = `
+<svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+  <rect x="7" y="11" width="24" height="13" rx="2" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
+  <rect x="4" y="26" width="30" height="4" rx="2" fill="#2596be"/>
+  <rect x="15" y="31" width="8" height="2" rx="1" fill="#217aa3"/>
+</svg>
 `;
+
 const iconaMobil = `
-    <svg width="300" height="300" viewBox="0 0 64 64" fill="none">
-        <rect x="20" y="6" width="24" height="52" rx="3" fill="#2596be" stroke="#217aa3" stroke-width="2"/>
-        <rect x="16" y="58" width="32" height="4" rx="2" fill="#b3d6e6" stroke="#217aa3" stroke-width="2"/>
-        <rect x="28" y="58" width="8" height="2" rx="1" fill="#217aa3"/>
-    </svg>
+<svg width="28" height="38" viewBox="0 0 28 38" fill="none">
+  <rect x="4" y="4" width="20" height="30" rx="4" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
+  <circle cx="14" cy="32" r="1.5" fill="#2596be"/>
+</svg>
+`;
+
+const iconaImpresora = `
+<svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+  <rect x="7" y="15" width="24" height="10" rx="2" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
+  <rect x="11" y="7" width="16" height="8" rx="1.5" fill="#2596be"/>
+  <rect x="11" y="25" width="16" height="6" rx="1.5" fill="#217aa3"/>
+  <circle cx="27" cy="20" r="1" fill="#2596be"/>
+</svg>
+`;
+
+const iconaMonitor = `
+<svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+  <rect x="6" y="10" width="26" height="16" rx="2" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
+  <rect x="15" y="28" width="8" height="2" rx="1" fill="#217aa3"/>
+  <rect x="13" y="31" width="12" height="2" rx="1" fill="#2596be"/>
+</svg>
 `;
 
 let lastData = null;
@@ -59,15 +76,25 @@ function renderBuscador() {
     const buscadorHtml = `
         <div id="buscador-container" class="buscador-container">
             <input type="text" id="buscador" class="buscador-input" placeholder="Cerca per ID o FQDN..." autocomplete="off">
+            <span class="buscador-icona">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <circle cx="9" cy="9" r="7" stroke="#2596be" stroke-width="2"/>
                     <line x1="14.2" y1="14.2" x2="18" y2="18" stroke="#2596be" stroke-width="2" stroke-linecap="round"/>
                 </svg>
             </span>
-            <button id="btn-afegir-pc" class="btn-afegir-dispositiu">+ Afegir PC</button>
-            <button id="btn-afegir-dispositiu" class="btn-afegir-dispositiu">+ Afegir dispositiu</button>
+            <div class="botons-container">
+                <button id="btn-afegir-pc" class="btn-afegir-dispositiu">+ Afegir PC</button>
+                <button id="btn-afegir-dispositiu" class="btn-afegir-dispositiu">+ Afegir dispositiu</button>
+            </div>
         </div>
         <div id="modal-afegir-dispositiu" class="modal-afegir-dispositiu">
             <div id="modal-content-dispositiu">
-                <button id="modal-close-dispositiu" title="Tancar">&times;</button>
+                <button id="modal-close-dispositiu" title="Tancar" class="btn-close-svg">
+                    <svg width="32" height="32" viewBox="0 0 32 32">
+                        <line x1="8" y1="8" x2="24" y2="24" stroke="#2596be" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="24" y1="8" x2="8" y2="24" stroke="#2596be" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </button>
                 <h3 style="margin-top: 0; padding-top: 2px;">Afegir nou dispositiu</h3>
                 <form id="form-afegir-dispositiu">
                     <label>ID:<br><input name="id" required></label><br>
@@ -109,7 +136,12 @@ function renderBuscador() {
         </div>
         <div id="modal-afegir-altredispositiu" class="modal-afegir-dispositiu">
             <div id="modal-content-altredispositiu">
-                <button id="modal-close-altredispositiu" title="Tancar">&times;</button>
+                <button id="modal-close-altredispositiu" title="Tancar" class="btn-close-svg">
+                    <svg width="32" height="32" viewBox="0 0 32 32">
+                        <line x1="8" y1="8" x2="24" y2="24" stroke="#2596be" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="24" y1="8" x2="8" y2="24" stroke="#2596be" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </button>
                 <h3 style="margin-top: 0; padding-top: 2px;">Afegir nou dispositiu</h3>
                 <form id="form-afegir-altredispositiu">
                     <label>Model:<br><input name="model" required></label><br>
@@ -565,7 +597,7 @@ html += `
                     <label>Descripció:<br>
                         <textarea name="descripcio" required></textarea>
                     </label><br>
-                    <label>Imatges:<br>
+                    <label style:"display: none;">Imatges:<br>
                         <input type="file" name="imatges" id="imatges-input" multiple accept="image/*" style="display:none;">
                         <button type="button" id="btn-upload-img" class="btn-upload-img">Adjuntar imatges</button>
                         <div id="imatges-preview" class="imatges-preview"></div>
@@ -623,30 +655,76 @@ async function main() {
             if (content) content.style.display = '';
             if (pc) {
                 content.innerHTML = `
-                    <div class="detall-container">
-                        <div class="detall-text">
-                            <h2>PC ID: ${pc.id}</h2>
-                            <p><strong>FQDN:</strong> ${pc.FQDN || ''}</p>
-                            <p><strong>Model:</strong> ${pc.model || ''}</p>
-                            <p><strong>Processador:</strong> ${pc.processador || ''}</p>
-                            <p><strong>RAM:</strong> ${pc.ram || ''}</p>
-                            <p><strong>Emmagatzematge:</strong> ${pc.emmagatzematge || ''}</p>
-                            <p><strong>Tarjeta Gràfica:</strong> ${pc.tarjetaGrafica || ''}</p>
-                            <p><strong>Sistema Operatiu:</strong> ${pc.sistemaOperatiu || ''}</p>
-                            <p><strong>Data d'Adquisició:</strong> ${pc.dataAdquisicio || ''}</p>
-                            <p><strong>Portàtil:</strong> ${pc.portatil ? 'Sí' : 'No'}</p>
-                            <p><strong>Usuari:</strong> ${pc.usuari || ''}</p>
-                            <p><strong>Departament:</strong> ${pc.departament || ''}</p>
-                            <a href="index.html">Tornar a l'inventari</a>
-                            <hr>
-                            ${renderReparacions(pc.reparacions, pc.id)}
-                        </div>
-                        <div class="detall-icona">
-                            ${getIconaDispositiu(pc.tipus || [])}
-                        </div>
-                    </div>
-                    <div id="qr-pc-container"></div>
+<div class="pc-detall-grid">
+  <!-- Info PC (esquerra) -->
+  <div class="pc-info">
+    <div class="pc-icona-titol">
+      <span class="pc-titol">ID: ${pc.id}</span>
+      ${getIconaDispositiu(pc.tipus || [])}
+    </div>
+    <p><strong>FQDN:</strong> ${pc.FQDN || ''}</p>
+    <p><strong>Model:</strong> ${pc.model || ''}</p>
+    <p><strong>Processador:</strong> ${pc.processador || ''}</p>
+    <p><strong>RAM:</strong> ${pc.ram || ''}</p>
+    <p><strong>Emmagatzematge:</strong> ${pc.emmagatzematge || ''}</p>
+    <p><strong>Tarjeta Gràfica:</strong> ${pc.tarjetaGrafica || ''}</p>
+    <p><strong>Sistema Operatiu:</strong> ${pc.sistemaOperatiu || ''}</p>
+    <p><strong>Data d'Adquisició:</strong> ${pc.dataAdquisicio || ''}</p>
+    <p><strong>Portàtil:</strong> ${pc.portatil ? 'Sí' : 'No'}</p>
+    <p><strong>Usuari:</strong> ${pc.usuari || ''}</p>
+    <p><strong>Departament:</strong> ${pc.departament || ''}</p>
+  </div>
+  <!-- Columna dreta: Botons a dalt, reparacions a sota -->
+  <div class="pc-dreta">
+    <div class="pc-actions">
+      <button id="btn-eliminar-pc" class="btn-eliminar-pc">🗑️ Eliminar</button>
+      <button id="btn-generar-qr" class="btn-guardar">Genera QR</button>
+      <button id="btn-tornar" class="btn-tornar">Tornar a l'inventari</button>
+    </div>
+    <div class="pc-reparacions">
+      ${renderReparacions(pc.reparacions, pc.id)}
+    </div>
+  </div>
+</div>
+<div id="qr-pc-container"></div>
+<!-- Modal confirmació eliminar -->
+<div id="modal-eliminar-pc" class="modal-eliminar-pc" style="display:none;">
+  <div class="modal-eliminar-content">
+    <h3>Segur que vols eliminar aquest PC?</h3>
+    <p>Aquesta acció no es pot desfer.</p>
+    <button id="confirmar-eliminar-pc" class="btn-eliminar-pc">Sí, eliminar</button>
+    <button id="cancelar-eliminar-pc" class="btn-tornar">Cancel·lar</button>
+  </div>
+</div>
                 `;
+                const btnEliminar = document.getElementById('btn-eliminar-pc');
+                if (btnEliminar) {
+                btnEliminar.onclick = () => {
+                    document.getElementById('modal-eliminar-pc').style.display = 'flex';
+                    const btnConfirma = document.getElementById('confirmar-eliminar-pc');
+                    const btnCancela = document.getElementById('cancelar-eliminar-pc');
+                    if (btnCancela) btnCancela.onclick = () => {
+                    document.getElementById('modal-eliminar-pc').style.display = 'none';
+                    };
+                    if (btnConfirma) btnConfirma.onclick = async () => {
+                    await deleteDoc(doc(db, "pcs", pc.id.toString()));
+                    window.location.href = "index.html";
+                    };
+                };
+                }
+
+                const btnQR = document.getElementById('btn-generar-qr');
+                if (btnQR) {
+                btnQR.onclick = () => obreQRAPestanya(pc);
+                }
+
+                const btnTornar = document.getElementById('btn-tornar');
+                if (btnTornar) {
+                btnTornar.onclick = () => {
+                    window.location.href = "index.html";
+                };
+                }
+
                 // --- Afegir reparació (modal) ---
                 document.getElementById('btn-afegir-reparacio').onclick = () => {
                     document.getElementById('modal-reparacio').style.display = 'flex';
@@ -792,10 +870,12 @@ async function main() {
 }
 
 function getIconaDispositiu(tipusArray) {
-    if (tipusArray.includes('Monitor')) return iconaMonitor;
-    if (tipusArray.includes('Impresora')) return iconaImpresora;
+    if (!tipusArray || tipusArray.length === 0) return iconaPC;
+    if (tipusArray.includes('Portàtil')) return iconaPortatil;
     if (tipusArray.includes('Mòbil')) return iconaMobil;
-    return '';
+    if (tipusArray.includes('Impresora')) return iconaImpresora;
+    if (tipusArray.includes('Monitor')) return iconaMonitor;
+    return iconaPC;
 }
 
 // --- QR: utilitats ---
@@ -886,18 +966,136 @@ function generaQRDispositiu(pc, destEl) {
     },50);
 }
 
-// Exemples de modificació dins de renderDetall (afegeix crida):
-// function renderDetall(pc) {
-//     // ...existing code...
-//     let qrContainer = document.getElementById('qr-pc-container');
-//     if (!qrContainer) {
-//         qrContainer = document.createElement('div');
-//         qrContainer.id = 'qr-pc-container';
-//         document.getElementById('detall-pc').appendChild(qrContainer); // ajusta id contenidor
-//     }
-//     generaQRDispositiu(pc, qrContainer);
-//     // ...existing code...
-// }
+function obreQRAPestanya(pc) {
+    const tmpDiv = document.createElement('div');
+    new QRCode(tmpDiv, {
+        text: `https://mcayuela.com/tmi/inventari-dispositius/?id=${pc.id}`,
+        width: 240,
+        height: 240,
+        correctLevel: QRCode.CorrectLevel.H
+    });
+    setTimeout(() => {
+        const qrImg = tmpDiv.querySelector('img') || tmpDiv.querySelector('canvas');
+        const mmYY = formatDataAdqMMYY(pc.dataAdquisicio);
+        let qrDataUrl = "";
+        if (qrImg.tagName === "IMG") qrDataUrl = qrImg.src;
+        else qrDataUrl = qrImg.toDataURL();
+
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <html>
+            <head>
+                <title>QR PC ${pc.id}</title>
+                <style>
+                    html, body {
+                        height: 100%;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        background: #fff !important;
+                    }
+                    body {
+                        width: 100vw;
+                        height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .qr-container {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 100vh;
+                        width: 100vw;
+                        box-sizing: border-box;
+                    }
+                    .qr-img {
+                        margin-bottom: 15px;
+                        background: #eaf4fa;
+                        display: block;
+                    }
+                    .qr-id {
+                        font-size: 2.2em;
+                        font-weight: 700;
+                        color: #217aa3;
+                        margin-bottom: 12px;
+                        letter-spacing: 1px;
+                        text-align: center;
+                        display: block;
+                    }
+                    .qr-logo {
+                        margin: 0;
+                        display: block;
+                        max-width: 240px;
+                        width: 100%;
+                        height: auto;
+                    }
+                    .print-btn {
+                        display: inline-block;
+                        margin-top: 22px;
+                        padding: 12px 32px;
+                        font-size: 1.1em;
+                        background: #2596be;
+                        color: #fff;
+                        border: none;
+                        border-radius: 7px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        box-shadow: 0 2px 8px rgba(37,150,190,0.06);
+                        transition: background 0.2s;
+                    }
+                    .print-btn:hover {
+                        background: #217aa3;
+                    }
+                    @media print {
+                        html, body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            background: #fff !important;
+                            width: 100vw !important;
+                            height: 100vh !important;
+                        }
+                        .qr-container {
+                            box-shadow: none !important;
+                            background: #fff !important;
+                            width: 100vw !important;
+                            min-height: 100vh !important;
+                            justify-content: center !important;
+                            align-items: center !important;
+                            page-break-inside: avoid !important;
+                            /* Escala tot el contingut per assegurar que capiga a una sola pàgina */
+                            transform: scale(0.75);
+                            transform-origin: top center;
+                            max-width: 100vw !important;
+                            max-height: 100vh !important;
+                        }
+                        .qr-img {
+                            max-width: 160px !important;
+                            max-height: 160px !important;
+                        }
+                        .qr-logo {
+                            max-width: 120px !important;
+                        }
+                        .qr-id {
+                            font-size: 1.1em !important;
+                        }
+                        .print-btn { display: none !important; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="qr-container">
+                    <img class="qr-img" src="${qrDataUrl}" width="240" height="240" alt="QR PC ${pc.id}">
+                    <span class="qr-id">PC ${pc.id}/${mmYY}</span>
+                    <img class="qr-logo" src="images/logotmi-horitzontal.png" alt="Logo" />
+                    <button class="print-btn" onclick="window.print()">Imprimir</button>
+                </div>
+            </body>
+            </html>
+        `);
+        win.document.close();
+    }, 100);
+}
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.float-input').forEach(inp => {
         const toggle = () => {
@@ -909,4 +1107,5 @@ document.addEventListener('DOMContentLoaded', () => {
         toggle();
     });
 });
+
 main();
