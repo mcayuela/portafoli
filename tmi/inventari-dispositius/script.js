@@ -22,41 +22,41 @@ const id = urlParams.get('id');
 // SVGs per a portàtil i sobretaula
 const iconaPC = `
 <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-  <rect x="4" y="8" width="30" height="16" rx="3" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
-  <rect x="12" y="28" width="14" height="3" rx="1.5" fill="#2596be"/>
-  <rect x="16" y="32" width="6" height="2" rx="1" fill="#217aa3"/>
+    <rect x="4" y="8" width="30" height="16" rx="3" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
+    <rect x="12" y="28" width="14" height="3" rx="1.5" fill="#2596be"/>
+    <rect x="16" y="32" width="6" height="2" rx="1" fill="#217aa3"/>
 </svg>
 `;
 
 const iconaPortatil = `
 <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-  <rect x="7" y="11" width="24" height="13" rx="2" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
-  <rect x="4" y="26" width="30" height="4" rx="2" fill="#2596be"/>
-  <rect x="15" y="31" width="8" height="2" rx="1" fill="#217aa3"/>
+    <rect x="7" y="11" width="24" height="13" rx="2" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
+    <rect x="4" y="26" width="30" height="4" rx="2" fill="#2596be"/>
+    <rect x="15" y="31" width="8" height="2" rx="1" fill="#217aa3"/>
 </svg>
 `;
 
 const iconaMobil = `
 <svg width="28" height="38" viewBox="0 0 28 38" fill="none">
-  <rect x="4" y="4" width="20" height="30" rx="4" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
-  <circle cx="14" cy="32" r="1.5" fill="#2596be"/>
+    <rect x="4" y="4" width="20" height="30" rx="4" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
+    <circle cx="14" cy="32" r="1.5" fill="#2596be"/>
 </svg>
 `;
 
 const iconaImpresora = `
 <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-  <rect x="7" y="15" width="24" height="10" rx="2" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
-  <rect x="11" y="7" width="16" height="8" rx="1.5" fill="#2596be"/>
-  <rect x="11" y="25" width="16" height="6" rx="1.5" fill="#217aa3"/>
-  <circle cx="27" cy="20" r="1" fill="#2596be"/>
+    <rect x="7" y="15" width="24" height="10" rx="2" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
+    <rect x="11" y="7" width="16" height="8" rx="1.5" fill="#2596be"/>
+    <rect x="11" y="25" width="16" height="6" rx="1.5" fill="#217aa3"/>
+    <circle cx="27" cy="20" r="1" fill="#2596be"/>
 </svg>
 `;
 
 const iconaMonitor = `
 <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-  <rect x="6" y="10" width="26" height="16" rx="2" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
-  <rect x="15" y="28" width="8" height="2" rx="1" fill="#217aa3"/>
-  <rect x="13" y="31" width="12" height="2" rx="1" fill="#2596be"/>
+    <rect x="6" y="10" width="26" height="16" rx="2" fill="#eaf4fa" stroke="#2596be" stroke-width="2"/>
+    <rect x="15" y="28" width="8" height="2" rx="1" fill="#217aa3"/>
+    <rect x="13" y="31" width="12" height="2" rx="1" fill="#2596be"/>
 </svg>
 `;
 
@@ -564,44 +564,42 @@ async function afegirReparacio(pcId, reparacio) {
 function renderReparacions(reparacions = [], pcId) {
     let html = `<div class="reparacions-container"><h3>Reparacions / Canvis</h3>`;
     if (reparacions && reparacions.length > 0) {
-        html += reparacions.map((r, idx) => `
-            <div class="reparacio-card">
-                <div class="reparacio-header">
-                    <span class="reparacio-data">${r.data}</span>
-                    <div class="reparacio-actions">
-                        <button class="btn-editar" data-idx="${idx}" title="Editar">&#9998;</button>
-                        <button class="btn-eliminar" data-idx="${idx}" title="Eliminar">&#128465;</button>
+        html += reparacions.map((r, idx) => {
+            // Mostra només la primera línia del textarea com a títol (màxim 30 caràcters)
+            const titol = (r.titol || '').slice(0, 30);
+            // La resta de la descripció (màxim 3 línies, pots limitar amb CSS)
+            const descripcio = r.descripcio || '';
+            return `
+                <div class="reparacio-card">
+                    <div class="rep-header">
+                        <span class="rep-titol">${titol}</span>
+                        <span class="rep-data">${r.data}</span>
+                    </div>
+                    <div class="rep-desc">${descripcio}</div>
+                    <div class="rep-botons">
+                        <button class="btn-editar" data-idx="${idx}">✏️</button>
+                        <button class="btn-eliminar" data-idx="${idx}">🗑️</button>
                     </div>
                 </div>
-                <div class="reparacio-body">
-                <strong>${r.descripcio}</strong>
-                ${r.imatges && r.imatges.length > 0 ? `
-                    <div class="reparacio-imgs" style="margin-top:10px;">
-                        ${r.imatges.map((img, imgIdx) => `<img src="${img}" alt="Imatge reparació" class="reparacio-img" data-img="${img}" data-idx="${imgIdx}" style="cursor:pointer;">`).join('')}
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `).join('');
-} else {
-    html += `<p>No hi ha reparacions/canvis registrats.</p>`;
-}
-html += `<button id="btn-afegir-reparacio" class="btn-afegir">+ Afegir reparació/canvi</button></div>`;
+            `;
+        }).join('');
+    } else {
+        html += `<p>No hi ha reparacions/canvis registrats.</p>`;
+    }
+    html += `<button id="btn-afegir-reparacio" class="btn-afegir">+ Afegir</button></div>`;
 
-html += `
+    html += `
         <div id="modal-reparacio" class="modal-reparacio" style="display:none;">
             <div class="modal-content">
                 <span class="modal-close" id="modal-close">&times;</span>
                 <form id="form-reparacio">
                     <h4>Nova reparació/canvi</h4>
-                    <label>Descripció:<br>
-                        <textarea name="descripcio" required></textarea>
-                    </label><br>
-                    <label style:"display: none;">Imatges:<br>
-                        <input type="file" name="imatges" id="imatges-input" multiple accept="image/*" style="display:none;">
-                        <button type="button" id="btn-upload-img" class="btn-upload-img">Adjuntar imatges</button>
-                        <div id="imatges-preview" class="imatges-preview"></div>
-                    </label><br>
+                    <label for="titol">Títol:</label>
+                    <input type="text" id="titol" name="titol" maxlength="30" required>
+
+                    <label for="descripcio">Descripció:</label>
+                    <textarea id="descripcio" name="descripcio" rows="5" required></textarea>
+
                     <button type="submit" class="btn-guardar">Guardar</button>
                 </form>
             </div>
@@ -656,11 +654,11 @@ async function main() {
             if (pc) {
                 content.innerHTML = `
 <div class="pc-detall-grid">
-  <!-- Info PC (esquerra) -->
-  <div class="pc-info">
+    <!-- Info PC (esquerra) -->
+    <div class="pc-info">
     <div class="pc-icona-titol">
-      <span class="pc-titol">ID: ${pc.id}</span>
-      ${getIconaDispositiu(pc.tipus || [])}
+        <span class="pc-titol">ID: ${pc.id}</span>
+        ${getIconaDispositiu(pc.tipus || [])}
     </div>
     <p><strong>FQDN:</strong> ${pc.FQDN || ''}</p>
     <p><strong>Model:</strong> ${pc.model || ''}</p>
@@ -673,28 +671,28 @@ async function main() {
     <p><strong>Portàtil:</strong> ${pc.portatil ? 'Sí' : 'No'}</p>
     <p><strong>Usuari:</strong> ${pc.usuari || ''}</p>
     <p><strong>Departament:</strong> ${pc.departament || ''}</p>
-  </div>
-  <!-- Columna dreta: Botons a dalt, reparacions a sota -->
-  <div class="pc-dreta">
+    </div>
+    <!-- Columna dreta: Botons a dalt, reparacions a sota -->
+    <div class="pc-dreta">
     <div class="pc-actions">
-      <button id="btn-eliminar-pc" class="btn-eliminar-pc">🗑️ Eliminar</button>
-      <button id="btn-generar-qr" class="btn-guardar">Genera QR</button>
-      <button id="btn-tornar" class="btn-tornar">Tornar a l'inventari</button>
+        <button id="btn-eliminar-pc" class="btn-eliminar-pc">🗑️ Eliminar</button>
+        <button id="btn-generar-qr" class="btn-guardar">Genera QR</button>
+        <button id="btn-tornar" class="btn-tornar">Tornar a l'inventari</button>
     </div>
     <div class="pc-reparacions">
-      ${renderReparacions(pc.reparacions, pc.id)}
+        ${renderReparacions(pc.reparacions, pc.id)}
     </div>
-  </div>
+    </div>
 </div>
 <div id="qr-pc-container"></div>
 <!-- Modal confirmació eliminar -->
 <div id="modal-eliminar-pc" class="modal-eliminar-pc" style="display:none;">
-  <div class="modal-eliminar-content">
-    <h3>Segur que vols eliminar aquest PC?</h3>
-    <p>Aquesta acció no es pot desfer.</p>
-    <button id="confirmar-eliminar-pc" class="btn-eliminar-pc">Sí, eliminar</button>
-    <button id="cancelar-eliminar-pc" class="btn-tornar">Cancel·lar</button>
-  </div>
+    <div class="modal-eliminar-content">
+        <h3>Segur que vols eliminar aquest PC?</h3>
+        <p>Aquesta acció no es pot desfer.</p>
+        <button id="confirmar-eliminar-pc" class="btn-eliminar-pc">Sí, eliminar</button>
+        <button id="cancelar-eliminar-pc" class="btn-tornar">Cancel·lar</button>
+    </div>
 </div>
                 `;
                 const btnEliminar = document.getElementById('btn-eliminar-pc');
@@ -732,72 +730,27 @@ async function main() {
                 document.getElementById('modal-close').onclick = () => {
                     document.getElementById('modal-reparacio').style.display = 'none';
                 };
-                // --- Imatges input preview ---
-                let filesArray = [];
-                document.getElementById('btn-upload-img').onclick = () => {
-                    document.getElementById('imatges-input').click();
-                };
-                document.getElementById('imatges-input').onchange = (e) => {
-                    filesArray = Array.from(e.target.files);
-                    const preview = document.getElementById('imatges-preview');
-                    preview.innerHTML = '';
-                    filesArray.forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = function(ev) {
-                            const img = document.createElement('img');
-                            img.src = ev.target.result;
-                            img.className = 'reparacio-img';
-                            img.style.maxWidth = '40px';
-                            img.style.maxHeight = '40px';
-                            img.style.margin = '2px';
-                            preview.appendChild(img);
-                            img.onclick = () => {
-                                document.getElementById('img-gran').src = ev.target.result;
-                                document.getElementById('modal-img-gran').style.display = 'flex';
-                            };
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                };
-                // --- Modal imatge gran ---
-                document.getElementById('modal-img-close').onclick = () => {
-                    document.getElementById('modal-img-gran').style.display = 'none';
-                };
-                // --- Afegir reparació amb imatges ---
+                // --- Afegir reparació sense imatges ---
                 document.getElementById('form-reparacio').onsubmit = async (e) => {
                     e.preventDefault();
-                    mostrarLoader();
+                    const titol = e.target.titol.value;
                     const descripcio = e.target.descripcio.value;
-                    let imatges = [];
-                    if (filesArray.length > 0) {
-                        imatges = await Promise.all(filesArray.map(async file => {
-                            return new Promise(resolve => {
-                                const reader = new FileReader();
-                                reader.onload = ev => resolve(ev.target.result);
-                                reader.readAsDataURL(file);
-                            });
-                        }));
-                    }
                     const novaReparacio = {
                         data: new Date().toISOString().slice(0, 10),
-                        descripcio,
-                        imatges
+                        titol,
+                        descripcio
                     };
                     await afegirReparacio(pc.id, novaReparacio);
                     document.getElementById('modal-reparacio').style.display = 'none';
-                    alert('Reparació afegida!');
-                    amagarLoader();
                     main();
                 };
                 // --- Eliminar reparació ---
                 document.querySelectorAll('.btn-eliminar').forEach(btn => {
                     btn.onclick = async () => {
-                        mostrarLoader();
                         const idx = parseInt(btn.getAttribute('data-idx'));
                         const reparacions = pc.reparacions || [];
                         reparacions.splice(idx, 1);
                         await updateDoc(doc(db, "pcs", pc.id.toString()), { reparacions });
-                        amagarLoader();
                         main();
                     };
                 });
@@ -807,34 +760,18 @@ async function main() {
                         const idx = parseInt(btn.getAttribute('data-idx'));
                         const reparacio = pc.reparacions[idx];
                         document.getElementById('modal-reparacio').style.display = 'flex';
-                        document.getElementById('form-reparacio').descripcio.value = reparacio.descripcio;
-                        document.getElementById('imatges-preview').innerHTML = '';
-                        if (reparacio.imatges && reparacio.imatges.length > 0) {
-                            reparacio.imatges.forEach(img => {
-                                const imgEl = document.createElement('img');
-                                imgEl.src = img;
-                                imgEl.className = 'reparacio-img';
-                                imgEl.style.maxWidth = '40px';
-                                imgEl.style.maxHeight = '40px';
-                                imgEl.style.margin = '2px';
-                                document.getElementById('imatges-preview').appendChild(imgEl);
-                                imgEl.onclick = () => {
-                                    document.getElementById('img-gran').src = img;
-                                    document.getElementById('modal-img-gran').style.display = 'flex';
-                                };
-                            });
-                        }
+                        document.getElementById('form-reparacio').titol.value = reparacio.titol || '';
+document.getElementById('form-reparacio').descripcio.value = reparacio.descripcio || '';
+
                         // Guardar edició
                         document.getElementById('form-reparacio').onsubmit = async (e) => {
                             e.preventDefault();
-                            mostrarLoader();
+                            reparacio.titol = e.target.titol.value;
                             reparacio.descripcio = e.target.descripcio.value;
                             reparacio.data = reparacio.data || new Date().toISOString().slice(0, 10);
                             pc.reparacions[idx] = reparacio;
                             await updateDoc(doc(db, "pcs", pc.id.toString()), { reparacions: pc.reparacions });
                             document.getElementById('modal-reparacio').style.display = 'none';
-                            alert('Reparació actualitzada!');
-                            amagarLoader();
                             main();
                         };
                     };
@@ -985,17 +922,27 @@ function obreQRAPestanya(pc) {
         win.document.write(`
             <html>
             <head>
-                <title>QR PC ${pc.id}</title>
+                <title>QR ${pc.id}</title>
                 <style>
                     html, body {
                         height: 100%;
                         margin: 0 !important;
                         padding: 0 !important;
                         background: #fff !important;
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        overflow: hidden;
                     }
                     body {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                         width: 100vw;
                         height: 100vh;
+                    }
+                    .qr-rotated-wrapper {
+                        width: 100vh;
+                        height: 100vw;
                         display: flex;
                         align-items: center;
                         justify-content: center;
@@ -1005,20 +952,23 @@ function obreQRAPestanya(pc) {
                         flex-direction: column;
                         align-items: center;
                         justify-content: center;
-                        min-height: 100vh;
-                        width: 100vw;
-                        box-sizing: border-box;
+                        background: #fff;
+                        padding: 0;
                     }
                     .qr-img {
-                        margin-bottom: 15px;
+                        margin-bottom: 10px;
                         background: #eaf4fa;
                         display: block;
+                        max-width: 180px;
+                        max-height: 180px;
+                        width: 100%;
+                        height: auto;
                     }
                     .qr-id {
-                        font-size: 2.2em;
+                        font-size: 2em;
                         font-weight: 700;
                         color: #217aa3;
-                        margin-bottom: 12px;
+                        margin-bottom: 8px;
                         letter-spacing: 1px;
                         text-align: center;
                         display: block;
@@ -1026,13 +976,13 @@ function obreQRAPestanya(pc) {
                     .qr-logo {
                         margin: 0;
                         display: block;
-                        max-width: 240px;
+                        max-width: 120px;
                         width: 100%;
                         height: auto;
                     }
                     .print-btn {
                         display: inline-block;
-                        margin-top: 22px;
+                        margin-top: 18px;
                         padding: 12px 32px;
                         font-size: 1.1em;
                         background: #2596be;
@@ -1048,47 +998,56 @@ function obreQRAPestanya(pc) {
                         background: #217aa3;
                     }
                     @media print {
+                        @page {
+                            size: landscape;
+                            margin: 0;
+                        }
                         html, body {
                             margin: 0 !important;
                             padding: 0 !important;
                             background: #fff !important;
                             width: 100vw !important;
                             height: 100vh !important;
+                            overflow: hidden !important;
+                        }
+                        .qr-rotated-wrapper {
+                            width: 100vh !important;
+                            height: 100vw !important;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
                         }
                         .qr-container {
-                            box-shadow: none !important;
-                            background: #fff !important;
-                            width: 100vw !important;
-                            min-height: 100vh !important;
-                            justify-content: center !important;
-                            align-items: center !important;
-                            page-break-inside: avoid !important;
-                            /* Escala tot el contingut per assegurar que capiga a una sola pàgina */
-                            transform: scale(0.75);
-                            transform-origin: top center;
+                            transform: rotate(-90deg) scale(0.7);
+                            transform-origin: center center;
                             max-width: 100vw !important;
                             max-height: 100vh !important;
                         }
                         .qr-img {
-                            max-width: 160px !important;
-                            max-height: 160px !important;
+                            max-width: 120px !important;
+                            max-height: 120px !important;
+                            margin-bottom: 4px !important;
                         }
                         .qr-logo {
-                            max-width: 120px !important;
+                            max-width: 80px !important;
+                            margin-top: 2px !important;
                         }
                         .qr-id {
-                            font-size: 1.1em !important;
+                            font-size: 0.9em !important;
+                            margin-bottom: 2px !important;
                         }
                         .print-btn { display: none !important; }
                     }
                 </style>
             </head>
             <body>
-                <div class="qr-container">
-                    <img class="qr-img" src="${qrDataUrl}" width="240" height="240" alt="QR PC ${pc.id}">
-                    <span class="qr-id">PC ${pc.id}/${mmYY}</span>
-                    <img class="qr-logo" src="images/logotmi-horitzontal.png" alt="Logo" />
-                    <button class="print-btn" onclick="window.print()">Imprimir</button>
+                <div class="qr-rotated-wrapper">
+                    <div class="qr-container">
+                        <img class="qr-img" src="${qrDataUrl}" width="180" height="180" alt="QR ${pc.id}">
+                        <span class="qr-id">${pc.id}/${mmYY}</span>
+                        <img class="qr-logo" src="images/logotmi-horitzontal.png" alt="Logo" />
+                        <button class="print-btn" onclick="window.print()">Imprimir</button>
+                    </div>
                 </div>
             </body>
             </html>
@@ -1096,6 +1055,9 @@ function obreQRAPestanya(pc) {
         win.document.close();
     }, 100);
 }
+
+// --- Inputs flotants (modals) --- 
+
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.float-input').forEach(inp => {
         const toggle = () => {
