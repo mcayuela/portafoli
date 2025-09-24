@@ -1252,13 +1252,31 @@ input[type="email"] {
 .rep-botons {
     display: flex;
     gap: 8px;
-    margin-bottom: 2px;
-    margin-left: auto;
+    margin-top: auto;
+    align-self: flex-end;
 }
 
 .rep-botons button {
-    margin-bottom: 0px !important;
-    margin-top: 5px !important;
+    background: none;
+    color: #217aa3;
+    border: 1.5px solid #2596be;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, border 0.18s;
+    box-shadow: none;
+    min-width: 32px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rep-botons button:hover {
+    background: #eaf4fa;
+    color: #217aa3;
+    border-color: #217aa3;
 }
 
 .rep-desc {
@@ -1468,3 +1486,82 @@ input[type="email"] {
         width: 100%;
     }
 }
+
+.botons-dispositiu {
+    display: flex;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.botons-dispositiu .btn-eliminar,
+.botons-dispositiu .btn-editar {
+    background: none;
+    color: #217aa3;
+    border: 1.5px solid #2596be;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 1.3em;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, border 0.18s;
+    box-shadow: none;
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.botons-dispositiu .btn-eliminar:hover,
+.botons-dispositiu .btn-editar:hover {
+    background: #eaf4fa;
+    color: #217aa3;
+    border-color: #217aa3;
+}
+
+#btn-editar-pc {
+    background: none;
+    color: #217aa3;
+    border: 1.5px solid #2596be;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, border 0.18s;
+    box-shadow: none;
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 50px;
+}
+
+#btn-editar-pc:hover {
+    background: #eaf4fa;
+    color: #217aa3;
+    border-color: #217aa3;
+}
+
+#btn-eliminar-pc {
+    background: rgb(190, 38, 38, 0.8);
+    color: #217aa3;
+    border: 1.5px solid #cc0000;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, border 0.18s;
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 50px;
+}
+
+#btn-eliminar-pc:hover {
+    background: rgb(255, 101, 101);
+    color: #217aa3;
+    border: 1.5px solid #bd3333;
+}
+

@@ -361,6 +361,41 @@ function renderBuscador() {
     // Tancar modal amb botó
     document.getElementById('modal-close-dispositiu').onclick = () => {
         document.getElementById('modal-afegir-dispositiu').style.display = 'none';
+        // Restaura el formulari a mode creació
+        const form = document.getElementById('form-afegir-dispositiu');
+        form.reset();
+        form.id.readOnly = false;
+        document.querySelector('#modal-content-dispositiu h3').textContent = "Afegir nou dispositiu";
+        // Torna a posar el submit original (creació)
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const nouDispositiu = {
+                id: fd.get('id'),
+                FQDN: fd.get('FQDN'),
+                model: fd.get('model'),
+                processador: fd.get('processador'),
+                ram: fd.get('ram'),
+                emmagatzematge: fd.get('emmagatzematge'),
+                tarjetaGrafica: fd.get('tarjetaGrafica'),
+                sistemaOperatiu: fd.get('sistemaOperatiu'),
+                dataAdquisicio: fd.get('dataAdquisicio'),
+                portatil: !!fd.get('portatil'),
+                usuari: fd.get('usuari'),
+                departament: fd.get('departament'),
+                reparacions: []
+            };
+            try {
+                await updateDoc(doc(db, "pcs", nouDispositiu.id.toString()), nouDispositiu)
+                    .catch(async () => {
+                        await setDoc(doc(db, "pcs", nouDispositiu.id.toString()), nouDispositiu);
+                    });
+                document.getElementById('modal-afegir-dispositiu').style.display = 'none';
+                main();
+            } catch (err) {
+                alert("Error afegint dispositiu: " + err.message);
+            }
+        };
     };
     document.getElementById('modal-close-altredispositiu').onclick = () => {
         document.getElementById('modal-afegir-altredispositiu').style.display = 'none';
@@ -577,8 +612,8 @@ function renderReparacions(reparacions = [], pcId) {
                     </div>
                     <div class="rep-desc">${descripcio}</div>
                     <div class="rep-botons">
-                        <button class="btn-editar" data-idx="${idx}">✏️</button>
-                        <button class="btn-eliminar" data-idx="${idx}">🗑️</button>
+                        <button class="btn-editar" data-idx="${idx}" title="Editar">✏️</button>
+                        <button class="btn-eliminar" data-idx="${idx}" title="Eliminar">🗑️</button>
                     </div>
                 </div>
             `;
@@ -675,7 +710,8 @@ async function main() {
     <!-- Columna dreta: Botons a dalt, reparacions a sota -->
     <div class="pc-dreta">
     <div class="pc-actions">
-        <button id="btn-eliminar-pc" class="btn-eliminar-pc">🗑️ Eliminar</button>
+        <button id="btn-editar-pc" title="Editar">✏️</button>
+        <button id="btn-eliminar-pc" class="btn-eliminar-pc">🗑️</button>
         <button id="btn-generar-qr" class="btn-guardar">Genera QR</button>
         <button id="btn-tornar" class="btn-tornar">Tornar a l'inventari</button>
     </div>
@@ -803,6 +839,65 @@ document.getElementById('form-reparacio').descripcio.value = reparacio.descripci
             content.style.display = '';
             content.innerHTML = "<p>Error carregant l'inventari.</p>";
         }
+    }
+
+    // --- EDITAR DISPOSITIU ---
+    const btnEditarPC = document.getElementById('btn-editar-pc');
+    if (btnEditarPC) {
+        btnEditarPC.onclick = async () => {
+            // Mostra el modal (ja està al DOM perquè el genera renderBuscador)
+            const modal = document.getElementById('modal-afegir-dispositiu');
+            modal.style.display = 'flex';
+
+            // Omple els camps amb les dades actuals del PC
+            const form = document.getElementById('form-afegir-dispositiu');
+            form.id.value = pc.id;
+            form.FQDN.value = pc.FQDN || '';
+            form.usuari.value = pc.usuari || '';
+            form.departament.value = pc.departament || '';
+            form.model.value = pc.model || '';
+            form.processador.value = pc.processador || '';
+            form.ram.value = pc.ram || '';
+            form.emmagatzematge.value = pc.emmagatzematge || '';
+            form.tarjetaGrafica.value = pc.tarjetaGrafica || '';
+            form.sistemaOperatiu.value = pc.sistemaOperatiu || '';
+            form.dataAdquisicio.value = pc.dataAdquisicio || '';
+            form.portatil.checked = !!pc.portatil;
+
+            // Bloqueja l'ID perquè no es pugui canviar
+            form.id.readOnly = true;
+
+            // Canvia el títol del modal
+            modal.querySelector('h3').textContent = "Editar dispositiu";
+
+            // Substitueix el submit per actualitzar (no crear)
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const fd = new FormData(form);
+                const nouDispositiu = {
+                    id: fd.get('id'),
+                    FQDN: fd.get('FQDN'),
+                    model: fd.get('model'),
+                    processador: fd.get('processador'),
+                    ram: fd.get('ram'),
+                    emmagatzematge: fd.get('emmagatzematge'),
+                    tarjetaGrafica: fd.get('tarjetaGrafica'),
+                    sistemaOperatiu: fd.get('sistemaOperatiu'),
+                    dataAdquisicio: fd.get('dataAdquisicio'),
+                    portatil: !!fd.get('portatil'),
+                    usuari: fd.get('usuari'),
+                    departament: fd.get('departament'),
+                    reparacions: pc.reparacions || []
+                };
+                try {
+                    await updateDoc(doc(db, "pcs", nouDispositiu.id.toString()), nouDispositiu);
+                    document.getElementById('modal-afegir-dispositiu').style.display = 'none';
+                    main();
+                } catch (err) {
+                    alert("Error editant dispositiu: " + err.message);
+                }
+            };
+        };
     }
 }
 
