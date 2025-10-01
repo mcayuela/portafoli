@@ -63,6 +63,7 @@ const iconaMonitor = `
 let lastData = null;
 let lastPage = 1;
 let lastFiltrat = null;
+let editantPC = false;
 
 function renderBuscador() {
     // Neteja el buscador i modal si ja existeixen
@@ -72,6 +73,8 @@ function renderBuscador() {
     if (oldModal) oldModal.remove();
     const oldModalAltres = document.getElementById('modal-afegir-altredispositiu');
     if (oldModalAltres) oldModalAltres.remove();
+    const oldModalEditar = document.getElementById('modal-editar-dispositiu');
+    if (oldModalEditar) oldModalEditar.remove();
 
     const buscadorHtml = `
         <div id="buscador-container" class="buscador-container">
@@ -160,6 +163,35 @@ function renderBuscador() {
                             <option value="Mòbil">Mòbil</option>
                         </select>
                     </label><br>
+                    <button type="submit" class="btn-guardar">Guardar</button>
+                </form>
+            </div>
+        </div>
+        <div id="modal-editar-dispositiu" class="modal-afegir-dispositiu" style="display:none;">
+            <div id="modal-content-editar-dispositiu">
+                <button id="modal-close-editar-dispositiu" title="Tancar" class="btn-close-svg">
+                    <svg width="32" height="32" viewBox="0 0 32 32">
+                        <line x1="8" y1="8" x2="24" y2="24" stroke="#2596be" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="24" y1="8" x2="8" y2="24" stroke="#2596be" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <h3 style="margin-top: 0; padding-top: 2px;">Editar dispositiu</h3>
+                <form id="form-editar-dispositiu">
+                    <label>ID:<br><input name="id" readonly></label><br>
+                    <label>FQDN:<br><input name="FQDN" required></label><br>
+                    <label>Usuari:<br><input name="usuari"></label><br>
+                    <label>Departament:<br><input name="departament"></label><br>
+                    <label>Model:<br><input name="model"></label><br>
+                    <label>Processador:<br><input name="processador"></label><br>
+                    <label>RAM:<br><input name="ram"></label><br>
+                    <label>Emmagatzematge:<br><input name="emmagatzematge"></label><br>
+                    <label>Tarjeta Gràfica:<br><input name="tarjetaGrafica"></label><br>
+                    <label>Sistema Operatiu:<br><input name="sistemaOperatiu"></label><br>
+                    <label>Data d'Adquisició:<br><input name="dataAdquisicio" type="date"></label><br>
+                    <label class="label-portatil">
+                        Portàtil:
+                        <input type="checkbox" name="portatil" class="checkbox-portatil">
+                    </label>
                     <button type="submit" class="btn-guardar">Guardar</button>
                 </form>
             </div>
@@ -360,8 +392,8 @@ function renderBuscador() {
 
     // Tancar modal amb botó
     document.getElementById('modal-close-dispositiu').onclick = () => {
-        document.getElementById('modal-afegir-dispositiu').style.display = 'none';
-        // Restaura el formulari a mode creació
+        const modal = document.getElementById('modal-afegir-dispositiu');
+        modal.style.display = 'none';
         const form = document.getElementById('form-afegir-dispositiu');
         form.reset();
         form.id.readOnly = false;
@@ -369,7 +401,7 @@ function renderBuscador() {
         // Torna a posar el submit original (creació)
         form.onsubmit = async (e) => {
             e.preventDefault();
-            const fd = new FormData(e.target);
+            const fd = new FormData(form);
             const nouDispositiu = {
                 id: fd.get('id'),
                 FQDN: fd.get('FQDN'),
@@ -390,7 +422,7 @@ function renderBuscador() {
                     .catch(async () => {
                         await setDoc(doc(db, "pcs", nouDispositiu.id.toString()), nouDispositiu);
                     });
-                document.getElementById('modal-afegir-dispositiu').style.display = 'none';
+                modal.style.display = 'none';
                 main();
             } catch (err) {
                 alert("Error afegint dispositiu: " + err.message);
@@ -399,6 +431,9 @@ function renderBuscador() {
     };
     document.getElementById('modal-close-altredispositiu').onclick = () => {
         document.getElementById('modal-afegir-altredispositiu').style.display = 'none';
+    };
+    document.getElementById('modal-close-editar-dispositiu').onclick = () => {
+        document.getElementById('modal-editar-dispositiu').style.display = 'none';
     };
 
     // Tancar modal clicant fora
@@ -410,6 +445,11 @@ function renderBuscador() {
     document.getElementById('modal-afegir-altredispositiu').onclick = (e) => {
         if (e.target.id === 'modal-afegir-altredispositiu') {
             document.getElementById('modal-afegir-altredispositiu').style.display = 'none';
+        }
+    };
+    document.getElementById('modal-editar-dispositiu').onclick = (e) => {
+        if (e.target.id === 'modal-editar-dispositiu') {
+            document.getElementById('modal-editar-dispositiu').style.display = 'none';
         }
     };
 
@@ -435,12 +475,11 @@ function renderBuscador() {
         try {
             await updateDoc(doc(db, "pcs", nouDispositiu.id.toString()), nouDispositiu)
                 .catch(async () => {
-                    // Si no existeix, crea'l
                     await setDoc(doc(db, "pcs", nouDispositiu.id.toString()), nouDispositiu);
                 });
             alert("Dispositiu afegit correctament!");
             document.getElementById('modal-afegir-dispositiu').style.display = 'none';
-            main();
+            main(); // Llama a la función main para refrescar la lista de dispositius
         } catch (err) {
             alert("Error afegint dispositiu: " + err.message);
         }
@@ -457,13 +496,12 @@ function renderBuscador() {
             departament: fd.get('departament'),
             anyAdquisicio: fd.get('anyAdquisicio'),
             tipus: tipus ? [tipus] : [],
-            // Pots afegir més camps si vols
         };
         try {
             await setDoc(doc(db, "altresDispositius", Date.now().toString()), nouDispositiu);
             alert("Dispositiu afegit correctament!");
             document.getElementById('modal-afegir-altredispositiu').style.display = 'none';
-            main();
+            main(); // Refresh the list of devices
         } catch (err) {
             alert("Error afegint dispositiu: " + err.message);
         }
@@ -498,6 +536,7 @@ function renderBuscador() {
     };
 }
 
+// Filtra la data segons el valor introduït a l'input
 function filtraData(data, valor) {
     valor = valor.trim().toLowerCase();
     if (!valor) return data;
@@ -507,6 +546,7 @@ function filtraData(data, valor) {
     );
 }
 
+// Renderitza la llista de PCs amb paginació
 function renderLlistat(data, paginaActual) {
     renderBuscador();
     const buscadorInput = document.getElementById('buscador');
@@ -597,7 +637,7 @@ async function afegirReparacio(pcId, reparacio) {
 
 // --- Render detall PC amb reparacions ---
 function renderReparacions(reparacions = [], pcId) {
-    let html = `<div class="reparacions-container"><h3>Reparacions / Canvis</h3>`;
+    let html = `<div class="reparacions-container"><h3>Notes</h3>`;
     if (reparacions && reparacions.length > 0) {
         html += reparacions.map((r, idx) => {
             // Mostra només la primera línia del textarea com a títol (màxim 30 caràcters)
@@ -619,7 +659,7 @@ function renderReparacions(reparacions = [], pcId) {
             `;
         }).join('');
     } else {
-        html += `<p>No hi ha reparacions/canvis registrats.</p>`;
+        html += `<p>No hi ha notes registrades.</p>`;
     }
     html += `<button id="btn-afegir-reparacio" class="btn-afegir">+ Afegir</button></div>`;
 
@@ -691,21 +731,15 @@ async function main() {
 <div class="pc-detall-grid">
     <!-- Info PC (esquerra) -->
     <div class="pc-info">
-    <div class="pc-icona-titol">
-        <span class="pc-titol">ID: ${pc.id}</span>
-        ${getIconaDispositiu(pc.tipus || [])}
-    </div>
-    <p><strong>FQDN:</strong> ${pc.FQDN || ''}</p>
-    <p><strong>Model:</strong> ${pc.model || ''}</p>
-    <p><strong>Processador:</strong> ${pc.processador || ''}</p>
-    <p><strong>RAM:</strong> ${pc.ram || ''}</p>
-    <p><strong>Emmagatzematge:</strong> ${pc.emmagatzematge || ''}</p>
-    <p><strong>Tarjeta Gràfica:</strong> ${pc.tarjetaGrafica || ''}</p>
-    <p><strong>Sistema Operatiu:</strong> ${pc.sistemaOperatiu || ''}</p>
-    <p><strong>Data d'Adquisició:</strong> ${pc.dataAdquisicio || ''}</p>
-    <p><strong>Portàtil:</strong> ${pc.portatil ? 'Sí' : 'No'}</p>
-    <p><strong>Usuari:</strong> ${pc.usuari || ''}</p>
-    <p><strong>Departament:</strong> ${pc.departament || ''}</p>
+    <form id="form-editar-pc">
+        ${renderPCInfo(pc, editantPC)}
+        ${editantPC ? `
+            <div style="margin-top:12px;">
+                <button type="submit" id="btn-guardar-pc" class="btn-guardar" style="margin-right:8px;">💾</button>
+                <button type="button" id="btn-cancelar-editar-pc" class="btn-tornar">❌</button>
+            </div>
+        ` : ''}
+    </form>
     </div>
     <!-- Columna dreta: Botons a dalt, reparacions a sota -->
     <div class="pc-dreta">
@@ -733,18 +767,18 @@ async function main() {
                 `;
                 const btnEliminar = document.getElementById('btn-eliminar-pc');
                 if (btnEliminar) {
-                btnEliminar.onclick = () => {
-                    document.getElementById('modal-eliminar-pc').style.display = 'flex';
-                    const btnConfirma = document.getElementById('confirmar-eliminar-pc');
-                    const btnCancela = document.getElementById('cancelar-eliminar-pc');
-                    if (btnCancela) btnCancela.onclick = () => {
-                    document.getElementById('modal-eliminar-pc').style.display = 'none';
+                    btnEliminar.onclick = () => {
+                        document.getElementById('modal-eliminar-pc').style.display = 'flex';
+                        const btnConfirma = document.getElementById('confirmar-eliminar-pc');
+                        const btnCancela = document.getElementById('cancelar-eliminar-pc');
+                        if (btnCancela) btnCancela.onclick = () => {
+                            document.getElementById('modal-eliminar-pc').style.display = 'none';
+                        };
+                        if (btnConfirma) btnConfirma.onclick = async () => {
+                            await deleteDoc(doc(db, "pcs", pc.id.toString()));
+                            window.location.href = "index.html";
+                        };
                     };
-                    if (btnConfirma) btnConfirma.onclick = async () => {
-                    await deleteDoc(doc(db, "pcs", pc.id.toString()));
-                    window.location.href = "index.html";
-                    };
-                };
                 }
 
                 const btnQR = document.getElementById('btn-generar-qr');
@@ -845,13 +879,12 @@ document.getElementById('form-reparacio').descripcio.value = reparacio.descripci
     const btnEditarPC = document.getElementById('btn-editar-pc');
     if (btnEditarPC) {
         btnEditarPC.onclick = async () => {
-            // Mostra el modal (ja està al DOM perquè el genera renderBuscador)
             const modal = document.getElementById('modal-afegir-dispositiu');
-            modal.style.display = 'flex';
+            const form = document.getElementById('form-afegir-dispositiu');
+            if (!modal || !form) return;
 
             // Omple els camps amb les dades actuals del PC
-            const form = document.getElementById('form-afegir-dispositiu');
-            form.id.value = pc.id;
+            form.id.value = pc.id || '';
             form.FQDN.value = pc.FQDN || '';
             form.usuari.value = pc.usuari || '';
             form.departament.value = pc.departament || '';
@@ -864,11 +897,14 @@ document.getElementById('form-reparacio').descripcio.value = reparacio.descripci
             form.dataAdquisicio.value = pc.dataAdquisicio || '';
             form.portatil.checked = !!pc.portatil;
 
-            // Bloqueja l'ID perquè no es pugui canviar
+            // Bloqueja l'ID
             form.id.readOnly = true;
 
             // Canvia el títol del modal
-            modal.querySelector('h3').textContent = "Editar dispositiu";
+            document.querySelector('#modal-content-dispositiu h3').textContent = "Editar dispositiu";
+
+            // Mostra el modal
+            modal.style.display = 'flex';
 
             // Substitueix el submit per actualitzar (no crear)
             form.onsubmit = async (e) => {
@@ -891,12 +927,51 @@ document.getElementById('form-reparacio').descripcio.value = reparacio.descripci
                 };
                 try {
                     await updateDoc(doc(db, "pcs", nouDispositiu.id.toString()), nouDispositiu);
-                    document.getElementById('modal-afegir-dispositiu').style.display = 'none';
+                    modal.style.display = 'none';
                     main();
                 } catch (err) {
                     alert("Error editant dispositiu: " + err.message);
                 }
             };
+        };
+    }
+
+    // Tancar modal d'edició
+    const btnCloseEditar = document.getElementById('modal-close-editar-dispositiu');
+    if (btnCloseEditar) {
+        btnCloseEditar.onclick = () => {
+            document.getElementById('modal-editar-dispositiu').style.display = 'none';
+        };
+    }
+
+    // Guardar canvis d'edició
+    const formEditar = document.getElementById('form-editar-dispositiu');
+    if (formEditar) {
+        formEditar.onsubmit = async (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const nouDispositiu = {
+                id: fd.get('id'),
+                FQDN: fd.get('FQDN'),
+                model: fd.get('model'),
+                processador: fd.get('processador'),
+                ram: fd.get('ram'),
+                emmagatzematge: fd.get('emmagatzematge'),
+                tarjetaGrafica: fd.get('tarjetaGrafica'),
+                sistemaOperatiu: fd.get('sistemaOperatiu'),
+                dataAdquisicio: fd.get('dataAdquisicio'),
+                portatil: !!fd.get('portatil'),
+                usuari: fd.get('usuari'),
+                departament: fd.get('departament'),
+                reparacions: pc.reparacions || []
+            };
+            try {
+                await updateDoc(doc(db, "pcs", nouDispositiu.id.toString()), nouDispositiu);
+                document.getElementById('modal-editar-dispositiu').style.display = 'none';
+                main();
+            } catch (err) {
+                alert("Error editant dispositiu: " + err.message);
+            }
         };
     }
 }
@@ -921,7 +996,7 @@ function formatDataAdqMMYY(iso) {
 }
 
 const qrLogoImg = new Image();
-qrLogoImg.src = 'logotmi-horitzontal.jpg'; // ajusta ruta si cal
+qrLogoImg.src = 'images/logotmi-horitzontal.png'; // ajusta ruta si cal
 
 function generaQRDispositiu(pc, destEl) {
     destEl.innerHTML = '';
@@ -1154,15 +1229,148 @@ function obreQRAPestanya(pc) {
 // --- Inputs flotants (modals) --- 
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.float-input').forEach(inp => {
-        const toggle = () => {
-            inp.classList.toggle('filled', inp.value.trim() !== '');
-        };
-        inp.addEventListener('input', toggle);
-        inp.addEventListener('blur', toggle);
-        // Inicial (autofill)
-        toggle();
-    });
+    renderBuscador();
+    main();
+
+    // Obrir modal de selecció quan cliques "+ Afegir PC"
+    setTimeout(() => {
+        const btnAfegirPC = document.getElementById('btn-afegir-pc');
+        if (btnAfegirPC) {
+            btnAfegirPC.onclick = () => {
+                document.getElementById('modal-seleccio-dispositiu').style.display = 'flex';
+            };
+        }
+
+        // Tancar modal de selecció
+        const btnCloseSeleccio = document.getElementById('modal-close-seleccio-dispositiu');
+        if (btnCloseSeleccio) {
+            btnCloseSeleccio.onclick = () => {
+                document.getElementById('modal-seleccio-dispositiu').style.display = 'none';
+            };
+        }
+
+        // Obrir modal de PC
+        const btnModalPC = document.getElementById('btn-modal-pc');
+        if (btnModalPC) {
+            btnModalPC.onclick = () => {
+                document.getElementById('modal-seleccio-dispositiu').style.display = 'none';
+                document.getElementById('modal-afegir-dispositiu').style.display = 'flex';
+            };
+        }
+
+        // Obrir modal d'altres dispositius (Monitor, Mòbil, Impressora, Altres)
+        ['btn-modal-monitor', 'btn-modal-mobil', 'btn-modal-impresora', 'btn-modal-altre'].forEach(idBtn => {
+            const btn = document.getElementById(idBtn);
+            if (btn) {
+                btn.onclick = () => {
+                    document.getElementById('modal-seleccio-dispositiu').style.display = 'none';
+                    document.getElementById('modal-afegir-altredispositiu').style.display = 'flex';
+                };
+            }
+        });
+    }, 200);
 });
 
-main();
+function renderPCInfo(pc, editant) {
+    if (!editant) {
+        return `
+        <div class="pc-icona-titol">
+            <span class="pc-titol">ID: ${pc.id}</span>
+            ${getIconaDispositiu(pc.tipus || [])}
+        </div>
+        <p><strong>FQDN:</strong> ${pc.FQDN || ''}</p>
+        <p><strong>Model:</strong> ${pc.model || ''}</p>
+        <p><strong>Processador:</strong> ${pc.processador || ''}</p>
+        <p><strong>RAM:</strong> ${pc.ram || ''}</p>
+        <p><strong>Emmagatzematge:</strong> ${pc.emmagatzematge || ''}</p>
+        <p><strong>Tarjeta Gràfica:</strong> ${pc.tarjetaGrafica || ''}</p>
+        <p><strong>Sistema Operatiu:</strong> ${pc.sistemaOperatiu || ''}</p>
+        <p><strong>Data d'Adquisició:</strong> ${pc.dataAdquisicio || ''}</p>
+        <p><strong>Portàtil:</strong> ${pc.portatil ? 'Sí' : 'No'}</p>
+        <p><strong>Usuari:</strong> ${pc.usuari || ''}</p>
+        <p><strong>Departament:</strong> ${pc.departament || ''}</p>
+        `;
+    } else {
+        return `
+        <div class="pc-icona-titol">
+            <span class="pc-titol">ID: <input name="id" value="${pc.id}" readonly style="width:80px"></span>
+            ${getIconaDispositiu(pc.tipus || [])}
+        </div>
+        <p><strong>FQDN:</strong> <input name="FQDN" value="${pc.FQDN || ''}" style="width:180px"></p>
+        <p><strong>Model:</strong> <input name="model" value="${pc.model || ''}" style="width:180px"></p>
+        <p><strong>Processador:</strong> <input name="processador" value="${pc.processador || ''}" style="width:180px"></p>
+        <p><strong>RAM:</strong> <input name="ram" value="${pc.ram || ''}" style="width:100px"></p>
+        <p><strong>Emmagatzematge:</strong> <input name="emmagatzematge" value="${pc.emmagatzematge || ''}" style="width:100px"></p>
+        <p><strong>Tarjeta Gràfica:</strong> <input name="tarjetaGrafica" value="${pc.tarjetaGrafica || ''}" style="width:180px"></p>
+        <p><strong>Sistema Operatiu:</strong> <input name="sistemaOperatiu" value="${pc.sistemaOperatiu || ''}" style="width:120px"></p>
+        <p><strong>Data d'Adquisició:</strong> <input name="dataAdquisicio" type="date" value="${pc.dataAdquisicio || ''}" style="width:130px"></p>
+        <p><strong>Portàtil:</strong> <input name="portatil" type="checkbox" ${pc.portatil ? 'checked' : ''}></p>
+        <p><strong>Usuari:</strong> <input name="usuari" value="${pc.usuari || ''}" style="width:120px"></p>
+        <p><strong>Departament:</strong> <input name="departament" value="${pc.departament || ''}" style="width:120px"></p>
+        `;
+    }
+}
+
+// Modal confirmació eliminar (nova versió)
+if (!document.getElementById('modal-eliminar-pc')) {
+    const modalEliminar = document.createElement('div');
+    modalEliminar.id = 'modal-eliminar-pc';
+    modalEliminar.className = 'modal-eliminar-pc';
+    modalEliminar.style.display = 'none';
+    modalEliminar.innerHTML = `
+        <div class="modal-eliminar-content">
+            <h3>Segur que vols eliminar aquest PC?</h3>
+            <p>Aquesta acció no es pot desfer.</p>
+            <button id="confirmar-eliminar-pc" class="btn-eliminar-pc">Sí, eliminar</button>
+            <button id="cancelar-eliminar-pc" class="btn-tornar">Cancel·lar</button>
+        </div>
+    `;
+    document.body.appendChild(modalEliminar);
+}
+
+// --- Modal selecció dispositiu ---
+function creaModalSeleccioDispositiu() {
+    if (document.getElementById('modal-seleccio-dispositiu')) return; // Ja existeix
+
+    const modal = document.createElement('div');
+    modal.id = 'modal-seleccio-dispositiu';
+    modal.className = 'modal-afegir-dispositiu';
+    modal.style.display = 'none';
+    modal.innerHTML = `
+        <div id="modal-content-seleccio-dispositiu">
+            <button id="modal-close-seleccio-dispositiu" title="Tancar" class="btn-close-svg" style="position:absolute;top:18px;right:22px;">
+                <svg width="32" height="32" viewBox="0 0 32 32">
+                    <line x1="8" y1="8" x2="24" y2="24" stroke="#2596be" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="24" y1="8" x2="8" y2="24" stroke="#2596be" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <h3 style="margin-top: 0; padding-top: 2px;">Selecciona quin dispositiu vols afegir</h3>
+            <div style="display:flex; flex-direction:column; gap:18px; margin-top:32px;">
+                <button id="btn-modal-pc" class="btn-afegir-dispositiu" style="font-size:1.2em;">PC</button>
+                <button id="btn-modal-monitor" class="btn-afegir-dispositiu" style="font-size:1.2em;">Monitor</button>
+                <button id="btn-modal-mobil" class="btn-afegir-dispositiu" style="font-size:1.2em;">Mòbil</button>
+                <button id="btn-modal-impresora" class="btn-afegir-dispositiu" style="font-size:1.2em;">Impressora</button>
+                <button id="btn-modal-altre" class="btn-afegir-dispositiu" style="font-size:1.2em;">Altres</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Tancar modal
+    document.getElementById('modal-close-seleccio-dispositiu').onclick = () => {
+        modal.style.display = 'none';
+    };
+
+    // Obrir modal de PC
+    document.getElementById('btn-modal-pc').onclick = () => {
+        modal.style.display = 'none';
+        document.getElementById('modal-afegir-dispositiu').style.display = 'flex';
+    };
+    // Obrir modal d'altres dispositius (per a Monitor, Mòbil, Impressora, Altres)
+    ['btn-modal-monitor', 'btn-modal-mobil', 'btn-modal-impresora', 'btn-modal-altre'].forEach(idBtn => {
+        document.getElementById(idBtn).onclick = () => {
+            modal.style.display = 'none';
+            document.getElementById('modal-afegir-altredispositiu').style.display = 'flex';
+        };
+    });
+}
