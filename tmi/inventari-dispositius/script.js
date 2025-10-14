@@ -123,6 +123,8 @@ async function carregarDades() {
         if (resultats) {
             resultats.innerHTML = '<div>Error carregant dades de la base de dades.</div>';
         }
+    } finally {
+        amagarLoader();
     }
 }
 
@@ -939,6 +941,28 @@ async function afegirNouDispositiu(tipus, modal) {
         alert(`Error afegint el dispositiu: ${error.message}`);
     }
 }
+
+// Loader global
+// filepath: c:\Users\itpractice\OneDrive - TECNICAS MECANICAS ILERDENSES SL\Documentos\GitHub\portafoli\tmi\inventari-dispositius\script.js
+
+// Mostra el loader quan la pàgina comença a carregar
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('global-loader');
+    if (loader) loader.classList.remove('hidden');
+});
+
+// Amaga el loader quan tot està carregat (després de carregarDades)
+function mostrarLoader() {
+    const loader = document.getElementById('global-loader');
+    if (loader) loader.classList.remove('hidden');
+}
+function amagarLoader() {
+    const loader = document.getElementById('global-loader');
+    if (loader) loader.classList.add('hidden');
+}
+
+// Crida amagarLoader() just després de carregar les dades correctament o si hi ha error
+// Exemple: al final de carregarDades()
 
 // Inicialitza l'aplicació
 document.addEventListener('DOMContentLoaded', () => {
