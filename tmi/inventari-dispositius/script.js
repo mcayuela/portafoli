@@ -1024,7 +1024,8 @@ function generaQRDispositiu(pc, destEl) {
     const id = pc.id;
     const mmYY = formatDataAdqMMYY(pc.dataAdquisicio);
     const textVisual = `${id}/${mmYY}`;
-    const url = `${window.location.origin}${window.location.pathname}dispositiu.html?id=${id}`;
+    // Torna a la URL original:
+    const url = `https://mcayuela.com/tmi/inventari-dispositius/dispositiu.html?id=${pc.id}`;
 
     const tmpDiv = document.createElement('div');
     new QRCode(tmpDiv, {
@@ -1089,6 +1090,7 @@ function generaQRDispositiu(pc, destEl) {
 
 function obreQRAPestanya(pc) {
     const mmYY = formatDataAdqMMYY(pc.dataAdquisicio);
+    // URL normal com estava abans
     const url = `https://mcayuela.com/tmi/inventari-dispositius/dispositiu.html?id=${pc.id}`;
     
     // Obre una nova pestanya amb el QR per imprimir
@@ -1189,8 +1191,9 @@ function obreQRAPestanya(pc) {
                         document.getElementById('qr-code').innerHTML = qr.createImgTag(6, 0);
                     } catch (error) {
                         console.error('Error generant QR:', error);
+                        // Fallback amb URL encara més curta
                         var qr = qrcode(0, 'L');
-                        qr.addData('${window.location.origin}/tmi/inventari-dispositius/?id=${pc.id}');
+                        qr.addData('https://mcayuela.com/tmi/inventari-dispositius/${pc.id}');
                         qr.make();
                         document.getElementById('qr-code').innerHTML = qr.createImgTag(6, 0);
                     }
