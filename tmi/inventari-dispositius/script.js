@@ -29,13 +29,33 @@ const resultats = document.getElementById('resultats');
 const contadorDispositius = document.querySelector('.contador-dispositius');
 let modeEditor = false;
 
+function mostrarLoader() {
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        loader.classList.remove('hidden');
+    }
+}
+
+function amagarLoader() {
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        loader.classList.add('hidden');
+    }
+}
+
+// Mostrar loader quan carrega la pàgina
+document.addEventListener('DOMContentLoaded', () => {
+    mostrarLoader();
+});
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
         // Usuario autenticado
         console.log("Usuario autenticado:", user.email);
+        carregarDades(); // CRIDA carregarDades() AQUÍ
     } else {
         // Usuario no autenticado, redirigir al login
+        amagarLoader(); // AFEGEIX AIXÒ
         window.location.href = "login.html";
     }
 });
@@ -263,6 +283,7 @@ function mostrarResultats(filtrats, pagina = 1) {
             <td>${dataFormatada}</td>
             ${modeEditor ? `<td class="accions-cell">
                 <button class="btn-editar" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" title="Editar dispositiu">✎</button>
+                <button class="btn-imprimir" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" data-model="${item.model || ''}" data-data="${item.dataAdquisicio || ''}" title="Imprimir etiqueta">🖨️</button>
                 <button class="btn-borrar" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" title="Borrar dispositiu">×</button>
             </td>` : ''}
         </tr>`;
@@ -285,6 +306,20 @@ function mostrarResultats(filtrats, pagina = 1) {
                 const id = this.dataset.id;
                 const tipus = this.dataset.tipus;
                 editarDispositiu(id, tipus);
+            });
+        });
+
+        // EVENT LISTENER PER AL BOTÓ D'IMPRESSIÓ - AFEGEIX AIXÒ:
+        resultats.querySelectorAll('.btn-imprimir').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const dispositiu = {
+                    id: this.dataset.id,
+                    tipusDispositiu: this.dataset.tipus,
+                    model: this.dataset.model,
+                    dataAdquisicio: this.dataset.data
+                };
+                
+                obreQRAPestanya(dispositiu);
             });
         });
     }
@@ -447,8 +482,20 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
                 <input type="text" id="edit-fqdn" value="${dades.FQDN || ''}" required>
             </div>
             <div class="camp-edicio">
+                <label for="edit-usuari">Usuari:</label>
+                <input type="text" id="edit-usuari" value="${dades.usuari || ''}">
+            </div>
+            <div class="camp-edicio">
                 <label for="edit-model">Model:</label>
                 <input type="text" id="edit-model" value="${dades.model || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-processador">Processador:</label>
+                <input type="text" id="edit-processador" value="${dades.processador || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-targeta-grafica">Targeta Gràfica:</label>
+                <input type="text" id="edit-targeta-grafica" value="${dades.targetaGrafica || ''}">
             </div>
             <div class="camp-edicio">
                 <label for="edit-so">Sistema Operatiu:</label>
@@ -577,7 +624,10 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
             dadesActualitzades = {
                 id: document.getElementById('edit-id').value,
                 FQDN: document.getElementById('edit-fqdn').value,
+                usuari: document.getElementById('edit-usuari').value,
                 model: document.getElementById('edit-model').value,
+                processador: document.getElementById('edit-processador').value,
+                targetaGrafica: document.getElementById('edit-targeta-grafica').value,
                 sistemaOperatiu: document.getElementById('edit-so').value,
                 memoriaRAM: document.getElementById('edit-ram').value,
                 emmagatzematge: document.getElementById('edit-emmagatzematge').value,
@@ -705,8 +755,20 @@ function mostrarModalAfegirDispositiu(tipus) {
                 <input type="text" id="add-fqdn" required>
             </div>
             <div class="camp-edicio">
+                <label for="add-usuari">Usuari:</label>
+                <input type="text" id="add-usuari">
+            </div>
+            <div class="camp-edicio">
                 <label for="add-model">Model:</label>
                 <input type="text" id="add-model">
+            </div>
+            <div class="camp-edicio">
+                <label for="add-processador">Processador:</label>
+                <input type="text" id="add-processador">
+            </div>
+            <div class="camp-edicio">
+                <label for="add-targeta-grafica">Targeta Gràfica:</label>
+                <input type="text" id="add-targeta-grafica">
             </div>
             <div class="camp-edicio">
                 <label for="add-so">Sistema Operatiu:</label>
@@ -875,7 +937,10 @@ async function afegirNouDispositiu(tipus, modal) {
             nouDispositiu = {
                 id: document.getElementById('add-id').value,
                 FQDN: document.getElementById('add-fqdn').value,
+                usuari: document.getElementById('add-usuari').value,
                 model: document.getElementById('add-model').value,
+                processador: document.getElementById('add-processador').value,
+                targetaGrafica: document.getElementById('add-targeta-grafica').value,
                 sistemaOperatiu: document.getElementById('add-so').value,
                 memoriaRAM: document.getElementById('add-ram').value,
                 emmagatzematge: document.getElementById('add-emmagatzematge').value,
@@ -935,36 +1000,204 @@ async function afegirNouDispositiu(tipus, modal) {
         
         // Recarrega les dades
         await carregarDades();
-        
     } catch (error) {
         console.error('Error afegint dispositiu:', error);
         alert(`Error afegint el dispositiu: ${error.message}`);
     }
 }
 
-// Loader global
-// filepath: c:\Users\itpractice\OneDrive - TECNICAS MECANICAS ILERDENSES SL\Documentos\GitHub\portafoli\tmi\inventari-dispositius\script.js
-
-// Mostra el loader quan la pàgina comença a carregar
-document.addEventListener('DOMContentLoaded', () => {
-    const loader = document.getElementById('global-loader');
-    if (loader) loader.classList.remove('hidden');
-});
-
-// Amaga el loader quan tot està carregat (després de carregarDades)
-function mostrarLoader() {
-    const loader = document.getElementById('global-loader');
-    if (loader) loader.classList.remove('hidden');
-}
-function amagarLoader() {
-    const loader = document.getElementById('global-loader');
-    if (loader) loader.classList.add('hidden');
+// Funcions per a la impressió d'etiquetes QR
+function formatDataAdqMMYY(dataString) {
+    if (!dataString) return 'N/A';
+    try {
+        const data = new Date(dataString);
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const any = String(data.getFullYear()).slice(-2);
+        return `${mes}${any}`;
+    } catch (e) {
+        return 'N/A';
+    }
 }
 
-// Crida amagarLoader() just després de carregar les dades correctament o si hi ha error
-// Exemple: al final de carregarDades()
+function generaQRDispositiu(pc, destEl) {
+    destEl.innerHTML = '';
+    const id = pc.id;
+    const mmYY = formatDataAdqMMYY(pc.dataAdquisicio);
+    const textVisual = `${id}/${mmYY}`;
+    const url = `${window.location.origin}${window.location.pathname}dispositiu.html?id=${id}`;
 
-// Inicialitza l'aplicació
-document.addEventListener('DOMContentLoaded', () => {
-    carregarDades();
-});
+    const tmpDiv = document.createElement('div');
+    new QRCode(tmpDiv, {
+        text: url,
+        width: 240,
+        height: 240,
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    setTimeout(() => {
+        const qrImg = tmpDiv.querySelector('img') || tmpDiv.querySelector('canvas');
+        const qrSize = 240;
+        const pad = 20;
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Logo dimensions
+        let logoWidth = qrSize;
+        let logoHeight = 60;
+
+        // Text metrics
+        const font = 'bold 32px Arial';
+        ctx.font = font;
+        const tw = ctx.measureText(textVisual).width;
+        const th = 40;
+
+        const totalW = qrSize + pad * 2;
+        const totalH = (qrSize + pad * 2) + th + logoHeight + pad;
+        canvas.width = totalW;
+        canvas.height = totalH;
+
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0,0,totalW,totalH);
+
+        // Draw QR
+        if (qrImg.tagName === 'IMG') {
+            ctx.drawImage(qrImg, pad, pad, qrSize, qrSize);
+        } else {
+            ctx.drawImage(qrImg, pad, pad);
+        }
+
+        // Text
+        ctx.font = font;
+        ctx.fillStyle = '#000';
+        const tx = (totalW - tw)/2;
+        const ty = qrSize + pad;
+        ctx.fillText(textVisual, tx, ty);
+
+        // Logo rectangle (simulat)
+        const ly = ty + th;
+        ctx.fillStyle = '#2596be';
+        ctx.fillRect(pad, ly, logoWidth, logoHeight);
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'qr-dispositiu-wrapper';
+        wrapper.appendChild(canvas);
+
+        destEl.appendChild(wrapper);
+    },50);
+}
+
+function obreQRAPestanya(pc) {
+    const mmYY = formatDataAdqMMYY(pc.dataAdquisicio);
+    const url = `https://mcayuela.com/tmi/inventari-dispositius/dispositiu.html?id=${pc.id}`;
+    
+    // Obre una nova pestanya amb el QR per imprimir
+    const win = window.open('', '_blank');
+    win.document.write(`
+        <html>
+        <head>
+            <title>QR ${pc.id}</title>
+            <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+            <style>
+                html, body {
+                    height: 100%;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: #fff !important;
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    overflow: hidden;
+                }
+                body {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 100vw;
+                    height: 100vh;
+                }
+                .qr-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    background: #fff;
+                    padding: 20px;
+                }
+                #qr-code {
+                    margin-bottom: 10px;
+                    margin-top: 20px;
+                }
+                .qr-id {
+                    font-size: 2em;
+                    font-weight: 700;
+                    color: #217aa3;
+                    margin-bottom: 10px;
+                    letter-spacing: 1px;
+                    text-align: center;
+                }
+                .qr-logo {
+                    margin-bottom: 20px;
+                    max-width: 120px;
+                    height: auto;
+                }
+                .print-btn {
+                    margin-top: 18px;
+                    padding: 12px 32px;
+                    font-size: 1.1em;
+                    background: #2596be;
+                    color: #fff;
+                    border: none;
+                    border-radius: 7px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: background 0.2s;
+                }
+                .print-btn:hover {
+                    background: #217aa3;
+                }
+                @media print {
+                    @page {
+                        size: landscape;
+                        margin: 0;
+                    }
+                    .print-btn { 
+                        display: none !important; 
+                    }
+                    .qr-container {
+                        transform: rotate(-90deg) scale(0.8);
+                        transform-origin: center center;
+                    }
+                    .qr-logo {
+                        max-width: 200px !important;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="qr-container">
+                <div id="qr-code"></div>
+                <div class="qr-id">${pc.id}/${mmYY}</div>
+                <img class="qr-logo" src="images/logotmi-horitzontal.png" alt="Logo TMI" />
+                <button class="print-btn" onclick="window.print()">Imprimir</button>
+            </div>
+            <script>
+                window.onload = function() {
+                    try {
+                        var qr = qrcode(0, 'L');
+                        qr.addData('${url}');
+                        qr.make();
+                        document.getElementById('qr-code').innerHTML = qr.createImgTag(6, 0);
+                    } catch (error) {
+                        console.error('Error generant QR:', error);
+                        var qr = qrcode(0, 'L');
+                        qr.addData('${window.location.origin}/tmi/inventari-dispositius/?id=${pc.id}');
+                        qr.make();
+                        document.getElementById('qr-code').innerHTML = qr.createImgTag(6, 0);
+                    }
+                }
+            </script>
+        </body>
+        </html>
+    `);
+    win.document.close();
+}

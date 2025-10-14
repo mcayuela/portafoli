@@ -17,33 +17,57 @@ let dispositiuActual = null;
 let tipusActual = '';
 
 // Elements del DOM
-const loading = document.getElementById('loading');
-const content = document.getElementById('content');
-const error = document.getElementById('error');
-const dispositiuTitol = document.getElementById('dispositiu-titol');
-const llistaNotes = document.getElementById('llista-notes');
-const noNotes = document.getElementById('no-notes');
-const btnAfegirNota = document.getElementById('btn-afegir-nota');
-const modalAfegirNota = document.getElementById('modal-afegir-nota');
-const formNota = document.getElementById('form-nota');
-const btnCancelarNota = document.getElementById('btn-cancelar-nota');
-const templateNota = document.getElementById('template-nota');
+let globalLoader, loading, content, error, dispositiuTitol, llistaNotes, noNotes;
+let btnAfegirNota, modalAfegirNota, formNota, btnCancelarNota, templateNota;
 
-// Comprova autenticació
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        console.log("Usuario autenticado:", user.email);
-        carregarDispositiu();
-    } else {
-        window.location.href = "login.html";
+// FUNCIONS DEL LOADER
+function mostrarLoader() {
+    if (globalLoader) {
+        globalLoader.classList.remove('hidden');
     }
-});
+}
 
-// Event listeners
-btnAfegirNota.addEventListener('click', mostrarModalAfegirNota);
-btnCancelarNota.addEventListener('click', tancarModalNota);
-formNota.addEventListener('submit', handleSubmitNota);
-modalAfegirNota.addEventListener('click', handleClickForaModal);
+function amagarLoader() {
+    if (globalLoader) {
+        globalLoader.classList.add('hidden');
+    }
+}
+
+// Inicialització quan el DOM està carregat
+document.addEventListener('DOMContentLoaded', () => {
+    // Obtenir referències dels elements DOM
+    globalLoader = document.getElementById('global-loader');
+    loading = document.getElementById('loading');
+    content = document.getElementById('content');
+    error = document.getElementById('error');
+    dispositiuTitol = document.getElementById('dispositiu-titol');
+    llistaNotes = document.getElementById('llista-notes');
+    noNotes = document.getElementById('no-notes');
+    btnAfegirNota = document.getElementById('btn-afegir-nota');
+    modalAfegirNota = document.getElementById('modal-afegir-nota');
+    formNota = document.getElementById('form-nota');
+    btnCancelarNota = document.getElementById('btn-cancelar-nota');
+    templateNota = document.getElementById('template-nota');
+
+    // Event listeners
+    if (btnAfegirNota) btnAfegirNota.addEventListener('click', mostrarModalAfegirNota);
+    if (btnCancelarNota) btnCancelarNota.addEventListener('click', tancarModalNota);
+    if (formNota) formNota.addEventListener('submit', handleSubmitNota);
+    if (modalAfegirNota) modalAfegirNota.addEventListener('click', handleClickForaModal);
+
+    mostrarLoader();
+    
+    // Comprova autenticació
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            console.log("Usuario autenticado:", user.email);
+            carregarDispositiu();
+        } else {
+            amagarLoader();
+            window.location.href = "login.html";
+        }
+    });
+});
 
 // Obté l'ID del dispositiu des de la URL
 function obtenirIdDispositiu() {
@@ -54,8 +78,12 @@ function obtenirIdDispositiu() {
 // Carrega les dades del dispositiu
 async function carregarDispositiu() {
     const id = obtenirIdDispositiu();
+    console.log("Buscant dispositiu amb ID:", id);
+    
     if (!id) {
+        console.log("No s'ha trobat ID a la URL");
         mostrarError();
+        amagarLoader();
         return;
     }
 
@@ -70,31 +98,40 @@ async function carregarDispositiu() {
         ];
 
         for (const col of col·leccions) {
+            console.log(`Buscant a la col·lecció: ${col.nom}`);
+            
             const docRef = db.collection(col.nom).doc(id);
             const docSnap = await docRef.get();
             
-            if (docSnap.exists()) {
+            if (docSnap.exists) {
+                console.log(`Trobat a ${col.nom}:`, docSnap.data());
                 dispositiuActual = docSnap.data();
                 tipusActual = col.tipus === 'Altres' ? dispositiuActual.tipus : col.tipus;
                 mostrarDispositiu();
+                amagarLoader();
                 return;
             }
         }
 
+        console.log("Dispositiu no trobat a cap col·lecció");
         mostrarError();
+        amagarLoader();
     } catch (error) {
         console.error('Error carregant dispositiu:', error);
         mostrarError();
+        amagarLoader();
     }
 }
 
 // Mostra la informació del dispositiu
 function mostrarDispositiu() {
-    loading.style.display = 'none';
-    content.style.display = 'block';
+    if (loading) loading.style.display = 'none';
+    if (content) content.style.display = 'block';
     
     // Títol
-    dispositiuTitol.textContent = `${tipusActual} - ID: ${dispositiuActual.id}`;
+    if (dispositiuTitol) {
+        dispositiuTitol.textContent = `${tipusActual} - ID: ${dispositiuActual.id}`;
+    }
     
     // Camps del dispositiu
     mostrarCampsDispositiu();
@@ -109,32 +146,67 @@ function mostrarCampsDispositiu() {
     document.querySelectorAll('.camps-tipus').forEach(el => el.style.display = 'none');
 
     if (tipusActual === 'PC') {
-        document.getElementById('camps-pc').style.display = 'block';
-        document.getElementById('pc-id').textContent = dispositiuActual.id || 'N/A';
-        document.getElementById('pc-fqdn').textContent = dispositiuActual.FQDN || 'N/A';
-        document.getElementById('pc-model').textContent = dispositiuActual.model || 'N/A';
-        document.getElementById('pc-so').textContent = dispositiuActual.sistemaOperatiu || 'N/A';
-        document.getElementById('pc-ram').textContent = dispositiuActual.memoriaRAM || 'N/A';
-        document.getElementById('pc-emmagatzematge').textContent = dispositiuActual.emmagatzematge || 'N/A';
-        document.getElementById('pc-data').textContent = formatarData(dispositiuActual.dataAdquisicio);
+        const campsPC = document.getElementById('camps-pc');
+        if (campsPC) campsPC.style.display = 'block';
+        
+        // Omple els camps del PC
+        const camps = {
+            'pc-id': dispositiuActual.id,
+            'pc-fqdn': dispositiuActual.FQDN,
+            'pc-usuari': dispositiuActual.usuari,
+            'pc-model': dispositiuActual.model,
+            'pc-processador': dispositiuActual.processador,
+            'pc-targeta-grafica': dispositiuActual.targetaGrafica,
+            'pc-so': dispositiuActual.sistemaOperatiu,
+            'pc-ram': dispositiuActual.memoriaRAM,
+            'pc-emmagatzematge': dispositiuActual.emmagatzematge,
+            'pc-data': formatarData(dispositiuActual.dataAdquisicio)
+        };
+        
+        Object.keys(camps).forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = camps[id] || 'N/A';
+        });
+        
     } else if (tipusActual === 'Mòbil') {
-        document.getElementById('camps-mobil').style.display = 'block';
-        document.getElementById('mobil-id').textContent = dispositiuActual.id || 'N/A';
-        document.getElementById('mobil-model').textContent = dispositiuActual.model || 'N/A';
-        document.getElementById('mobil-ram').textContent = dispositiuActual.memoriaRAM || 'N/A';
-        document.getElementById('mobil-interna').textContent = dispositiuActual.memoriaInterna || 'N/A';
-        document.getElementById('mobil-sn').textContent = dispositiuActual.sn || 'N/A';
-        document.getElementById('mobil-imei1').textContent = dispositiuActual.imei1 || 'N/A';
-        document.getElementById('mobil-imei2').textContent = dispositiuActual.imei2 || 'N/A';
-        document.getElementById('mobil-mail').textContent = dispositiuActual.mailRegistre || 'N/A';
-        document.getElementById('mobil-data').textContent = formatarData(dispositiuActual.dataAdquisicio);
+        const campsMobil = document.getElementById('camps-mobil');
+        if (campsMobil) campsMobil.style.display = 'block';
+        
+        // Omple els camps del mòbil
+        const camps = {
+            'mobil-id': dispositiuActual.id,
+            'mobil-model': dispositiuActual.model,
+            'mobil-ram': dispositiuActual.memoriaRAM,
+            'mobil-interna': dispositiuActual.memoriaInterna,
+            'mobil-sn': dispositiuActual.sn,
+            'mobil-imei1': dispositiuActual.imei1,
+            'mobil-imei2': dispositiuActual.imei2,
+            'mobil-mail': dispositiuActual.mailRegistre,
+            'mobil-data': formatarData(dispositiuActual.dataAdquisicio)
+        };
+        
+        Object.keys(camps).forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = camps[id] || 'N/A';
+        });
+        
     } else {
-        document.getElementById('camps-altres').style.display = 'block';
-        document.getElementById('altres-id').textContent = dispositiuActual.id || 'N/A';
-        document.getElementById('altres-nom').textContent = dispositiuActual.nom || 'N/A';
-        document.getElementById('altres-model').textContent = dispositiuActual.model || 'N/A';
-        document.getElementById('altres-tipus').textContent = dispositiuActual.tipus || tipusActual;
-        document.getElementById('altres-data').textContent = formatarData(dispositiuActual.dataAdquisicio);
+        const campsAltres = document.getElementById('camps-altres');
+        if (campsAltres) campsAltres.style.display = 'block';
+        
+        // Omple els camps d'altres dispositius
+        const camps = {
+            'altres-id': dispositiuActual.id,
+            'altres-nom': dispositiuActual.nom,
+            'altres-model': dispositiuActual.model,
+            'altres-tipus': dispositiuActual.tipus || tipusActual,
+            'altres-data': formatarData(dispositiuActual.dataAdquisicio)
+        };
+        
+        Object.keys(camps).forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = camps[id] || 'N/A';
+        });
     }
 }
 
@@ -143,45 +215,51 @@ function mostrarNotes() {
     const notes = dispositiuActual.notes || [];
     
     // Neteja el contenidor de notes
-    const notesExistents = llistaNotes.querySelectorAll('.nota-item');
-    notesExistents.forEach(nota => nota.remove());
+    if (llistaNotes) {
+        const notesExistents = llistaNotes.querySelectorAll('.nota-item');
+        notesExistents.forEach(nota => nota.remove());
+    }
     
     if (notes.length === 0) {
-        noNotes.style.display = 'block';
+        if (noNotes) noNotes.style.display = 'block';
         return;
     }
     
-    noNotes.style.display = 'none';
+    if (noNotes) noNotes.style.display = 'none';
     
     // Ordena les notes per data (més recent primer)
     notes.sort((a, b) => new Date(b.data) - new Date(a.data));
     
     notes.forEach((nota, index) => {
-        const notaElement = templateNota.content.cloneNode(true);
-        
-        notaElement.querySelector('.nota-titol').textContent = nota.titol;
-        notaElement.querySelector('.nota-data').textContent = formatarData(nota.data);
-        notaElement.querySelector('.nota-descripcio').textContent = nota.descripcio;
-        notaElement.querySelector('.btn-eliminar-nota').dataset.index = index;
-        
-        // Event listener per eliminar nota
-        notaElement.querySelector('.btn-eliminar-nota').addEventListener('click', function() {
-            eliminarNota(parseInt(this.dataset.index));
-        });
-        
-        llistaNotes.appendChild(notaElement);
+        if (templateNota) {
+            const notaElement = templateNota.content.cloneNode(true);
+            
+            notaElement.querySelector('.nota-titol').textContent = nota.titol;
+            notaElement.querySelector('.nota-data').textContent = formatarData(nota.data);
+            notaElement.querySelector('.nota-descripcio').textContent = nota.descripcio;
+            notaElement.querySelector('.btn-eliminar-nota').dataset.index = index;
+            
+            // Event listener per eliminar nota
+            notaElement.querySelector('.btn-eliminar-nota').addEventListener('click', function() {
+                eliminarNota(parseInt(this.dataset.index));
+            });
+            
+            if (llistaNotes) llistaNotes.appendChild(notaElement);
+        }
     });
 }
 
 // Gestió del modal
 function mostrarModalAfegirNota() {
-    modalAfegirNota.style.display = 'flex';
-    document.getElementById('nota-titol').value = '';
-    document.getElementById('nota-descripcio').value = '';
+    if (modalAfegirNota) modalAfegirNota.style.display = 'flex';
+    const notaTitol = document.getElementById('nota-titol');
+    const notaDescripcio = document.getElementById('nota-descripcio');
+    if (notaTitol) notaTitol.value = '';
+    if (notaDescripcio) notaDescripcio.value = '';
 }
 
 function tancarModalNota() {
-    modalAfegirNota.style.display = 'none';
+    if (modalAfegirNota) modalAfegirNota.style.display = 'none';
 }
 
 function handleClickForaModal(e) {
@@ -198,6 +276,8 @@ function handleSubmitNota(e) {
 // Afegeix una nova nota
 async function afegirNota() {
     try {
+        mostrarLoader();
+        
         const titol = document.getElementById('nota-titol').value;
         const descripcio = document.getElementById('nota-descripcio').value;
         
@@ -226,9 +306,12 @@ async function afegirNota() {
         tancarModalNota();
         mostrarNotes();
         
+        amagarLoader();
+        
     } catch (error) {
         console.error('Error afegint nota:', error);
         alert('Error afegint la nota');
+        amagarLoader();
     }
 }
 
@@ -239,6 +322,8 @@ async function eliminarNota(index) {
     }
     
     try {
+        mostrarLoader();
+        
         const nota = dispositiuActual.notes[index];
         const col·leccio = obtenirCol·leccio(tipusActual);
         const docRef = db.collection(col·leccio).doc(dispositiuActual.id);
@@ -254,9 +339,12 @@ async function eliminarNota(index) {
         // Refresca les notes
         mostrarNotes();
         
+        amagarLoader();
+        
     } catch (error) {
         console.error('Error eliminant nota:', error);
         alert('Error eliminant la nota');
+        amagarLoader();
     }
 }
 
@@ -282,6 +370,6 @@ function formatarData(dataString) {
 }
 
 function mostrarError() {
-    loading.style.display = 'none';
-    error.style.display = 'block';
+    if (loading) loading.style.display = 'none';
+    if (error) error.style.display = 'block';
 }

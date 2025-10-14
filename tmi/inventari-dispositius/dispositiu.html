@@ -3,167 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalls del Dispositiu - Inventari TMI</title>
+    <title>Dispositiu - Inventari TMI</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+    
+    <!-- Firebase v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 </head>
 <body>
+    <!-- Loader global -->
+    <div id="global-loader" class="global-loader hidden">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <p class="loader-text">Carregant...</p>
+        </div>
+    </div>
+
+    <!-- Header igual que l'index -->
     <header id="site-header">
-        <img src="/images/logo_tmi_sensefons.png" alt="TMI Logo">
-        <h1>Inventari de Dispositius</h1>
+        <div class="container">
+            <div class="logo">
+                <img src="images/logotmi-horitzontal.png" alt="TMI Logo">
+            </div>
+            <h1>Inventari de Dispositius</h1>
+        </div>
     </header>
 
+    <!-- Contingut principal -->
     <div class="container">
-        <div id="loading">Carregant dispositiu...</div>
-        
+        <!-- Loading -->
+        <div id="loading" style="display: block;">
+            <p>Carregant informació del dispositiu...</p>
+        </div>
+
+        <!-- Error -->
+        <div id="error" style="display: none;">
+            <h2>Dispositiu no trobat</h2>
+            <p>No s'ha pogut trobar el dispositiu amb l'ID especificat.</p>
+            <a href="index.html" class="btn-tornar">← Tornar a l'inventari</a>
+        </div>
+
+        <!-- Contingut del dispositiu -->
         <div id="content" style="display: none;">
             <div class="dispositiu-header">
+                <h2 id="dispositiu-titol">Carregant...</h2>
                 <a href="index.html" class="btn-tornar">← Tornar a l'inventari</a>
-                <h2 id="dispositiu-titol"></h2>
             </div>
 
             <div class="dispositiu-container">
+                <!-- Informació del dispositiu -->
                 <div class="dispositiu-info">
                     <h3>Informació del Dispositiu</h3>
-                    <div id="camps-dispositiu">
-                        <!-- Camps PC -->
-                        <div id="camps-pc" class="camps-tipus" style="display: none;">
-                            <div class="camp-info">
-                                <label>ID:</label>
-                                <span id="pc-id">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>FQDN:</label>
-                                <span id="pc-fqdn">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Model:</label>
-                                <span id="pc-model">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Sistema Operatiu:</label>
-                                <span id="pc-so">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Memòria RAM:</label>
-                                <span id="pc-ram">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Emmagatzematge:</label>
-                                <span id="pc-emmagatzematge">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Data d'Adquisició:</label>
-                                <span id="pc-data">N/A</span>
-                            </div>
+                    
+                    <!-- Camps per PC -->
+                    <div id="camps-pc" class="camps-tipus">
+                        <div class="camp-info">
+                            <label>ID:</label>
+                            <span id="pc-id">-</span>
                         </div>
-
-                        <!-- Camps Mòbil -->
-                        <div id="camps-mobil" class="camps-tipus" style="display: none;">
-                            <div class="camp-info">
-                                <label>ID:</label>
-                                <span id="mobil-id">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Model:</label>
-                                <span id="mobil-model">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Memòria RAM:</label>
-                                <span id="mobil-ram">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Memòria Interna:</label>
-                                <span id="mobil-interna">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>SN:</label>
-                                <span id="mobil-sn">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>IMEI 1:</label>
-                                <span id="mobil-imei1">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>IMEI 2:</label>
-                                <span id="mobil-imei2">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Mail registre:</label>
-                                <span id="mobil-mail">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Data d'Adquisició:</label>
-                                <span id="mobil-data">N/A</span>
-                            </div>
+                        <div class="camp-info">
+                            <label>FQDN:</label>
+                            <span id="pc-fqdn">-</span>
                         </div>
+                        <div class="camp-info">
+                            <label>Usuari:</label>
+                            <span id="pc-usuari">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Model:</label>
+                            <span id="pc-model">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Processador:</label>
+                            <span id="pc-processador">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Targeta Gràfica:</label>
+                            <span id="pc-targeta-grafica">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Sistema Operatiu:</label>
+                            <span id="pc-so">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Memòria RAM:</label>
+                            <span id="pc-ram">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Emmagatzematge:</label>
+                            <span id="pc-emmagatzematge">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Data d'Adquisició:</label>
+                            <span id="pc-data">-</span>
+                        </div>
+                    </div>
 
-                        <!-- Camps Altres -->
-                        <div id="camps-altres" class="camps-tipus" style="display: none;">
-                            <div class="camp-info">
-                                <label>ID:</label>
-                                <span id="altres-id">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Nom:</label>
-                                <span id="altres-nom">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Model:</label>
-                                <span id="altres-model">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Tipus:</label>
-                                <span id="altres-tipus">N/A</span>
-                            </div>
-                            <div class="camp-info">
-                                <label>Data d'Adquisició:</label>
-                                <span id="altres-data">N/A</span>
-                            </div>
+                    <!-- Camps per Mòbil -->
+                    <div id="camps-mobil" class="camps-tipus">
+                        <div class="camp-info">
+                            <label>ID:</label>
+                            <span id="mobil-id">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Model:</label>
+                            <span id="mobil-model">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Memòria RAM:</label>
+                            <span id="mobil-ram">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Memòria Interna:</label>
+                            <span id="mobil-interna">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>SN:</label>
+                            <span id="mobil-sn">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>IMEI 1:</label>
+                            <span id="mobil-imei1">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>IMEI 2:</label>
+                            <span id="mobil-imei2">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Mail registre:</label>
+                            <span id="mobil-mail">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Data d'Adquisició:</label>
+                            <span id="mobil-data">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Camps per altres dispositius (Monitor, Impressora, Altres) -->
+                    <div id="camps-altres" class="camps-tipus">
+                        <div class="camp-info">
+                            <label>ID:</label>
+                            <span id="altres-id">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Nom:</label>
+                            <span id="altres-nom">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Model:</label>
+                            <span id="altres-model">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Tipus:</label>
+                            <span id="altres-tipus">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Data d'Adquisició:</label>
+                            <span id="altres-data">-</span>
                         </div>
                     </div>
                 </div>
 
+                <!-- Secció de notes -->
                 <div class="dispositiu-notes">
                     <div class="notes-header">
                         <h3>Notes</h3>
                         <button id="btn-afegir-nota" class="btn-afegir-nota">+ Afegir nota</button>
                     </div>
-                    <div id="llista-notes">
-                        <p id="no-notes" class="no-notes" style="display: none;">No hi ha notes per aquest dispositiu.</p>
+                    <div id="no-notes" class="no-notes">
+                        No hi ha notes per aquest dispositiu.
                     </div>
+                    <div id="llista-notes"></div>
                 </div>
             </div>
-        </div>
-
-        <div id="error" style="display: none;">
-            <h2>Error</h2>
-            <p>No s'ha pogut carregar el dispositiu.</p>
-            <a href="index.html" class="btn-tornar">← Tornar a l'inventari</a>
         </div>
     </div>
-
-    <!-- Template per a les notes -->
-    <template id="template-nota">
-        <div class="nota-item">
-            <div class="nota-header">
-                <h4 class="nota-titol"></h4>
-                <div class="nota-meta">
-                    <span class="nota-data"></span>
-                    <button class="btn-eliminar-nota" title="Eliminar nota">×</button>
-                </div>
-            </div>
-            <p class="nota-descripcio"></p>
-        </div>
-    </template>
 
     <!-- Modal per afegir nota -->
     <div id="modal-afegir-nota" class="modal-overlay" style="display: none;">
         <div class="modal-nota">
-            <h3 class="modal-titol-nota">Afegir Nota</h3>
+            <h3 class="modal-titol-nota">Afegir Nova Nota</h3>
             <form id="form-nota" class="form-nota">
                 <div class="camp-nota">
                     <label for="nota-titol">Títol:</label>
@@ -181,15 +201,20 @@
         </div>
     </div>
 
-    <!-- Loader global -->
-    <div id="global-loader" class="global-loader">
-        <div class="loader-content">
-            <div class="spinner"></div>
-            <p class="loader-text">Carregant...</p>
+    <!-- Template per notes -->
+    <template id="template-nota">
+        <div class="nota-item">
+            <div class="nota-header">
+                <h4 class="nota-titol"></h4>
+                <div class="nota-meta">
+                    <span class="nota-data"></span>
+                    <button class="btn-eliminar-nota" title="Eliminar nota">×</button>
+                </div>
+            </div>
+            <p class="nota-descripcio"></p>
         </div>
-    </div>
+    </template>
 
-    <script type="module" src="script.js"></script>
     <script src="dispositiu.js"></script>
 </body>
 </html>
