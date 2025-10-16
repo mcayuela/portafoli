@@ -895,8 +895,16 @@ select option:hover {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
-    padding-bottom: 20px;
     border-bottom: 2px solid #eaf4fa;
+}
+
+#dispositiu-titol {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #222d32;
+    margin-left: 33px;
+    padding: 0px;
+    font-weight: bold;
 }
 
 .btn-tornar {
@@ -904,6 +912,7 @@ select option:hover {
     color: white;
     text-decoration: none;
     padding: 10px 20px;
+    margin-right: 30px;
     border-radius: 6px;
     font-weight: 600;
     transition: background-color 0.3s ease;
@@ -926,6 +935,8 @@ select option:hover {
 .dispositiu-info {
     background: white;
     padding: 25px;
+    margin-left: 30px;
+    margin-bottom: 30px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -946,7 +957,6 @@ select option:hover {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 15px;
-    margin-bottom: 15px;
     padding: 12px 0;
     border-bottom: 1px solid #f0f0f0;
 }
@@ -968,6 +978,8 @@ select option:hover {
 .dispositiu-notes {
     background: white;
     padding: 25px;
+    margin-right: 30px;
+    margin-bottom: 30px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -1274,4 +1286,27 @@ select option:hover {
 /* Amagar contingut mentre carrega */
 .loading .container {
     visibility: hidden;
+}
+
+/* Container específic per la pàgina del dispositiu */
+.container:not(#site-header .container) {
+    max-width: 1500px;
+    min-width: 1200px;
+    padding: 0;
+    margin: 20px auto;
+}
+
+/* Assegurar que el header del dispositiu sigui igual a l'index */
+body:has(#dispositiu-titol) #site-header {
+    padding: 10px 40px;
+    background: rgb(255, 255, 255);
+    backdrop-filter: blur(15px);
+    height: var(--header-h, 80px);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(37, 150, 190, 0.15);
 }
