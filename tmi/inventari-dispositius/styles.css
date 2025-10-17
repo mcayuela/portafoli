@@ -202,28 +202,113 @@ main {
 }
 
 .filtreDepartament {
-    margin-left: 10px;
-    padding: 10px;
+    width: 250px; /* Mateixa amplada que el buscador */
     border: 2px solid;
     border-color: rgba(0, 0, 0, 0.5);
     background: #f5f5f5;
+    padding: 10px 10px;
     border-radius: 5px;
-    font-size: 0.9rem;
+    font-size: 1rem; /* Mateixa mida de font */
     color: #000000;
     opacity: 0.7;
+    margin-left: 10px;
+    appearance: none; /* Elimina l'estil per defecte del select */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    cursor: pointer;
 }
 
 .filtreDepartament:hover {
     border: 2px solid #222d32;
+    opacity: 1;
+}
+
+.filtreDepartament:focus {
+    outline: none;
+    border-color: #222d32;
+    opacity: 1;
 }
 
 /* Estil per a les opcions del select */
-select option:checked {
+.filtreDepartament option {
+    background: white;
+    color: #000000;
+    padding: 8px;
+    font-size: 0.9rem;
+}
+
+.filtreDepartament option:checked {
     background-color: #222d32;
     color: white;
 }
-select option:hover {
+
+.filtreDepartament option:hover {
+    background-color: #f0f0f0;
+}
+
+/* També millora el filtreSubdepartament per consistència */
+.filtreSubdepartament {
+    width: 250px; /* Mateixa amplada */
+    border: 2px solid;
+    border-color: rgba(0, 0, 0, 0.5);
+    background: #f5f5f5;
+    padding: 10px 10px;
+    border-radius: 5px;
+    font-size: 1rem; /* Mateixa mida de font */
+    color: #000000;
+    opacity: 0.7;
+    margin-left: 10px;
+    appearance: none; /* Elimina l'estil per defecte del select */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    cursor: pointer;
+}
+
+.filtreSubdepartament:hover {
+    border: 2px solid #222d32;
+    opacity: 1;
+}
+
+.filtreSubdepartament:focus {
+    outline: none;
+    border-color: #222d32;
+    opacity: 1;
+}
+
+.filtreSubdepartament option {
+    background: white;
+    color: #000000;
+    padding: 8px;
+    font-size: 0.9rem;
+}
+
+.filtreSubdepartament option:checked {
     background-color: #222d32;
+    color: white;
+}
+
+.filtreSubdepartament option:hover {
+    background-color: #f0f0f0;
+}
+
+/* Responsive per als selectors */
+@media (max-width: 750px) {
+    .filtreDepartament,
+    .filtreSubdepartament {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 650px) {
+    .filtreDepartament,
+    .filtreSubdepartament {
+        width: 100%;
+    }
 }
 
 .llista-resultats {
@@ -1309,4 +1394,65 @@ body:has(#dispositiu-titol) #site-header {
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid rgba(37, 150, 190, 0.15);
+}
+
+.filtreTipus {
+    width: 150px; /* Mateixa amplada que el buscador */
+    height: 42px;
+    border: 2px solid;
+    border-color: rgba(0, 0, 0, 0.5);
+    background: #f5f5f5;
+    padding: 10px 10px;
+    border-radius: 5px;
+    font-size: 1rem; /* Mateixa mida de font */
+    color: #000000;
+    opacity: 0.7;
+    appearance: none; /* Elimina l'estil per defecte del select */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    cursor: pointer;
+}
+
+.filtreTipus:hover {
+    border: 2px solid #222d32;
+    opacity: 1;
+}
+
+.filtreTipus:focus {
+    outline: none;
+    border-color: #222d32;
+    opacity: 1;
+}
+
+/* Estil per a les opcions del select */
+.filtreTipus option {
+    background: white;
+    color: #000000;
+    padding: 8px;
+    font-size: 0.9rem;
+}
+
+.filtreTipus option:checked {
+    background-color: #222d32;
+    color: white;
+}
+
+.filtreTipus option:hover {
+    background-color: #f0f0f0;
+}
+
+/* Responsive per al selector */
+@media (max-width: 750px) {
+    .filtreTipus {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 650px) {
+    .filtreTipus {
+        width: 100%;
+    }
 }

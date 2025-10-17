@@ -373,3 +373,68 @@ function mostrarError() {
     if (loading) loading.style.display = 'none';
     if (error) error.style.display = 'block';
 }
+
+// Dins de guardarCanvisDispositiu per PC:
+if (tipus === 'PC') {
+    dadesActualitzades = {
+        id: document.getElementById('edit-id').value,
+        FQDN: document.getElementById('edit-fqdn').value,
+        usuari: document.getElementById('edit-usuari').value,
+        departament: document.getElementById('edit-departament').value, // AFEGEIX
+        model: document.getElementById('edit-model').value,
+        processador: document.getElementById('edit-processador').value,
+        targetaGrafica: document.getElementById('edit-targeta-grafica').value,
+        sistemaOperatiu: document.getElementById('edit-so').value,
+        memoriaRAM: document.getElementById('edit-ram').value,
+        emmagatzematge: document.getElementById('edit-emmagatzematge').value,
+        dataAdquisicio: document.getElementById('edit-data').value
+    };
+} else if (tipus === 'Mòbil') {
+    dadesActualitzades = {
+        id: document.getElementById('edit-id').value,
+        departament: document.getElementById('edit-departament').value, // AFEGEIX
+        model: document.getElementById('edit-model').value,
+        memoriaRAM: document.getElementById('edit-ram').value,
+        memoriaInterna: document.getElementById('edit-interna').value,
+        sn: document.getElementById('edit-sn').value,
+        imei1: document.getElementById('edit-imei1').value,
+        imei2: document.getElementById('edit-imei2').value,
+        mailRegistre: document.getElementById('edit-mail').value,
+        dataAdquisicio: document.getElementById('edit-data').value
+    };
+} else {
+    dadesActualitzades = {
+        id: document.getElementById('edit-id').value,
+        nom: document.getElementById('edit-nom').value,
+        departament: document.getElementById('edit-departament').value, // AFEGEIX
+        model: document.getElementById('edit-model').value,
+        tipus: document.getElementById('edit-tipus').value,
+        dataAdquisicio: document.getElementById('edit-data').value
+    };
+}
+
+// També cal afegir departament als modals d'edició dins del dispositiu.js
+// Copia les mateixes funcions mostrarModalEdicio i guardarCanvisDispositiu del script.js
+
+// Per exemple, dins de mostrarModalEdicio per PC:
+if (tipus === 'PC') {
+    campsHTML = `
+        <div class="camp-edicio">
+            <label for="edit-id">ID:</label>
+            <input type="text" id="edit-id" value="${dades.id || ''}" readonly>
+        </div>
+        <div class="camp-edicio">
+            <label for="edit-fqdn">FQDN:</label>
+            <input type="text" id="edit-fqdn" value="${dades.FQDN || ''}" required>
+        </div>
+        <div class="camp-edicio">
+            <label for="edit-usuari">Usuari:</label>
+            <input type="text" id="edit-usuari" value="${dades.usuari || ''}">
+        </div>
+        <div class="camp-edicio">
+            <label for="edit-departament">Departament:</label>
+            <input type="text" id="edit-departament" value="${dades.departament || ''}">
+        </div>
+        <!-- Rest dels camps igual -->
+    `;
+}

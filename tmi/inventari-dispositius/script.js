@@ -71,6 +71,8 @@ async function carregarDades() {
             pcs.push({
                 id: data.id,
                 fqdn: data.FQDN || '',
+                usuari: data.usuari || '',
+                departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || '',
                 tipusDispositiu: 'PC',
                 dataAdquisicio: data.dataAdquisicio || ''
@@ -84,7 +86,9 @@ async function carregarDades() {
             const data = doc.data();
             mobils.push({
                 id: data.id,
-                fqdn: '-',  // Guió per als mòbils
+                fqdn: '-',
+                usuari: '',
+                departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || '',
                 tipusDispositiu: 'Mòbil',
                 dataAdquisicio: data.dataAdquisicio || ''
@@ -98,7 +102,9 @@ async function carregarDades() {
             const data = doc.data();
             monitors.push({
                 id: data.id,
-                fqdn: '-',  // Guió per als monitors
+                fqdn: '-',
+                usuari: '',
+                departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || data.nom || '',
                 tipusDispositiu: 'Monitor',
                 dataAdquisicio: data.dataAdquisicio || ''
@@ -112,7 +118,9 @@ async function carregarDades() {
             const data = doc.data();
             impressores.push({
                 id: data.id,
-                fqdn: '-',  // Guió per a les impressores
+                fqdn: '-',
+                usuari: '',
+                departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || data.nom || '',
                 tipusDispositiu: 'Impressora',
                 dataAdquisicio: data.dataAdquisicio || ''
@@ -126,7 +134,9 @@ async function carregarDades() {
             const data = doc.data();
             altres.push({
                 id: data.id,
-                fqdn: '-',  // Guió per als altres dispositius
+                fqdn: '-',
+                usuari: '',
+                departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || data.nom || '',
                 tipusDispositiu: data.tipus || 'Altres',
                 dataAdquisicio: data.dataAdquisicio || ''
@@ -186,7 +196,7 @@ function filtraITipus(tipus) {
     mostrarResultats(resultatsFiltrats, paginaActual);
 }
 
-// Filtra per text (ID, FQDN, model, tipus)
+// Filtra per text (ID, FQDN, model, tipus, usuari, departament)
 function filtraPerText(llista, text) {
     if (!text) return llista;
     text = text.trim().toLowerCase();
@@ -194,7 +204,9 @@ function filtraPerText(llista, text) {
         (item.id && item.id.toString().toLowerCase().includes(text)) ||
         (item.fqdn && item.fqdn.toLowerCase().includes(text)) ||
         (item.model && item.model.toLowerCase().includes(text)) ||
-        (item.tipusDispositiu && item.tipusDispositiu.toLowerCase().includes(text))
+        (item.tipusDispositiu && item.tipusDispositiu.toLowerCase().includes(text)) ||
+        (item.usuari && item.usuari.toLowerCase().includes(text)) ||
+        (item.departament && item.departament.toLowerCase().includes(text)) // AFEGEIX AQUESTA LÍNIA
     );
 }
 
@@ -248,14 +260,16 @@ function mostrarResultats(filtrats, pagina = 1) {
     const final = inici + RESULTATS_PER_PAGINA;
     const paginaDades = filtrats.slice(inici, final);
 
-    // Taula de resultats amb botons si estem en mode editor
+    // Taula de resultats amb la nova columna Departament
     let html = `<table class="taula-resultats">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>FQDN</th>
+                <th>FQDN/Nom</th>
+                <th>Usuari</th>
+                <th>Departament</th>
                 <th>Model</th>
-                <th>Tipus Dispositiu</th>
+                <th>Tipus</th>
                 <th>Data Adquisició</th>
                 ${modeEditor ? '<th class="col-accions">Accions</th>' : ''}
             </tr>
@@ -278,6 +292,8 @@ function mostrarResultats(filtrats, pagina = 1) {
         html += `<tr>
             <td><a href="dispositiu.html?id=${item.id}" class="link-dispositiu">${item.id || ''}</a></td>
             <td><a href="dispositiu.html?id=${item.id}" class="link-dispositiu">${item.fqdn || ''}</a></td>
+            <td>${item.usuari || 'N/A'}</td>
+            <td>${item.departament || 'N/A'}</td>
             <td>${item.model || ''}</td>
             <td>${item.tipusDispositiu || ''}</td>
             <td>${dataFormatada}</td>
@@ -486,6 +502,10 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
                 <input type="text" id="edit-usuari" value="${dades.usuari || ''}">
             </div>
             <div class="camp-edicio">
+                <label for="edit-departament">Departament:</label>
+                <input type="text" id="edit-departament" value="${dades.departament || ''}">
+            </div>
+            <div class="camp-edicio">
                 <label for="edit-model">Model:</label>
                 <input type="text" id="edit-model" value="${dades.model || ''}">
             </div>
@@ -507,7 +527,7 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
             </div>
             <div class="camp-edicio">
                 <label for="edit-emmagatzematge">Emmagatzematge:</label>
-                <input type="text" id="edit-emmagatzematge" value="${dades.emmagatzematge || ''}">
+                <input type="text" id="edit-emmagatzematge" value="${dades.dataAdquisicio || ''}">
             </div>
             <div class="camp-edicio">
                 <label for="edit-data">Data d'Adquisició:</label>
@@ -519,6 +539,10 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
             <div class="camp-edicio">
                 <label for="edit-id">ID:</label>
                 <input type="text" id="edit-id" value="${dades.id || ''}" readonly>
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-departament">Departament:</label>
+                <input type="text" id="edit-departament" value="${dades.departament || ''}">
             </div>
             <div class="camp-edicio">
                 <label for="edit-model">Model:</label>
@@ -562,6 +586,10 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
             <div class="camp-edicio">
                 <label for="edit-nom">Nom:</label>
                 <input type="text" id="edit-nom" value="${dades.nom || ''}" required>
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-departament">Departament:</label>
+                <input type="text" id="edit-departament" value="${dades.departament || ''}">
             </div>
             <div class="camp-edicio">
                 <label for="edit-model">Model:</label>
@@ -625,6 +653,7 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
                 id: document.getElementById('edit-id').value,
                 FQDN: document.getElementById('edit-fqdn').value,
                 usuari: document.getElementById('edit-usuari').value,
+                departament: document.getElementById('edit-departament').value, // AFEGEIX AQUESTA LÍNIA
                 model: document.getElementById('edit-model').value,
                 processador: document.getElementById('edit-processador').value,
                 targetaGrafica: document.getElementById('edit-targeta-grafica').value,
@@ -636,6 +665,7 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
         } else if (tipus === 'Mòbil') {
             dadesActualitzades = {
                 id: document.getElementById('edit-id').value,
+                departament: document.getElementById('edit-departament').value, // AFEGEIX AQUESTA LÍNIA
                 model: document.getElementById('edit-model').value,
                 memoriaRAM: document.getElementById('edit-ram').value,
                 memoriaInterna: document.getElementById('edit-interna').value,
@@ -649,6 +679,7 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
             dadesActualitzades = {
                 id: document.getElementById('edit-id').value,
                 nom: document.getElementById('edit-nom').value,
+                departament: document.getElementById('edit-departament').value, // AFEGEIX AQUESTA LÍNIA
                 model: document.getElementById('edit-model').value,
                 tipus: document.getElementById('edit-tipus').value,
                 dataAdquisicio: document.getElementById('edit-data').value
@@ -759,6 +790,10 @@ function mostrarModalAfegirDispositiu(tipus) {
                 <input type="text" id="add-usuari">
             </div>
             <div class="camp-edicio">
+                <label for="add-departament">Departament:</label>
+                <input type="text" id="add-departament">
+            </div>
+            <div class="camp-edicio">
                 <label for="add-model">Model:</label>
                 <input type="text" id="add-model">
             </div>
@@ -792,6 +827,10 @@ function mostrarModalAfegirDispositiu(tipus) {
             <div class="camp-edicio">
                 <label for="add-id">ID:</label>
                 <input type="text" id="add-id" required>
+            </div>
+            <div class="camp-edicio">
+                <label for="add-departament">Departament:</label>
+                <input type="text" id="add-departament">
             </div>
             <div class="camp-edicio">
                 <label for="add-model">Model:</label>
@@ -837,6 +876,10 @@ function mostrarModalAfegirDispositiu(tipus) {
                 <input type="text" id="add-nom" required>
             </div>
             <div class="camp-edicio">
+                <label for="add-departament">Departament:</label>
+                <input type="text" id="add-departament">
+            </div>
+            <div class="camp-edicio">
                 <label for="add-model">Model:</label>
                 <input type="text" id="add-model">
             </div>
@@ -856,6 +899,10 @@ function mostrarModalAfegirDispositiu(tipus) {
                 <input type="text" id="add-nom" required>
             </div>
             <div class="camp-edicio">
+                <label for="add-departament">Departament:</label>
+                <input type="text" id="add-departament">
+            </div>
+            <div class="camp-edicio">
                 <label for="add-model">Model:</label>
                 <input type="text" id="add-model">
             </div>
@@ -873,6 +920,10 @@ function mostrarModalAfegirDispositiu(tipus) {
             <div class="camp-edicio">
                 <label for="add-nom">Nom:</label>
                 <input type="text" id="add-nom" required>
+            </div>
+            <div class="camp-edicio">
+                <label for="add-departament">Departament:</label>
+                <input type="text" id="add-departament">
             </div>
             <div class="camp-edicio">
                 <label for="add-model">Model:</label>
@@ -938,6 +989,7 @@ async function afegirNouDispositiu(tipus, modal) {
                 id: document.getElementById('add-id').value,
                 FQDN: document.getElementById('add-fqdn').value,
                 usuari: document.getElementById('add-usuari').value,
+                departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
                 processador: document.getElementById('add-processador').value,
                 targetaGrafica: document.getElementById('add-targeta-grafica').value,
@@ -947,9 +999,10 @@ async function afegirNouDispositiu(tipus, modal) {
                 dataAdquisicio: document.getElementById('add-data').value
             };
         } else if (tipus === 'Mòbil') {
-            col·leccio = 'mobils';  // Canviat de 'telefons' a 'mobils'
+            col·leccio = 'mobils';
             nouDispositiu = {
                 id: document.getElementById('add-id').value,
+                departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
                 memoriaRAM: document.getElementById('add-ram').value,
                 memoriaInterna: document.getElementById('add-interna').value,
@@ -960,28 +1013,31 @@ async function afegirNouDispositiu(tipus, modal) {
                 dataAdquisicio: document.getElementById('add-data').value
             };
         } else if (tipus === 'Monitor') {
-            col·leccio = 'monitors';  // Col·lecció específica per monitors
+            col·leccio = 'monitors';
             nouDispositiu = {
                 id: document.getElementById('add-id').value,
                 nom: document.getElementById('add-nom').value,
+                departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
                 tipus: 'Monitor',
                 dataAdquisicio: document.getElementById('add-data').value
             };
         } else if (tipus === 'Impressora') {
-            col·leccio = 'impressores';  // Col·lecció específica per impressores
+            col·leccio = 'impressores';
             nouDispositiu = {
                 id: document.getElementById('add-id').value,
                 nom: document.getElementById('add-nom').value,
+                departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
                 tipus: 'Impressora',
                 dataAdquisicio: document.getElementById('add-data').value
             };
         } else {
-            col·leccio = 'altresDispositius';  // Per altres tipus
+            col·leccio = 'altresDispositius';
             nouDispositiu = {
                 id: document.getElementById('add-id').value,
                 nom: document.getElementById('add-nom').value,
+                departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
                 tipus: document.getElementById('add-tipus').value,
                 dataAdquisicio: document.getElementById('add-data').value
@@ -1059,7 +1115,7 @@ function generaQRDispositiu(pc, destEl) {
         canvas.height = totalH;
 
         ctx.fillStyle = '#fff';
-        ctx.fillRect(0,0,totalW,totalH);
+        ctx.fillRect(0, 0, totalW, totalH);
 
         // Draw QR
         if (qrImg.tagName === 'IMG') {
@@ -1068,11 +1124,11 @@ function generaQRDispositiu(pc, destEl) {
             ctx.drawImage(qrImg, pad, pad);
         }
 
-        // Text
+        // Draw text
         ctx.font = font;
         ctx.fillStyle = '#000';
-        const tx = (totalW - tw)/2;
-        const ty = qrSize + pad;
+        const tx = (totalW - tw) / 2;
+        const ty = pad + qrSize + pad + th;
         ctx.fillText(textVisual, tx, ty);
 
         // Logo rectangle (simulat)
@@ -1085,122 +1141,121 @@ function generaQRDispositiu(pc, destEl) {
         wrapper.appendChild(canvas);
 
         destEl.appendChild(wrapper);
-    },50);
+    }, 50);
 }
 
 function obreQRAPestanya(pc) {
     const mmYY = formatDataAdqMMYY(pc.dataAdquisicio);
-    // URL normal com estava abans
-    const url = `https://mcayuela.com/tmi/inventari-dispositius/dispositiu?id=${pc.id}`;
-    
-    // Obre una nova pestanya amb el QR per imprimir
+    const url = `https://mcayuela.com/tmi/inventari-dispositius/dispositiu?id=${encodeURIComponent(pc.id)}`;
+
+    const html = `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>QR ${pc.id}</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+    html, body {
+        height: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        overflow: hidden;
+    }
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100vw;
+        height: 100vh;
+    }
+    .qr-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        padding: 20px;
+    }
+    #qr-code {
+        margin-bottom: 10px;
+        margin-top: 20px;
+    }
+    .qr-id {
+        font-size: 2em;
+        font-weight: 700;
+        color: #217aa3;
+        margin-bottom: 10px;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+    .qr-logo {
+        margin-bottom: 20px;
+        max-width: 120px;
+        height: auto;
+    }
+    .print-btn {
+        margin-top: 18px;
+        padding: 12px 32px;
+        font-size: 1.1em;
+        background: #2596be;
+        color: #fff;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    .print-btn:hover {
+        background: #217aa3;
+    }
+    @media print {
+        @page { size: landscape; margin: 0; }
+        .print-btn { display: none !important; }
+        .qr-container { transform: rotate(-90deg) scale(0.8); transform-origin: center center; }
+        .qr-logo { max-width: 200px !important; }
+    }
+</style>
+</head>
+<body>
+    <div class="qr-container">
+        <div id="qr-code"></div>
+        <div class="qr-id">${pc.id}/${mmYY}</div>
+        <img class="qr-logo" src="images/logotmi-horitzontal.png" alt="Logo TMI" />
+        <button class="print-btn" onclick="window.print()">Imprimir</button>
+    </div>
+    <script>
+        (function() {
+            try {
+                var qr = qrcode(0, 'L');
+                qr.addData('${url}');
+                qr.make();
+                document.getElementById('qr-code').innerHTML = qr.createImgTag(6, 0);
+            } catch (err) {
+                try {
+                    var qr2 = qrcode(0, 'L');
+                    qr2.addData('${url}');
+                    qr2.make();
+                    document.getElementById('qr-code').innerHTML = qr2.createImgTag(6, 0);
+                } catch (err) {
+                    // As a last resort, show the URL
+                    document.getElementById('qr-code').textContent = '${url}';
+                }
+            }
+        })();
+    </script>
+</body>
+</html>`;
+
     const win = window.open('', '_blank');
-    win.document.write(`
-        <html>
-        <head>
-            <title>QR ${pc.id}</title>
-            <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
-            <style>
-                html, body {
-                    height: 100%;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    background: #fff !important;
-                    width: 100vw !important;
-                    height: 100vh !important;
-                    overflow: hidden;
-                }
-                body {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 100vw;
-                    height: 100vh;
-                }
-                .qr-container {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    background: #fff;
-                    padding: 20px;
-                }
-                #qr-code {
-                    margin-bottom: 10px;
-                    margin-top: 20px;
-                }
-                .qr-id {
-                    font-size: 2em;
-                    font-weight: 700;
-                    color: #217aa3;
-                    margin-bottom: 10px;
-                    letter-spacing: 1px;
-                    text-align: center;
-                }
-                .qr-logo {
-                    margin-bottom: 20px;
-                    max-width: 120px;
-                    height: auto;
-                }
-                .print-btn {
-                    margin-top: 18px;
-                    padding: 12px 32px;
-                    font-size: 1.1em;
-                    background: #2596be;
-                    color: #fff;
-                    border: none;
-                    border-radius: 7px;
-                    cursor: pointer;
-                    font-weight: 600;
-                    transition: background 0.2s;
-                }
-                .print-btn:hover {
-                    background: #217aa3;
-                }
-                @media print {
-                    @page {
-                        size: landscape;
-                        margin: 0;
-                    }
-                    .print-btn { 
-                        display: none !important; 
-                    }
-                    .qr-container {
-                        transform: rotate(-90deg) scale(0.8);
-                        transform-origin: center center;
-                    }
-                    .qr-logo {
-                        max-width: 200px !important;
-                    }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="qr-container">
-                <div id="qr-code"></div>
-                <div class="qr-id">${pc.id}/${mmYY}</div>
-                <img class="qr-logo" src="images/logotmi-horitzontal.png" alt="Logo TMI" />
-                <button class="print-btn" onclick="window.print()">Imprimir</button>
-            </div>
-            <script>
-                window.onload = function() {
-                    try {
-                        var qr = qrcode(0, 'L');
-                        qr.addData('${url}');
-                        qr.make();
-                        document.getElementById('qr-code').innerHTML = qr.createImgTag(6, 0);
-                    } catch (error) {
-                        console.error('Error generant QR:', error);
-                        // Fallback amb URL encara més curta
-                        var qr = qrcode(0, 'L');
-                        qr.addData('https://mcayuela.com/tmi/inventari-dispositius/dispositiu${pc.id}');
-                        qr.make();
-                        document.getElementById('qr-code').innerHTML = qr.createImgTag(6, 0);
-                    }
-                }
-            </script>
-        </body>
-        </html>
-    `);
+    if (!win) {
+        alert('No s\'ha pogut obrir la finestra d\'impressió.');
+        return;
+    }
+    
+    win.document.open();
+    win.document.write(html);
     win.document.close();
 }
