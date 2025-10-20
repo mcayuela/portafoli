@@ -1325,126 +1325,6 @@ window.addEventListener("DOMContentLoaded", () => {
   renderCalendar();
   mostrarTasquesPendentsSenseDia(); // arrenca amb “sense dia”
   setUndoRedoDisabled();
-
-  // --- MODAL DE CERCA DE TASQUES EN TEMPS REAL ---
-  const searchBtn = document.getElementById('search-btn');
-  const searchModal = document.getElementById('search-modal');
-  const closeSearchModal = document.getElementById('close-search-modal');
-  const searchInput = document.getElementById('search-modal-input');
-  const resultsList = document.getElementById('search-modal-results');
-
-  let lastSearchTerm = "";
-  let searchTimeout = null;
-
-  // Obrir el modal
-  searchBtn.onclick = () => {
-    searchModal.style.display = "";
-    searchInput.value = lastSearchTerm;
-    searchInput.focus();
-    doSearch(searchInput.value);
-  };
-
-  // Tancar el modal
-  closeSearchModal.onclick = () => {
-    searchModal.style.display = "none";
-  };
-
-  // Tancar amb ESC
-  searchModal.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") searchModal.style.display = "none";
-  });
-
-  searchInput.oninput = function() {
-    lastSearchTerm = this.value;
-    if (searchTimeout) clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      doSearch(lastSearchTerm);
-    }, 300);
-  };
-
-  async function doSearch(term) {
-    resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cercant...</li>";
-    const snapshot = await getDocs(collection(db, "tasques"));
-    const seenIds = new Set();
-    let results = [];
-    term = (term || "").toLowerCase();
-    snapshot.forEach(docu => {
-      const docId = docu.id;
-      const tasques = docu.data().tasques || [];
-      tasques.forEach(t => {
-        if (
-          (!term || t.text?.toLowerCase().includes(term) || (t.description ?? "").toLowerCase().includes(term))
-          && !seenIds.has(t.id)
-        ) {
-          seenIds.add(t.id);
-          results.push({ ...t, docId });
-        }
-      });
-    });
-
-    resultsList.innerHTML = "";
-    if (!results.length) {
-      resultsList.innerHTML = "<li style='color:#888;padding:8px;'>Cap resultat</li>";
-    } else {
-      results.forEach(tasca => {
-        const li = document.createElement("li");
-        li.className = "search-result-item";
-        if (tasca.done) li.classList.add("done");
-        // Títol
-        const title = document.createElement("span");
-        title.className = "search-result-title";
-        title.textContent = tasca.text;
-        // Data
-        const date = document.createElement("span");
-        date.className = "search-result-date";
-        let dateText = "";
-        if (tasca.docId === UNASSIGNED_ID) {
-          dateText = "Sense dia";
-        } else {
-          const parts = tasca.docId.split("-");
-          if (parts.length === 3) {
-            dateText = `${parts[2]}-${parts[1]}-${parts[0]}`;
-          } else {
-            dateText = tasca.docId;
-          }
-        }
-        date.textContent = dateText;
-        // Dificultat
-        const diff = document.createElement("span");
-        diff.className = "search-result-difficulty";
-        diff.textContent = ` ★${tasca.priority ?? 3}`;
-        diff.style.color = "#f1b314";
-        // Estat
-        if (tasca.done) {
-          date.style.color = "#27ae60";
-          date.style.fontWeight = "bold";
-        }
-        // Click
-        title.onclick = () => {
-          searchModal.style.display = "none";
-          if (tasca.docId === UNASSIGNED_ID) {
-            mostrarTasquesPendentsSenseDia();
-          } else {
-            const parts = tasca.docId.split("-");
-            if (parts.length === 3) {
-              const data = new Date(parts[0], parts[1] - 1, parts[2]);
-              mostrarTasquesDelDia(data);
-            }
-          }
-        };
-        li.appendChild(title);
-        li.appendChild(date);
-        li.appendChild(diff);
-        li.onclick = () => title.onclick();
-        resultsList.appendChild(li);
-      });
-    }
-  };
-
-  // Tancar el modal fent clic fora
-  searchModal.addEventListener("click", function(e) {
-    if (e.target === searchModal) searchModal.style.display = "none";
-  });
 });
 
 function parseLinks(text) {
@@ -1529,72 +1409,157 @@ function openTaskModal() {
   
   repeatType.onchange = function() {
     repeatOptions.innerHTML = "";
-    repeatOptions.style.display = this.value ? "" : "none";
+    repeatOptions.style.display = this.value ? "block" : "none";
     
     if (this.value === "diaria") {
       repeatOptions.innerHTML = `
-        <div id="repeat-weekday-checkboxes">
+        <div id="repeat-weekday-checkboxes" style="margin-bottom:10px;">
           <label><input type="checkbox" value="1" /> Dilluns</label>
           <label><input type="checkbox" value="2" /> Dimarts</label>
           <label><input type="checkbox" value="3" /> Dimecres</label>
           <label><input type="checkbox" value="4" /> Dijous</label>
           <label><input type="checkbox" value="5" /> Divendres</label>
         </div>
-        <label style="color:#2596be;">Data final de repetició:</label>
-        <input type="text" id="edit-task-repeat-end" readonly style="width:120px; margin-right:8px;" />
-        <button id="open-repeat-calendar" type="button" style="background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">Calendari</button>
-        <div id="repeat-calendar-popup" style="display:none;position:absolute;z-index:1001;"></div>
+        <div style="margin-bottom:10px;">
+          <label style="color:#2596be;display:block;margin-bottom:5px;">Data final de repetició:</label>
+          <input type="text" id="edit-task-repeat-end" readonly style="width:120px; margin-right:8px;" placeholder="Selecciona data..." />
+          <button id="open-repeat-calendar" type="button" style="background:#2596be;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;">📅 Calendari</button>
+        </div>
+        <div id="repeat-calendar-popup" style="display:none;"></div>
       `;
-      setupCalendarPicker();
-    } 
-    // AFEGEIX AQUESTA NOVA CONDICIÓ:
-    else if (this.value === "setmanal") {
+      
+      // CONFIGURA EL CALENDARI DESPRÉS DE CREAR EL HTML
+      setTimeout(() => {
+        const repeatEndInput = repeatOptions.querySelector("#edit-task-repeat-end");
+        const calendarBtn = repeatOptions.querySelector("#open-repeat-calendar");
+        const calendarPopup = repeatOptions.querySelector("#repeat-calendar-popup");
+
+        if (repeatEndInput && calendarBtn && calendarPopup) {
+          calendarBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            calendarPopup.style.display = "block";
+            calendarPopup.innerHTML = `
+              <input type="date" id="repeat-end-date" style="font-size:1em;padding:6px;border-radius:6px;border:1px solid #2596be;" />
+              <button id="set-repeat-end" type="button" style="margin-left:8px;background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">OK</button>
+            `;
+            
+            // Posiciona el popup
+            const rect = calendarBtn.getBoundingClientRect();
+            calendarPopup.style.position = "absolute";
+            calendarPopup.style.left = rect.left + window.scrollX + "px";
+            calendarPopup.style.top = rect.bottom + window.scrollY + 2 + "px";
+            calendarPopup.style.zIndex = "1002";
+            calendarPopup.style.background = "white";
+            calendarPopup.style.border = "1px solid #ccc";
+            calendarPopup.style.borderRadius = "6px";
+            calendarPopup.style.padding = "8px";
+            calendarPopup.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+
+            const dateInput = calendarPopup.querySelector("#repeat-end-date");
+            const okBtn = calendarPopup.querySelector("#set-repeat-end");
+            
+            // Focus al input de data
+            setTimeout(() => dateInput.focus(), 50);
+
+            okBtn.onclick = function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              const val = dateInput.value;
+              if (val) {
+                repeatEndInput.value = val;
+                calendarPopup.style.display = "none";
+              }
+            };
+            
+            // Tancar al fer clic fora
+            setTimeout(() => {
+              function handler(ev) {
+                if (!calendarPopup.contains(ev.target) && ev.target !== calendarBtn) {
+                  calendarPopup.style.display = "none";
+                  document.removeEventListener("mousedown", handler);
+                }
+              }
+              document.addEventListener("mousedown", handler);
+            }, 100);
+          };
+        }
+      }, 50);
+      
+    } else if (this.value === "setmanal") {
       repeatOptions.innerHTML = `
-        <div style="margin-bottom:8px;">
+        <div style="margin-bottom:10px;">
           <span style="color:#666;">La tasca es repetirà cada setmana el mateix dia de la setmana.</span>
         </div>
-        <label style="color:#2596be;">Data final de repetició:</label>
-        <input type="text" id="edit-task-repeat-end" readonly style="width:120px; margin-right:8px;" />
-        <button id="open-repeat-calendar" type="button" style="background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">Calendari</button>
-        <div id="repeat-calendar-popup" style="display:none;position:absolute;z-index:1001;"></div>
+        <div style="margin-bottom:10px;">
+          <label style="color:#2596be;display:block;margin-bottom:5px;">Data final de repetició:</label>
+          <input type="text" id="edit-task-repeat-end" readonly style="width:120px; margin-right:8px;" placeholder="Selecciona data..." />
+          <button id="open-repeat-calendar" type="button" style="background:#2596be;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;">📅 Calendari</button>
+        </div>
+        <div id="repeat-calendar-popup" style="display:none;"></div>
       `;
-      setupCalendarPicker();
+      
+      // CONFIGURA EL CALENDARI PER SETMANAL TAMBÉ
+      setTimeout(() => {
+        const repeatEndInput = repeatOptions.querySelector("#edit-task-repeat-end");
+        const calendarBtn = repeatOptions.querySelector("#open-repeat-calendar");
+        const calendarPopup = repeatOptions.querySelector("#repeat-calendar-popup");
+
+        if (repeatEndInput && calendarBtn && calendarPopup) {
+          calendarBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            calendarPopup.style.display = "block";
+            calendarPopup.innerHTML = `
+              <input type="date" id="repeat-end-date" style="font-size:1em;padding:6px;border-radius:6px;border:1px solid #2596be;" />
+              <button id="set-repeat-end" type="button" style="margin-left:8px;background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">OK</button>
+            `;
+            
+            // Posiciona el popup
+            const rect = calendarBtn.getBoundingClientRect();
+            calendarPopup.style.position = "absolute";
+            calendarPopup.style.left = rect.left + window.scrollX + "px";
+            calendarPopup.style.top = rect.bottom + window.scrollY + 2 + "px";
+            calendarPopup.style.zIndex = "1002";
+            calendarPopup.style.background = "white";
+            calendarPopup.style.border = "1px solid #ccc";
+            calendarPopup.style.borderRadius = "6px";
+            calendarPopup.style.padding = "8px";
+            calendarPopup.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+
+            const dateInput = calendarPopup.querySelector("#repeat-end-date");
+            const okBtn = calendarPopup.querySelector("#set-repeat-end");
+            
+            // Focus al input de data
+            setTimeout(() => dateInput.focus(), 50);
+
+            okBtn.onclick = function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              const val = dateInput.value;
+              if (val) {
+                repeatEndInput.value = val;
+                calendarPopup.style.display = "none";
+              }
+            };
+            
+            // Tancar al fer clic fora
+            setTimeout(() => {
+              function handler(ev) {
+                if (!calendarPopup.contains(ev.target) && ev.target !== calendarBtn) {
+                  calendarPopup.style.display = "none";
+                  document.removeEventListener("mousedown", handler);
+                }
+              }
+              document.addEventListener("mousedown", handler);
+            }, 100);
+          };
+        }
+      }, 50);
     }
   };
-
-  // Funció auxiliar per configurar el selector de calendari
-  function setupCalendarPicker() {
-    const repeatEndInput = repeatOptions.querySelector("#edit-task-repeat-end");
-    const calendarBtn = repeatOptions.querySelector("#open-repeat-calendar");
-    const calendarPopup = repeatOptions.querySelector("#repeat-calendar-popup");
-
-    calendarBtn.onclick = function(e) {
-      calendarPopup.style.display = "";
-      calendarPopup.innerHTML = `
-        <input type="date" id="repeat-end-date" style="font-size:1em;padding:6px;border-radius:6px;border:1px solid #2596be;" />
-        <button id="set-repeat-end" style="margin-left:8px;background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">OK</button>
-      `;
-      calendarPopup.style.left = calendarBtn.getBoundingClientRect().left + window.scrollX + "px";
-      calendarPopup.style.top = calendarBtn.getBoundingClientRect().bottom + window.scrollY + "px";
-
-      calendarPopup.querySelector("#set-repeat-end").onclick = function() {
-        const val = calendarPopup.querySelector("#repeat-end-date").value;
-        if (val) {
-          repeatEndInput.value = val;
-          calendarPopup.style.display = "none";
-        }
-      };
-      
-      setTimeout(() => {
-        document.addEventListener("mousedown", function handler(ev) {
-          if (!calendarPopup.contains(ev.target) && ev.target !== calendarBtn) {
-            calendarPopup.style.display = "none";
-            document.removeEventListener("mousedown", handler);
-          }
-        });
-      }, 10);
-    };
-  }
 
   openModal({
     title: "Afegir Tasca",
@@ -1615,7 +1580,6 @@ function openTaskModal() {
           const done = wrap.querySelector("#edit-task-done").value === "true";
           
           if (repeatTypeVal === "diaria") {
-            // Lògica existent per repetició diària...
             const repeat = { type: repeatTypeVal };
             repeat.days = Array.from(wrap.querySelectorAll("#repeat-weekday-checkboxes input[type=checkbox]:checked")).map(cb => parseInt(cb.value));
             const repeatEndInput = wrap.querySelector("#edit-task-repeat-end");
@@ -1646,7 +1610,6 @@ function openTaskModal() {
               await setDoc(doc(db, "tasques", iso), { tasques });
             }
           } 
-          // AFEGEIX AQUESTA NOVA LÒGICA PER REPETICIÓ SETMANAL:
           else if (repeatTypeVal === "setmanal") {
             const repeatEndInput = wrap.querySelector("#edit-task-repeat-end");
             const endDateStr = repeatEndInput ? repeatEndInput.value : "";
@@ -1658,22 +1621,18 @@ function openTaskModal() {
               let endDate = new Date(endDateStr);
               let currentDate = new Date(baseDate);
               
-              // Afegeix la data inicial
               dates.push(obtenirDataISO(currentDate));
               
-              // Calcula les dates setmanals següents
               while (currentDate < endDate) {
-                currentDate.setDate(currentDate.getDate() + 7); // Afegeix 7 dies (1 setmana)
+                currentDate.setDate(currentDate.getDate() + 7);
                 if (currentDate <= endDate) {
                   dates.push(obtenirDataISO(currentDate));
                 }
               }
             } else {
-              // Si no hi ha data final, només crea la tasca per avui
               dates.push(obtenirDataISO(baseDate));
             }
             
-            // Crea la tasca per cada data calculada
             for (const iso of dates) {
               const docSnap = await getDoc(doc(db, "tasques", iso));
               const tasques = docSnap.exists() ? docSnap.data().tasques : [];
@@ -1689,7 +1648,6 @@ function openTaskModal() {
             }
           } 
           else {
-            // Tasca normal (sense repetició)
             const docId = selectedDate ?? UNASSIGNED_ID;
             const docSnap = await getDoc(doc(db, "tasques", docId));
             const tasques = docSnap.exists() ? docSnap.data().tasques : [];
@@ -1804,7 +1762,7 @@ function openSpecialDayModal(iso) {
           // Guarda el dia especial a Firestore
           const docSnap = await getDoc(doc(db, "tasques", iso));
           const tasques = docSnap.exists() ? docSnap.data().tasques : [];
-          // Marca el dia especial (guardem com una tasca especial invisible)
+          // Marca el dia especial (guardem amb una tasca especial invisible)
           let found = tasques.find(t => t.specialDay);
           if (found) {
             found.specialMotiu = motiu;
@@ -1867,7 +1825,6 @@ function openFestaDayModal(iso) {
     ]
   });
 }
-
 window.renderCalendar = renderCalendar;
 window.mostrarTasquesPendentsSenseDia = mostrarTasquesPendentsSenseDia;
 window.setUndoRedoDisabled = setUndoRedoDisabled;
