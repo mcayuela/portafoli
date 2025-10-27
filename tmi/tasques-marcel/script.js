@@ -1406,11 +1406,63 @@ function openTaskModal() {
 
   const repeatType = wrap.querySelector("#edit-task-repeat-type");
   const repeatOptions = wrap.querySelector("#repeat-options");
-  
+
   repeatType.onchange = function() {
     repeatOptions.innerHTML = "";
     repeatOptions.style.display = this.value ? "block" : "none";
-    
+
+    // Helper per calendari
+    function setupCalendarPicker() {
+      const repeatEndInput = repeatOptions.querySelector("#edit-task-repeat-end");
+      const calendarBtn = repeatOptions.querySelector("#open-repeat-calendar");
+      const calendarPopup = repeatOptions.querySelector("#repeat-calendar-popup");
+      if (!repeatEndInput || !calendarBtn || !calendarPopup) return;
+
+      calendarBtn.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        calendarPopup.style.display = "block";
+        calendarPopup.innerHTML = `
+          <input type="date" id="repeat-end-date" style="font-size:1em;padding:6px;border-radius:6px;border:1px solid #2596be;" />
+          <button id="set-repeat-end" type="button" style="margin-left:8px;background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">OK</button>
+        `;
+        // Posiciona el popup
+        const rect = calendarBtn.getBoundingClientRect();
+        calendarPopup.style.position = "absolute";
+        calendarPopup.style.left = rect.left + window.scrollX + "px";
+        calendarPopup.style.top = rect.bottom + window.scrollY + 2 + "px";
+        calendarPopup.style.zIndex = "1002";
+        calendarPopup.style.background = "white";
+        calendarPopup.style.border = "1px solid #ccc";
+        calendarPopup.style.borderRadius = "6px";
+        calendarPopup.style.padding = "8px";
+        calendarPopup.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+
+        const dateInput = calendarPopup.querySelector("#repeat-end-date");
+        const okBtn = calendarPopup.querySelector("#set-repeat-end");
+        setTimeout(() => dateInput.focus(), 50);
+
+        okBtn.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const val = dateInput.value;
+          if (val) {
+            repeatEndInput.value = val;
+            calendarPopup.style.display = "none";
+          }
+        };
+        setTimeout(() => {
+          function handler(ev) {
+            if (!calendarPopup.contains(ev.target) && ev.target !== calendarBtn) {
+              calendarPopup.style.display = "none";
+              document.removeEventListener("mousedown", handler);
+            }
+          }
+          document.addEventListener("mousedown", handler);
+        }, 100);
+      };
+    }
+
     if (this.value === "diaria") {
       repeatOptions.innerHTML = `
         <div id="repeat-weekday-checkboxes" style="margin-bottom:10px;">
@@ -1427,67 +1479,9 @@ function openTaskModal() {
         </div>
         <div id="repeat-calendar-popup" style="display:none;"></div>
       `;
-      
-      // CONFIGURA EL CALENDARI DESPRÉS DE CREAR EL HTML
-      setTimeout(() => {
-        const repeatEndInput = repeatOptions.querySelector("#edit-task-repeat-end");
-        const calendarBtn = repeatOptions.querySelector("#open-repeat-calendar");
-        const calendarPopup = repeatOptions.querySelector("#repeat-calendar-popup");
-
-        if (repeatEndInput && calendarBtn && calendarPopup) {
-          calendarBtn.onclick = function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            calendarPopup.style.display = "block";
-            calendarPopup.innerHTML = `
-              <input type="date" id="repeat-end-date" style="font-size:1em;padding:6px;border-radius:6px;border:1px solid #2596be;" />
-              <button id="set-repeat-end" type="button" style="margin-left:8px;background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">OK</button>
-            `;
-            
-            // Posiciona el popup
-            const rect = calendarBtn.getBoundingClientRect();
-            calendarPopup.style.position = "absolute";
-            calendarPopup.style.left = rect.left + window.scrollX + "px";
-            calendarPopup.style.top = rect.bottom + window.scrollY + 2 + "px";
-            calendarPopup.style.zIndex = "1002";
-            calendarPopup.style.background = "white";
-            calendarPopup.style.border = "1px solid #ccc";
-            calendarPopup.style.borderRadius = "6px";
-            calendarPopup.style.padding = "8px";
-            calendarPopup.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
-
-            const dateInput = calendarPopup.querySelector("#repeat-end-date");
-            const okBtn = calendarPopup.querySelector("#set-repeat-end");
-            
-            // Focus al input de data
-            setTimeout(() => dateInput.focus(), 50);
-
-            okBtn.onclick = function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              const val = dateInput.value;
-              if (val) {
-                repeatEndInput.value = val;
-                calendarPopup.style.display = "none";
-              }
-            };
-            
-            // Tancar al fer clic fora
-            setTimeout(() => {
-              function handler(ev) {
-                if (!calendarPopup.contains(ev.target) && ev.target !== calendarBtn) {
-                  calendarPopup.style.display = "none";
-                  document.removeEventListener("mousedown", handler);
-                }
-              }
-              document.addEventListener("mousedown", handler);
-            }, 100);
-          };
-        }
-      }, 50);
-      
-    } else if (this.value === "setmanal") {
+      setTimeout(setupCalendarPicker, 50);
+    }
+    else if (this.value === "setmanal") {
       repeatOptions.innerHTML = `
         <div style="margin-bottom:10px;">
           <span style="color:#666;">La tasca es repetirà cada setmana el mateix dia de la setmana.</span>
@@ -1499,65 +1493,21 @@ function openTaskModal() {
         </div>
         <div id="repeat-calendar-popup" style="display:none;"></div>
       `;
-      
-      // CONFIGURA EL CALENDARI PER SETMANAL TAMBÉ
-      setTimeout(() => {
-        const repeatEndInput = repeatOptions.querySelector("#edit-task-repeat-end");
-        const calendarBtn = repeatOptions.querySelector("#open-repeat-calendar");
-        const calendarPopup = repeatOptions.querySelector("#repeat-calendar-popup");
-
-        if (repeatEndInput && calendarBtn && calendarPopup) {
-          calendarBtn.onclick = function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            calendarPopup.style.display = "block";
-            calendarPopup.innerHTML = `
-              <input type="date" id="repeat-end-date" style="font-size:1em;padding:6px;border-radius:6px;border:1px solid #2596be;" />
-              <button id="set-repeat-end" type="button" style="margin-left:8px;background:#2596be;color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;">OK</button>
-            `;
-            
-            // Posiciona el popup
-            const rect = calendarBtn.getBoundingClientRect();
-            calendarPopup.style.position = "absolute";
-            calendarPopup.style.left = rect.left + window.scrollX + "px";
-            calendarPopup.style.top = rect.bottom + window.scrollY + 2 + "px";
-            calendarPopup.style.zIndex = "1002";
-            calendarPopup.style.background = "white";
-            calendarPopup.style.border = "1px solid #ccc";
-            calendarPopup.style.borderRadius = "6px";
-            calendarPopup.style.padding = "8px";
-            calendarPopup.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
-
-            const dateInput = calendarPopup.querySelector("#repeat-end-date");
-            const okBtn = calendarPopup.querySelector("#set-repeat-end");
-            
-            // Focus al input de data
-            setTimeout(() => dateInput.focus(), 50);
-
-            okBtn.onclick = function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              const val = dateInput.value;
-              if (val) {
-                repeatEndInput.value = val;
-                calendarPopup.style.display = "none";
-              }
-            };
-            
-            // Tancar al fer clic fora
-            setTimeout(() => {
-              function handler(ev) {
-                if (!calendarPopup.contains(ev.target) && ev.target !== calendarBtn) {
-                  calendarPopup.style.display = "none";
-                  document.removeEventListener("mousedown", handler);
-                }
-              }
-              document.addEventListener("mousedown", handler);
-            }, 100);
-          };
-        }
-      }, 50);
+      setTimeout(setupCalendarPicker, 50);
+    }
+    else if (this.value === "mensual") {
+      repeatOptions.innerHTML = `
+        <div style="margin-bottom:10px;">
+          <span style="color:#666;">La tasca es repetirà el mateix dia de cada mes.</span>
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="color:#2596be;display:block;margin-bottom:5px;">Data final de repetició:</label>
+          <input type="text" id="edit-task-repeat-end" readonly style="width:120px; margin-right:8px;" placeholder="Selecciona data..." />
+          <button id="open-repeat-calendar" type="button" style="background:#2596be;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;">📅 Calendari</button>
+        </div>
+        <div id="repeat-calendar-popup" style="display:none;"></div>
+      `;
+      setTimeout(setupCalendarPicker, 50);
     }
   };
 
@@ -1573,28 +1523,31 @@ function openTaskModal() {
         onClick: async () => {
           const text = wrap.querySelector("#edit-task-title").value.trim();
           if (!text) return true;
-          
           const repeatTypeVal = repeatType.value;
           const description = wrap.querySelector("#edit-task-desc").value;
           const priority = parseInt(wrap.querySelector("#edit-task-priority").value);
           const done = wrap.querySelector("#edit-task-done").value === "true";
-          
+          const repeatEndInput = wrap.querySelector("#edit-task-repeat-end");
+          const endDateStr = repeatEndInput ? repeatEndInput.value : "";
+          let baseDate = selectedDate ? new Date(selectedDate) : new Date();
+
+          // DIÀRIA
           if (repeatTypeVal === "diaria") {
             const repeat = { type: repeatTypeVal };
             repeat.days = Array.from(wrap.querySelectorAll("#repeat-weekday-checkboxes input[type=checkbox]:checked")).map(cb => parseInt(cb.value));
-            const repeatEndInput = wrap.querySelector("#edit-task-repeat-end");
-            const endDateStr = repeatEndInput ? repeatEndInput.value : "";
-            let baseDate = selectedDate ? new Date(selectedDate) : new Date();
             let dates = [];
-            if (endDateStr) {
+            if (endDateStr && repeat.days.length) {
               let endDate = new Date(endDateStr);
               let d = new Date(baseDate);
               while (d <= endDate) {
-                if (repeat.days.includes(d.getDay())) {
+                // getDay: 0 = diumenge, 1 = dilluns, ..., 6 = dissabte
+                if (repeat.days.includes(d.getDay() === 0 ? 7 : d.getDay())) {
                   dates.push(obtenirDataISO(d));
                 }
                 d.setDate(d.getDate() + 1);
               }
+            } else {
+              dates.push(obtenirDataISO(baseDate));
             }
             for (const iso of dates) {
               const docSnap = await getDoc(doc(db, "tasques", iso));
@@ -1609,20 +1562,14 @@ function openTaskModal() {
               });
               await setDoc(doc(db, "tasques", iso), { tasques });
             }
-          } 
+          }
+          // SETMANAL
           else if (repeatTypeVal === "setmanal") {
-            const repeatEndInput = wrap.querySelector("#edit-task-repeat-end");
-            const endDateStr = repeatEndInput ? repeatEndInput.value : "";
-            
-            let baseDate = selectedDate ? new Date(selectedDate) : new Date();
             let dates = [];
-            
             if (endDateStr) {
               let endDate = new Date(endDateStr);
               let currentDate = new Date(baseDate);
-              
               dates.push(obtenirDataISO(currentDate));
-              
               while (currentDate < endDate) {
                 currentDate.setDate(currentDate.getDate() + 7);
                 if (currentDate <= endDate) {
@@ -1632,7 +1579,6 @@ function openTaskModal() {
             } else {
               dates.push(obtenirDataISO(baseDate));
             }
-            
             for (const iso of dates) {
               const docSnap = await getDoc(doc(db, "tasques", iso));
               const tasques = docSnap.exists() ? docSnap.data().tasques : [];
@@ -1646,7 +1592,39 @@ function openTaskModal() {
               });
               await setDoc(doc(db, "tasques", iso), { tasques });
             }
-          } 
+          }
+          // MENSUAL
+          else if (repeatTypeVal === "mensual") {
+            let dates = [];
+            if (endDateStr) {
+              let endDate = new Date(endDateStr);
+              let currentDate = new Date(baseDate);
+              dates.push(obtenirDataISO(currentDate));
+              while (currentDate < endDate) {
+                let mes = currentDate.getMonth();
+                currentDate.setMonth(mes + 1);
+                if (currentDate <= endDate) {
+                  dates.push(obtenirDataISO(currentDate));
+                }
+              }
+            } else {
+              dates.push(obtenirDataISO(baseDate));
+            }
+            for (const iso of dates) {
+              const docSnap = await getDoc(doc(db, "tasques", iso));
+              const tasques = docSnap.exists() ? docSnap.data().tasques : [];
+              tasques.push({
+                id: crearId(),
+                text,
+                description,
+                priority,
+                done,
+                repeat: null
+              });
+              await setDoc(doc(db, "tasques", iso), { tasques });
+            }
+          }
+          // SENSE REPETICIÓ
           else {
             const docId = selectedDate ?? UNASSIGNED_ID;
             const docSnap = await getDoc(doc(db, "tasques", docId));
@@ -1661,7 +1639,6 @@ function openTaskModal() {
             });
             await setDoc(doc(db, "tasques", docId), { tasques });
           }
-          
           escoltarTasques(selectedDate ?? UNASSIGNED_ID);
           return false;
         }

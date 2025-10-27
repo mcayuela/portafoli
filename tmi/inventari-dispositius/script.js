@@ -265,7 +265,7 @@ function mostrarResultats(filtrats, pagina = 1) {
         <thead>
             <tr>
                 <th>ID</th>
-                <th>FQDN/Nom</th>
+                <th>FQDN</th>
                 <th>Usuari</th>
                 <th>Departament</th>
                 <th>Model</th>
