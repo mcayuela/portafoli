@@ -50,13 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Usuario autenticado
-        console.log("Usuario autenticado:", user.email);
-        carregarDades(); // CRIDA carregarDades() AQUÍ
+        console.log("Usuari autenticat:", user.email);
+        carregarDades();
     } else {
-        // Usuario no autenticado, redirigir al login
-        amagarLoader(); // AFEGEIX AIXÒ
-        window.location.href = "login.html";
+        window.location.href = 'login.html';
     }
 });
 
@@ -75,7 +72,8 @@ async function carregarDades() {
                 departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || '',
                 tipusDispositiu: 'PC',
-                dataAdquisicio: data.dataAdquisicio || ''
+                dataAdquisicio: data.dataAdquisicio || '',
+                codiTeamViewer: data.codiTeamViewer || '' // NOU CAMP
             });
         });
 
@@ -207,6 +205,7 @@ function filtraPerText(llista, text) {
         (item.tipusDispositiu && item.tipusDispositiu.toLowerCase().includes(text)) ||
         (item.usuari && item.usuari.toLowerCase().includes(text)) ||
         (item.departament && item.departament.toLowerCase().includes(text)) // AFEGEIX AQUESTA LÍNIA
+        || (item.codiTeamViewer && item.codiTeamViewer.toLowerCase().includes(text)) // NOU CAMP
     );
 }
 
@@ -229,6 +228,9 @@ function mostrarResultats(filtrats, pagina = 1) {
                     <button id="btn-afegir-dispositiu" class="btn-afegir">
                         <span class="btn-afegir-text">+ Afegir dispositiu</span>
                     </button>
+                    <button id="btn-exportar-csv" class="btn-editor">
+                        <span class="btn-editor-text">Exportar a CSV</span>
+                    </button>
                 ` : ''}
                 <button id="btn-mode-editor" class="btn-editor ${modeEditor ? 'actiu' : ''}">
                     <span class="btn-editor-text">${modeEditor ? 'Mode Usuari' : 'Mode Editor'}</span>
@@ -243,6 +245,11 @@ function mostrarResultats(filtrats, pagina = 1) {
         document.getElementById('btn-afegir-dispositiu').addEventListener('click', () => {
             mostrarModalSeleccioDispositiu();
         });
+
+        // Event listener per al botó d'exportar (només si està en mode editor)
+        document.getElementById('btn-exportar-csv').addEventListener('click', () => {
+            exportarACSV(filtrats);
+        });
     }
     
     // Event listener per al botó editor
@@ -250,7 +257,7 @@ function mostrarResultats(filtrats, pagina = 1) {
         modeEditor = !modeEditor;
         mostrarResultats(filtrats, pagina); // Refresca la vista
     });
-    
+
     if (!filtrats.length) {
         resultats.innerHTML = '<div>No s\'han trobat resultats.</div>';
         return;
@@ -438,6 +445,52 @@ async function borrarDispositiu(id, tipus) {
     }
 }
 
+// Funció per exportar a CSV
+function exportarACSV(dades) {
+    if (!dades.length) {
+        alert("No hi ha dades per exportar.");
+        return;
+    }
+
+    // Defineix les capçaleres del CSV
+    const capcaleres = [
+        "ID",
+        "FQDN",
+        "Usuari",
+        "Departament",
+        "Model",
+        "TipusDispositiu",
+        "DataAdquisicio"
+    ];
+
+    // Funció per escapar les dades per al CSV
+    const escapa = (valor) => {
+        let str = valor === null || valor === undefined ? '' : String(valor);
+        // Si conté comes, cometes dobles o salts de línia, el tanquem entre cometes
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            str = `"${str.replace(/"/g, '""')}"`; // Escapa les cometes dobles duplicant-les
+        }
+        return str;
+    };
+
+    // Converteix les dades a format CSV
+    const filesCSV = dades.map(fila => capcaleres.map(capcalera => escapa(fila[capcalera] || '')).join(','));
+    
+    // Afegeix la fila de capçaleres al principi
+    const contingutCSV = [capcaleres.join(',')].concat(filesCSV).join('\n');
+
+    // Crea i descarrega l'arxiu
+    const blob = new Blob([contingutCSV], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "inventari.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 // Funció per editar dispositiu
 async function editarDispositiu(id, tipus) {
     try {
@@ -500,6 +553,10 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
             <div class="camp-edicio">
                 <label for="edit-usuari">Usuari:</label>
                 <input type="text" id="edit-usuari" value="${dades.usuari || ''}">
+            </div>
+            <div class="camp-edicio"> <!-- NOU CAMP -->
+                <label for="edit-teamviewer">Codi TeamViewer:</label>
+                <input type="text" id="edit-teamviewer" value="${dades.codiTeamViewer || ''}">
             </div>
             <div class="camp-edicio">
                 <label for="edit-departament">Departament:</label>
@@ -659,7 +716,8 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
                 targetaGrafica: document.getElementById('edit-targeta-grafica').value,
                 sistemaOperatiu: document.getElementById('edit-so').value,
                 memoriaRAM: document.getElementById('edit-ram').value,
-                emmagatzematge: document.getElementById('edit-emmagatzematge').value,
+                emmagatzematge: document.getElementById('edit-emmagatzematge').value, // Corregit: era dataAdquisicio
+                codiTeamViewer: document.getElementById('edit-teamviewer').value, // NOU CAMP
                 dataAdquisicio: document.getElementById('edit-data').value
             };
         } else if (tipus === 'Mòbil') {
@@ -788,6 +846,10 @@ function mostrarModalAfegirDispositiu(tipus) {
             <div class="camp-edicio">
                 <label for="add-usuari">Usuari:</label>
                 <input type="text" id="add-usuari">
+            </div>
+            <div class="camp-edicio"> <!-- NOU CAMP -->
+                <label for="add-teamviewer">Codi TeamViewer:</label>
+                <input type="text" id="add-teamviewer">
             </div>
             <div class="camp-edicio">
                 <label for="add-departament">Departament:</label>
@@ -995,7 +1057,8 @@ async function afegirNouDispositiu(tipus, modal) {
                 targetaGrafica: document.getElementById('add-targeta-grafica').value,
                 sistemaOperatiu: document.getElementById('add-so').value,
                 memoriaRAM: document.getElementById('add-ram').value,
-                emmagatzematge: document.getElementById('add-emmagatzematge').value,
+                emmagatzematge: document.getElementById('add-emmagatzematge').value, // Corregit: era dataAdquisicio
+                codiTeamViewer: document.getElementById('add-teamviewer').value, // NOU CAMP
                 dataAdquisicio: document.getElementById('add-data').value
             };
         } else if (tipus === 'Mòbil') {
@@ -1146,7 +1209,7 @@ function generaQRDispositiu(pc, destEl) {
 
 function obreQRAPestanya(pc) {
     const mmYY = formatDataAdqMMYY(pc.dataAdquisicio);
-    const url = `https://mcayuela.com/tmi/inventari-dispositius/dispositiu?id=${encodeURIComponent(pc.id)}`;
+    const url = `https://mcayuela.com/tmi/inventari-dispositius/dispositiu.html?id=${encodeURIComponent(pc.id)}`;
 
     const html = `<!doctype html>
 <html>

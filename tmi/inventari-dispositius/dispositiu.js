@@ -1,17 +1,21 @@
 // Configuració Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
 const firebaseConfig = {
     apiKey: "AIzaSyDqsy5zE7YnUuMt80ZskvvUVFjIiVTdOB8",
     authDomain: "inventari-pc-s.firebaseapp.com",
     projectId: "inventari-pc-s",
-    storageBucket: "inventari-pc-s.firebasestorage.app",
+    storageBucket: "inventari-pc-s.appspot.com",
     messagingSenderId: "998595234302",
     appId: "1:998595234302:web:d253d36f99d82b549f18af",
     measurementId: "G-0QM2VV5NZD"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 let dispositiuActual = null;
 let tipusActual = '';
@@ -56,18 +60,44 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalAfegirNota) modalAfegirNota.addEventListener('click', handleClickForaModal);
 
     mostrarLoader();
-    
+
     // Comprova autenticació
-    auth.onAuthStateChanged((user) => {
+    onAuthStateChanged(auth, (user) => {
         if (user) {
             console.log("Usuario autenticado:", user.email);
             carregarDispositiu();
         } else {
             amagarLoader();
-            window.location.href = "login.html";
+            mostrarModalLogin();
         }
     });
 });
+
+function mostrarModalLogin() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-login';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>Inicia sessió per veure el dispositiu</h3>
+            <input type="email" id="login-email" placeholder="Correu electrònic" />
+            <input type="password" id="login-password" placeholder="Contrasenya" />
+            <button id="login-btn">Entrar</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('#login-btn').onclick = async () => {
+        const email = modal.querySelector('#login-email').value;
+        const password = modal.querySelector('#login-password').value;
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            document.body.removeChild(modal);
+            // No cal cridar a carregarDispositiu() aquí, onAuthStateChanged ho farà.
+        } catch (err) {
+            alert('Credencials incorrectes');
+        }
+    };
+}
 
 // Obté l'ID del dispositiu des de la URL
 function obtenirIdDispositiu() {
@@ -100,8 +130,8 @@ async function carregarDispositiu() {
         for (const col of col·leccions) {
             console.log(`Buscant a la col·lecció: ${col.nom}`);
             
-            const docRef = db.collection(col.nom).doc(id);
-            const docSnap = await docRef.get();
+            const docRef = doc(db, col.nom, id);
+            const docSnap = await getDoc(docRef);
             
             if (docSnap.exists) {
                 console.log(`Trobat a ${col.nom}:`, docSnap.data());
@@ -159,7 +189,8 @@ function mostrarCampsDispositiu() {
             'pc-targeta-grafica': dispositiuActual.targetaGrafica,
             'pc-so': dispositiuActual.sistemaOperatiu,
             'pc-ram': dispositiuActual.memoriaRAM,
-            'pc-emmagatzematge': dispositiuActual.emmagatzematge,
+            'pc-emmagatzematge': dispositiuActual.emmagatzematge, // Corregit: era dataAdquisicio
+            'pc-teamviewer': dispositiuActual.codiTeamViewer, // NOU CAMP
             'pc-data': formatarData(dispositiuActual.dataAdquisicio)
         };
         
@@ -289,11 +320,11 @@ async function afegirNota() {
         
         // Obté la col·lecció correcta
         const col·leccio = obtenirCol·leccio(tipusActual);
-        const docRef = db.collection(col·leccio).doc(dispositiuActual.id);
+        const docRef = doc(db, col·leccio, dispositiuActual.id);
         
         // Afegeix la nota a l'array
-        await docRef.update({
-            notes: firebase.firestore.FieldValue.arrayUnion(novaNota)
+        await updateDoc(docRef, {
+            notes: arrayUnion(novaNota)
         });
         
         // Actualitza les dades locals
@@ -326,11 +357,11 @@ async function eliminarNota(index) {
         
         const nota = dispositiuActual.notes[index];
         const col·leccio = obtenirCol·leccio(tipusActual);
-        const docRef = db.collection(col·leccio).doc(dispositiuActual.id);
+        const docRef = doc(db, col·leccio, dispositiuActual.id);
         
         // Elimina la nota de l'array
-        await docRef.update({
-            notes: firebase.firestore.FieldValue.arrayRemove(nota)
+        await updateDoc(docRef, {
+            notes: arrayRemove(nota)
         });
         
         // Actualitza les dades locals

@@ -22,14 +22,12 @@ let entregues = [];
 let paginaActual = 1;
 let resultatsFiltrats = [];
 const RESULTATS_PER_PAGINA = 50;
-const COLLECCIO_ENTREGUES = "entrega de material";
+const COLLECCIO_ENTREGUES = "entregues";
 const DOC_CONTADOR = "metadades/contador_entregues"; // Per l'ID incremental
 
 const cercador = document.getElementById('buscador');
-// El filtreTipus no existeix a entrega-material.html, però el referenciem per robustesa
-const selectTipus = document.querySelector('.filtreTipus'); 
+const filtreTipusEntrega = document.getElementById('filtre-tipus-entrega');
 const resultats = document.getElementById('resultats');
-const contadorEntregues = document.querySelector('.contador-dispositius');
 let modeEditor = false;
 
 // Funcions del Loader
@@ -76,17 +74,19 @@ async function carregarDades() {
                 usuari: data.usuari || '',
                 departament: data.departament || '',
                 data: data.data || '', // Data en format ISO (YYYY-MM-DD)
-                notes: data.notes || ''
+                notes: data.notes || '',
+                tipusEntrega: data.tipusEntrega || 'Normal' // NOU CAMP
             });
         });
         
         // Ordena per ID descendent per mostrar les més recents primer
-        entregues.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+        entregues.sort((a, b) => {
+            const idA = parseInt(a.id, 10) || 0;
+            const idB = parseInt(b.id, 10) || 0;
+            return idB - idA;
+        });
         
-        console.log("Total entregues carregades:", entregues.length);
-        
-        // Abans cridava a mostrarTaula, ara crida al filtre per visualitzar correctament
-        filtraIText(''); // <--- AQUESTA CRIDA SUBSTITUEIX LA CRIDA ERRÒNIA
+        filtraDades();
     } catch (error) {
         console.error("Error carregant entregues:", error);
         if (resultats) {
@@ -97,15 +97,19 @@ async function carregarDades() {
     }
 }
 
-// Filtra només per text (ID, Article, Usuari, Departament, Notes)
-function filtraIText() {
+// Filtra per tipus d'entrega i text
+function filtraDades() {
+    const tipusSeleccionat = filtreTipusEntrega.value;
     const valorCercador = cercador.value.trim().toLowerCase();
-    resultatsFiltrats = filtraPerText(entregues, valorCercador);
+
+    let dadesFiltrades = entregues.filter(item => 
+        !tipusSeleccionat || item.tipusEntrega === tipusSeleccionat
+    );
+
+    resultatsFiltrats = filtraPerText(dadesFiltrades, valorCercador);
     paginaActual = 1;
     mostrarResultats(resultatsFiltrats, paginaActual);
 }
-
-// Filtra per text
 function filtraPerText(llista, text) {
     if (!text) return llista;
     return llista.filter(item =>
@@ -114,13 +118,17 @@ function filtraPerText(llista, text) {
         (item.usuari && item.usuari.toLowerCase().includes(text)) ||
         (item.departament && item.departament.toLowerCase().includes(text)) ||
         (item.notes && item.notes.toLowerCase().includes(text)) ||
-        (item.data && item.data.toLowerCase().includes(text))
+        (item.data && formatarData(item.data).toLowerCase().includes(text))
     );
 }
 
 // Quan escrius al cercador
 if (cercador) {
-    cercador.addEventListener('input', filtraIText);
+    cercador.addEventListener('input', filtraDades);
+}
+
+if (filtreTipusEntrega) {
+    filtreTipusEntrega.addEventListener('change', filtraDades);
 }
 
 // Funció auxiliar per formatar la data
@@ -147,7 +155,7 @@ function mostrarResultats(filtrats, pagina = 1) {
             <div class="botons-header">
                 ${modeEditor ? `
                     <button id="btn-afegir-entrega" class="btn-afegir">
-                        <span class="btn-afegir-text">+ Afegir Entrega</span>
+                        <span class="btn-afegir-text">+ Afegir entrega</span>
                     </button>
                 ` : ''}
                 <button id="btn-mode-editor" class="btn-editor ${modeEditor ? 'actiu' : ''}">
@@ -156,7 +164,7 @@ function mostrarResultats(filtrats, pagina = 1) {
             </div>
         </div>
     `;
-    if (contadorEntregues) contadorEntregues.innerHTML = headerHtml;
+    resultats.innerHTML += headerHtml;
     
     // Event listeners per al header
     if (modeEditor) {
@@ -168,7 +176,7 @@ function mostrarResultats(filtrats, pagina = 1) {
     });
     
     if (!filtrats.length) {
-        resultats.innerHTML = '<div style="text-align: center; margin-top: 20px;">No s\'han trobat resultats.</div>';
+        resultats.innerHTML += '<div style="text-align: center; margin-top: 20px;">No s\'han trobat resultats.</div>';
         return;
     }
     
@@ -178,7 +186,7 @@ function mostrarResultats(filtrats, pagina = 1) {
     const paginaDades = filtrats.slice(inici, final);
 
     // Taula de resultats
-    let html = `<table class="taula-resultats">
+    let taulaHtml = `<table class="taula-resultats">
         <thead>
             <tr>
                 <th>ID</th>
@@ -186,6 +194,7 @@ function mostrarResultats(filtrats, pagina = 1) {
                 <th>Usuari</th>
                 <th>Departament</th>
                 <th>Data</th>
+                <th>Tipus</th>
                 <th>Notes</th>
                 ${modeEditor ? '<th class="col-accions">Accions</th>' : ''}
             </tr>
@@ -195,13 +204,15 @@ function mostrarResultats(filtrats, pagina = 1) {
     
     for (const item of paginaDades) {
         const dataFormatada = formatarData(item.data);
-        
-        html += `<tr>
+        const classeFila = item.tipusEntrega === 'Prèstec' ? 'class="fila-prestec"' : '';
+
+        taulaHtml += `<tr ${classeFila}>
             <td>${item.id || ''}</td>
             <td>${item.article || ''}</td>
             <td>${item.usuari || 'N/A'}</td>
             <td>${item.departament || 'N/A'}</td>
             <td>${dataFormatada}</td>
+            <td>${item.tipusEntrega || 'Normal'}</td>
             <td>${(item.notes || '').substring(0, 50) + (item.notes && item.notes.length > 50 ? '...' : '')}</td>
             ${modeEditor ? `<td class="accions-cell">
                 <button class="btn-editar" data-id="${item.id}" title="Editar entrega">✎</button>
@@ -209,8 +220,8 @@ function mostrarResultats(filtrats, pagina = 1) {
             </td>` : ''}
         </tr>`;
     }
-    html += '</tbody></table>';
-    resultats.innerHTML = html;
+    taulaHtml += '</tbody></table>';
+    resultats.innerHTML += taulaHtml;
 
     // Event listeners per als botons de l'editor
     if (modeEditor) {
@@ -259,14 +270,14 @@ async function generarNouIdEntrega() {
             const docRef = doc(db, DOC_CONTADOR);
             const docSnap = await transaction.get(docRef);
 
-            let lastId = 0;
+            let lastId = 1000; // Comença a 1001
             if (docSnap.exists()) {
-                lastId = docSnap.data().lastId || 0;
+                lastId = docSnap.data().lastId || 1000;
             }
 
             const newIdNum = lastId + 1;
-            const newIdStr = String(newIdNum).padStart(4, '0');
-
+            const newIdStr = String(newIdNum);
+            
             transaction.set(docRef, { lastId: newIdNum });
             return newIdStr;
         });
@@ -317,6 +328,13 @@ async function mostrarModalAfegirEntrega() {
             <input type="date" id="add-data" value="${new Date().toISOString().substring(0, 10)}">
         </div>
         <div class="camp-edicio">
+            <label for="add-tipus-entrega">Tipus d'Entrega:</label>
+            <select id="add-tipus-entrega">
+                <option value="Normal" selected>Normal</option>
+                <option value="Prèstec">Prèstec</option>
+            </select>
+        </div>
+        <div class="camp-edicio">
             <label for="add-notes">Notes:</label>
             <textarea id="add-notes" rows="4"></textarea>
         </div>
@@ -364,7 +382,8 @@ async function afegirNouEntrega(modal) {
             usuari: document.getElementById('add-usuari').value,
             departament: document.getElementById('add-departament').value,
             data: document.getElementById('add-data').value,
-            notes: document.getElementById('add-notes').value
+            notes: document.getElementById('add-notes').value,
+            tipusEntrega: document.getElementById('add-tipus-entrega').value
         };
         
         if (!nouEntrega.article || !nouEntrega.usuari) {
@@ -373,7 +392,10 @@ async function afegirNouEntrega(modal) {
 
         // Afegeix a Firebase
         const docRef = doc(db, COLLECCIO_ENTREGUES, nouEntrega.id);
-        await setDoc(docRef, nouEntrega);
+        // No guardem l'ID dins del document, ja que és la clau
+        const { id, ...dadesPerGuardar } = nouEntrega;
+        dadesPerGuardar.id = id; // Guardem l'ID com a camp
+        await setDoc(docRef, dadesPerGuardar);
         
         alert(`Entrega amb ID: ${nouEntrega.id} afegida correctament!`);
         
@@ -418,8 +440,8 @@ function mostrarModalEdicio(id, dades) {
     
     const campsHTML = `
         <div class="camp-edicio">
-            <label for="edit-id">ID:</label>
-            <input type="text" id="edit-id" value="${dades.id || ''}" readonly>
+            <label>ID:</label>
+            <input type="text" value="${id}" readonly>
         </div>
         <div class="camp-edicio">
             <label for="edit-article">Article:</label>
@@ -436,6 +458,13 @@ function mostrarModalEdicio(id, dades) {
         <div class="camp-edicio">
             <label for="edit-data">Data (YYYY-MM-DD):</label>
             <input type="date" id="edit-data" value="${dades.data || ''}">
+        </div>
+        <div class="camp-edicio">
+            <label for="edit-tipus-entrega">Tipus d'Entrega:</label>
+            <select id="edit-tipus-entrega">
+                <option value="Normal" ${dades.tipusEntrega === 'Normal' ? 'selected' : ''}>Normal</option>
+                <option value="Prèstec" ${dades.tipusEntrega === 'Prèstec' ? 'selected' : ''}>Prèstec</option>
+            </select>
         </div>
         <div class="camp-edicio">
             <label for="edit-notes">Notes:</label>
@@ -480,12 +509,12 @@ async function guardarCanvisEntrega(id, modal) {
     try {
         mostrarLoader();
         const dadesActualitzades = {
-            id: document.getElementById('edit-id').value,
             article: document.getElementById('edit-article').value,
             usuari: document.getElementById('edit-usuari').value,
             departament: document.getElementById('edit-departament').value,
             data: document.getElementById('edit-data').value,
-            notes: document.getElementById('edit-notes').value
+            notes: document.getElementById('edit-notes').value,
+            tipusEntrega: document.getElementById('edit-tipus-entrega').value
         };
         
         if (!dadesActualitzades.article || !dadesActualitzades.usuari) {

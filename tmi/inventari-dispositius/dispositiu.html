@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dispositiu - Inventari TMI</title>
     <link rel="stylesheet" href="styles.css">
-    
-    <!-- Firebase v8 -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 </head>
 <body>
     <!-- Loader global -->
@@ -70,6 +65,10 @@
                         <div class="camp-info">
                             <label>Usuari:</label>
                             <span id="pc-usuari">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Codi TeamViewer:</label>
+                            <span id="pc-teamviewer">-</span>
                         </div>
                         <div class="camp-info">
                             <label>Model:</label>
@@ -216,6 +215,6 @@
         </div>
     </template>
 
-    <script src="dispositiu.js"></script>
+    <script type="module" src="dispositiu.js"></script>
 </body>
 </html>

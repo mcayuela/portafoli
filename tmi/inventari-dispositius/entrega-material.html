@@ -19,8 +19,12 @@
     <main>
         <div class="contenidor-principal-superior">
           <div class="grup-filtres-cercador">
-            <input id="buscador" class="buscador" placeholder="Cerca entrega..." />
-            <!-- El select i subfiltre no són necessaris per entregues, elimina'ls -->
+            <input id="buscador" class="buscador" placeholder="Cerca per ID, article, usuari..." />
+            <select class="filtreTipus" id="filtre-tipus-entrega">
+              <option value="">Tots els tipus</option>
+              <option value="Normal">Normal</option>
+              <option value="Prèstec">Prèstec</option>
+            </select>
           </div>
         </div>
         <div id="resultats"></div>
