@@ -22,12 +22,13 @@ let entregues = [];
 let paginaActual = 1;
 let resultatsFiltrats = [];
 const RESULTATS_PER_PAGINA = 50;
-const COLLECCIO_ENTREGUES = "entregues";
+const COLLECCIO_ENTREGUES = "entregues"; // Nom de la col·lecció a Firebase
 const DOC_CONTADOR = "metadades/contador_entregues"; // Per l'ID incremental
 
 const cercador = document.getElementById('buscador');
 const filtreTipusEntrega = document.getElementById('filtre-tipus-entrega');
 const resultats = document.getElementById('resultats');
+const contadorDispositius = document.querySelector('.contador-dispositius'); // Canviat de .contador-contactes
 let modeEditor = false;
 
 // Funcions del Loader
@@ -61,7 +62,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// La funció de càrrega de dades requerida i corregida
+// Carrega dades de Firebase
 async function carregarDades() {
     try {
         const queryentregues = await getDocs(collection(db, COLLECCIO_ENTREGUES));
@@ -97,14 +98,17 @@ async function carregarDades() {
     }
 }
 
-// Filtra per tipus d'entrega i text
+// Filtra per tipus d'entrega i després pel text del cercador
 function filtraDades() {
     const tipusSeleccionat = filtreTipusEntrega.value;
     const valorCercador = cercador.value.trim().toLowerCase();
 
-    let dadesFiltrades = entregues.filter(item => 
-        !tipusSeleccionat || item.tipusEntrega === tipusSeleccionat
-    );
+    let dadesFiltrades;
+    if (!tipusSeleccionat) {
+        dadesFiltrades = entregues;
+    } else {
+        dadesFiltrades = entregues.filter(d => d.tipusEntrega === tipusSeleccionat);
+    }
 
     resultatsFiltrats = filtraPerText(dadesFiltrades, valorCercador);
     paginaActual = 1;
@@ -122,11 +126,11 @@ function filtraPerText(llista, text) {
     );
 }
 
-// Quan escrius al cercador
+// Quan escrius al cercador, manté el filtre de tipus
 if (cercador) {
     cercador.addEventListener('input', filtraDades);
 }
-
+// Quan canvies el filtre de tipus
 if (filtreTipusEntrega) {
     filtreTipusEntrega.addEventListener('change', filtraDades);
 }
@@ -147,8 +151,8 @@ function formatarData(dataString) {
 // Mostra resultats
 function mostrarResultats(filtrats, pagina = 1) {
     resultats.innerHTML = '';
-    
-    // Header amb botons
+
+    // Header amb comptador i botons
     const headerHtml = `
         <div class="header-resultats">
             <span class="comptador-text">Entregues: ${filtrats.length}</span>
@@ -157,26 +161,35 @@ function mostrarResultats(filtrats, pagina = 1) {
                     <button id="btn-afegir-entrega" class="btn-afegir">
                         <span class="btn-afegir-text">+ Afegir entrega</span>
                     </button>
+                    <button id="btn-exportar-csv" class="btn-editor">
+                        <span class="btn-editor-text">Exportar a CSV</span>
+                    </button>
+                    <a href="index.html" class="btn-editor">
+                        <span class="btn-editor-text">Inventari Dispositius</span>
+                    </a>
                 ` : ''}
                 <button id="btn-mode-editor" class="btn-editor ${modeEditor ? 'actiu' : ''}">
-                    <span class="btn-editor-text">${modeEditor ? 'Mode Usuari' : 'Mode Editor'}</span>
+                    <span class="btn-editor-text">${modeEditor ? 'Tancar Edició' : 'Mode Editor'}</span>
                 </button>
             </div>
         </div>
     `;
-    resultats.innerHTML += headerHtml;
-    
+    // Canviat per actualitzar el contenidor correcte
+    if (contadorDispositius) contadorDispositius.innerHTML = headerHtml;
+
     // Event listeners per al header
-    if (modeEditor) {
-        document.getElementById('btn-afegir-entrega').addEventListener('click', mostrarModalAfegirEntrega);
-    }
     document.getElementById('btn-mode-editor').addEventListener('click', () => {
         modeEditor = !modeEditor;
         mostrarResultats(filtrats, pagina);
     });
+
+    if (modeEditor) {
+        document.getElementById('btn-afegir-entrega').addEventListener('click', mostrarModalAfegirEntrega);
+        document.getElementById('btn-exportar-csv').addEventListener('click', () => exportarEntreguesACSV(filtrats));
+    }
     
     if (!filtrats.length) {
-        resultats.innerHTML += '<div style="text-align: center; margin-top: 20px;">No s\'han trobat resultats.</div>';
+        resultats.innerHTML = '<div style="text-align: center; margin-top: 20px;">No s\'han trobat resultats.</div>';
         return;
     }
     
@@ -209,7 +222,7 @@ function mostrarResultats(filtrats, pagina = 1) {
         taulaHtml += `<tr ${classeFila}>
             <td>${item.id || ''}</td>
             <td>${item.article || ''}</td>
-            <td>${item.usuari || 'N/A'}</td>
+            <td>${item.usuari || ''}</td>
             <td>${item.departament || 'N/A'}</td>
             <td>${dataFormatada}</td>
             <td>${item.tipusEntrega || 'Normal'}</td>
@@ -221,7 +234,7 @@ function mostrarResultats(filtrats, pagina = 1) {
         </tr>`;
     }
     taulaHtml += '</tbody></table>';
-    resultats.innerHTML += taulaHtml;
+    resultats.innerHTML = taulaHtml; // Canviat per evitar duplicar contingut
 
     // Event listeners per als botons de l'editor
     if (modeEditor) {
@@ -238,10 +251,10 @@ function mostrarResultats(filtrats, pagina = 1) {
     }
 
     // Paginació al peu de pàgina
-    const paginacioFooter = document.getElementById('paginacio-footer');
     const totalPagines = Math.ceil(filtrats.length / RESULTATS_PER_PAGINA);
-    if (paginacioFooter) paginacioFooter.innerHTML = ''; 
-    
+    const paginacioFooter = document.getElementById('paginacio-footer'); 
+    if (paginacioFooter) paginacioFooter.innerHTML = '';
+
     if (totalPagines > 1 && paginacioFooter) {
         let paginacioHtml = `<div class="paginacio">`;
         paginacioHtml += `<button class="paginacio-btn" data-pagina="${pagina - 1}" ${pagina === 1 ? 'disabled' : ''}>&lt;</button>`;
@@ -262,8 +275,56 @@ function mostrarResultats(filtrats, pagina = 1) {
     }
 }
 
+// Funció per exportar les entregues a CSV
+function exportarEntreguesACSV(dades) {
+    if (!dades.length) {
+        alert("No hi ha dades per exportar.");
+        return;
+    }
 
-// Funció per generar un nou ID incremental de 4 dígits
+    // Defineix les capçaleres del CSV
+    const capcaleres = [
+        "ID",
+        "Article",
+        "Usuari",
+        "Departament",
+        "Data",
+        "TipusEntrega",
+        "Notes"
+    ];
+
+    // Funció per escapar les dades per al CSV
+    const escapa = (valor) => {
+        let str = valor === null || valor === undefined ? '' : String(valor);
+        // Si conté comes, cometes dobles o salts de línia, el tanquem entre cometes
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            str = `"${str.replace(/"/g, '""')}"`; // Escapa les cometes dobles duplicant-les
+        }
+        return str;
+    };
+
+    // Converteix les dades a format CSV
+    const filesCSV = dades.map(fila => capcaleres.map(capcalera => {
+        const clau = capcalera === 'Tipus' ? 'tipusEntrega' : capcalera.toLowerCase();
+        return escapa(fila[clau] || '');
+    }).join(','));
+    
+    // Afegeix la fila de capçaleres al principi
+    const contingutCSV = [capcaleres.join(',')].concat(filesCSV).join('\n');
+
+    // Crea i descarrega l'arxiu
+    const blob = new Blob([contingutCSV], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "entregues.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Funció per generar un nou ID incremental
 async function generarNouIdEntrega() {
     try {
         const nouId = await runTransaction(db, async (transaction) => {
@@ -271,7 +332,7 @@ async function generarNouIdEntrega() {
             const docSnap = await transaction.get(docRef);
 
             let lastId = 1000; // Comença a 1001
-            if (docSnap.exists()) {
+            if (docSnap.exists() && docSnap.data().lastId) {
                 lastId = docSnap.data().lastId || 1000;
             }
 
@@ -289,7 +350,7 @@ async function generarNouIdEntrega() {
     }
 }
 
-// Mostra modal per afegir nova entrega
+// Mostra modal per afegir una nova entrega
 async function mostrarModalAfegirEntrega() {
     mostrarLoader();
     let nouId;
@@ -330,7 +391,7 @@ async function mostrarModalAfegirEntrega() {
         <div class="camp-edicio">
             <label for="add-tipus-entrega">Tipus d'Entrega:</label>
             <select id="add-tipus-entrega">
-                <option value="Normal" selected>Normal</option>
+                <option value="Normal" selected>Entrega</option>
                 <option value="Prèstec">Prèstec</option>
             </select>
         </div>
@@ -372,7 +433,7 @@ async function mostrarModalAfegirEntrega() {
     });
 }
 
-// Afegeix nova entrega a Firebase
+// Afegeix la nova entrega a Firebase
 async function afegirNouEntrega(modal) {
     try {
         mostrarLoader();
@@ -394,7 +455,6 @@ async function afegirNouEntrega(modal) {
         const docRef = doc(db, COLLECCIO_ENTREGUES, nouEntrega.id);
         // No guardem l'ID dins del document, ja que és la clau
         const { id, ...dadesPerGuardar } = nouEntrega;
-        dadesPerGuardar.id = id; // Guardem l'ID com a camp
         await setDoc(docRef, dadesPerGuardar);
         
         alert(`Entrega amb ID: ${nouEntrega.id} afegida correctament!`);
@@ -411,7 +471,7 @@ async function afegirNouEntrega(modal) {
 }
 
 
-// Funció per editar entrega
+// Funció per carregar dades i mostrar modal d'edició
 async function editarEntrega(id) {
     try {
         mostrarLoader();
@@ -462,7 +522,7 @@ function mostrarModalEdicio(id, dades) {
         <div class="camp-edicio">
             <label for="edit-tipus-entrega">Tipus d'Entrega:</label>
             <select id="edit-tipus-entrega">
-                <option value="Normal" ${dades.tipusEntrega === 'Normal' ? 'selected' : ''}>Normal</option>
+                <option value="Normal" ${dades.tipusEntrega === 'Normal' ? 'selected' : ''}>Entrega</option>
                 <option value="Prèstec" ${dades.tipusEntrega === 'Prèstec' ? 'selected' : ''}>Prèstec</option>
             </select>
         </div>
@@ -504,7 +564,7 @@ function mostrarModalEdicio(id, dades) {
     });
 }
 
-// Guarda els canvis de l'entrega
+// Guarda els canvis de l'entrega a Firebase
 async function guardarCanvisEntrega(id, modal) {
     try {
         mostrarLoader();
@@ -539,7 +599,7 @@ async function guardarCanvisEntrega(id, modal) {
 }
 
 
-// Mostra modal de confirmació per borrar
+// Mostra modal de confirmació per esborrar
 function mostrarModalConfirmacio(id) {
     const modal = document.createElement('div');
     modal.id = 'modal-confirmacio-borrar';
@@ -548,7 +608,7 @@ function mostrarModalConfirmacio(id) {
     modal.innerHTML = `
         <div class="modal-confirmacio">
             <h3 class="modal-titol-borrar">Confirmar eliminació</h3>
-            <p class="modal-text">Estàs segur que vols borrar l'entrega <strong>ID: ${id}</strong>?</p>
+            <p class="modal-text">Estàs segur que vols esborrar l'entrega <strong>ID: ${id}</strong>?</p>
             <p class="modal-warning">Aquesta acció no es pot desfer.</p>
             <div class="modal-botons">
                 <button id="btn-confirmar-borrar" class="btn-confirmar">Sí, borrar</button>
@@ -575,15 +635,16 @@ function mostrarModalConfirmacio(id) {
     });
 }
 
-// Borra entrega de la base de dades
+// Esborra l'entrega de la base de dades
 async function borrarEntrega(id) {
     try {
         mostrarLoader();
         await deleteDoc(doc(db, COLLECCIO_ENTREGUES, id.toString()));
+        alert(`Entrega amb ID: ${id} esborrada correctament.`);
         await carregarDades();
     } catch (error) {
         console.error('Error borrant entrega:', error);
-        alert('Error borrant l\'entrega. Comprova la connexió.');
+        alert('Error esborrant l\'entrega. Comprova la connexió.');
     } finally {
         amagarLoader();
     }

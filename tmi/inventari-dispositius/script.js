@@ -231,9 +231,12 @@ function mostrarResultats(filtrats, pagina = 1) {
                     <button id="btn-exportar-csv" class="btn-editor">
                         <span class="btn-editor-text">Exportar a CSV</span>
                     </button>
+                    <a href="entrega-material.html" class="btn-editor">
+                        <span class="btn-editor-text">Entregues Material</span>
+                    </a>
                 ` : ''}
                 <button id="btn-mode-editor" class="btn-editor ${modeEditor ? 'actiu' : ''}">
-                    <span class="btn-editor-text">${modeEditor ? 'Mode Usuari' : 'Mode Editor'}</span>
+                    <span class="btn-editor-text">${modeEditor ? 'Tancar Edició' : 'Mode Editor'}</span>
                 </button>
             </div>
         </div>

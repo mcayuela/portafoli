@@ -2,37 +2,38 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" href="images/logo_tmi_sensefons.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestió d'Entregues de Material - TMI</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header id="site-header">
       <div class="logo-esquerra">
-        <img src="/images/logo_tmi_sensefons.png" alt="Logo esquerra" />
+        <img src="images/logo_tmi_sensefons.png" alt="Logo esquerra" />
       </div>
       <a class="titol-principal" href="entrega-material.html">Gestió d'Entregues de Material - TMI</a>
       <div class="logo-dreta">
-        <img src="/images/logo_tmi_sensefons.png" alt="Logo dreta" />
+        <img src="images/logo_tmi_sensefons.png" alt="Logo dreta" />
       </div>
     </header>
     <main>
         <div class="contenidor-principal-superior">
           <div class="grup-filtres-cercador">
             <input id="buscador" class="buscador" placeholder="Cerca per ID, article, usuari..." />
-            <select class="filtreTipus" id="filtre-tipus-entrega">
+            <select id="filtre-tipus-entrega" class="filtreTipus">
               <option value="">Tots els tipus</option>
               <option value="Normal">Normal</option>
               <option value="Prèstec">Prèstec</option>
             </select>
+            <span id="contenidor-subfiltre"></span>
           </div>
+          <div class="contador-dispositius">Entregues: 0</div>
         </div>
         <div id="resultats"></div>
     </main>
     <footer>
         <div id="paginacio-footer"></div>
     </footer>
-    <!-- Loader global -->
     <div id="global-loader" class="global-loader">
         <div class="loader-content">
             <div class="spinner"></div>
