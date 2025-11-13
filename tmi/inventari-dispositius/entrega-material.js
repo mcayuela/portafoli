@@ -1,6 +1,6 @@
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, deleteDoc, runTransaction } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, setDoc, deleteDoc, runTransaction, arrayUnion } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 // Configuració Firebase (Mateixa que la resta de l'inventari)
@@ -21,6 +21,8 @@ const auth = getAuth(app);
 let entregues = [];
 let paginaActual = 1;
 let resultatsFiltrats = [];
+let articlesUnics = new Set();
+let departamentsUnics = [];
 const RESULTATS_PER_PAGINA = 50;
 const COLLECCIO_ENTREGUES = "entregues"; // Nom de la col·lecció a Firebase
 const DOC_CONTADOR = "metadades/contador_entregues"; // Per l'ID incremental
@@ -62,9 +64,45 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
+// Carrega la configuració dels articles des de Firebase
+async function carregarConfiguracioArticles() {
+    try {
+        const docRef = doc(db, "configuracio", "tipus_article");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && Array.isArray(docSnap.data().Articles)) {
+            articlesUnics = new Set(docSnap.data().Articles);
+        } else {
+            console.warn("Document 'configuracio/tipus_article' o camp 'Articles' no trobat. S'utilitzarà una llista buida.");
+            articlesUnics = new Set();
+        }
+    } catch (error) {
+        console.error("Error carregant la configuració d'articles:", error);
+        articlesUnics = new Set(); // Fallback a una llista buida en cas d'error
+    }
+}
+
+// Carrega la configuració dels departaments des de Firebase
+async function carregarConfiguracioDepartaments() {
+    try {
+        const docRef = doc(db, "configuracio", "departaments");
+        const docSnap = await getDoc(docRef);
+        // L'usuari ha indicat que el camp és un array dins del document
+        if (docSnap.exists() && Array.isArray(docSnap.data().Departaments)) {
+            departamentsUnics = docSnap.data().Departaments.sort();
+        } else {
+            console.warn("Document 'configuracio/departaments' o camp array 'Departaments' no trobat.");
+            departamentsUnics = [];
+        }
+    } catch (error) {
+        console.error("Error carregant la configuració de departaments:", error);
+        departamentsUnics = []; // Fallback a una llista buida en cas d'error
+    }
+}
+
 // Carrega dades de Firebase
 async function carregarDades() {
     try {
+        await Promise.all([carregarConfiguracioArticles(), carregarConfiguracioDepartaments()]); // Carrega configuracions en paral·lel
         const queryentregues = await getDocs(collection(db, COLLECCIO_ENTREGUES));
         entregues = [];
         queryentregues.forEach((doc) => {
@@ -336,28 +374,22 @@ function exportarEntreguesACSV(dades) {
 
 // Funció per generar un nou ID incremental
 async function generarNouIdEntrega() {
-    try {
-        const nouId = await runTransaction(db, async (transaction) => {
-            const docRef = doc(db, DOC_CONTADOR);
-            const docSnap = await transaction.get(docRef);
-
-            let lastId = 1000; // Comença a 1001
-            if (docSnap.exists() && docSnap.data().lastId) {
-                lastId = docSnap.data().lastId || 1000;
-            }
-
-            const newIdNum = lastId + 1;
-            const newIdStr = String(newIdNum);
-            
-            transaction.set(docRef, { lastId: newIdNum });
-            return newIdStr;
-        });
-
-        return nouId;
-    } catch (error) {
-        console.error("Error generant nou ID:", error);
-        throw new Error("No s'ha pogut generar un nou ID d'entrega. Comprova la col·lecció 'metadades' a Firebase.");
+    // L'array 'entregues' ja està carregat en aquest punt
+    if (!entregues || entregues.length === 0) {
+        return "1001"; // Si no hi ha entregues, comença per 1001
     }
+
+    // Troba l'ID més alt existent a la llista
+    const maxId = entregues.reduce((max, entrega) => {
+        const currentId = parseInt(entrega.id, 10);
+        // Comprova si el currentId és un número vàlid abans de comparar
+        if (!isNaN(currentId) && currentId > max) {
+            return currentId;
+        }
+        return max;
+    }, 1000); // Comença amb 1000 per assegurar que el següent sigui com a mínim 1001
+
+    return String(maxId + 1);
 }
 
 // Mostra modal per afegir una nova entrega
@@ -384,7 +416,9 @@ async function mostrarModalAfegirEntrega() {
         </div>
         <div class="camp-edicio">
             <label for="add-article">Article:</label>
-            <input type="text" id="add-article" required>
+            <div class="autocomplete-container">
+                <input type="text" id="add-article" required autocomplete="off">
+            </div>
         </div>
         <div class="camp-edicio">
             <label for="add-usuari">Usuari:</label>
@@ -392,7 +426,12 @@ async function mostrarModalAfegirEntrega() {
         </div>
         <div class="camp-edicio">
             <label for="add-departament">Departament:</label>
-            <input type="text" id="add-departament">
+            <select id="add-departament">
+                <option value="">-- Selecciona un departament --</option>
+                ${departamentsUnics.map(dep => 
+                    `<option value="${dep}">${dep}</option>`
+                ).join('')}
+            </select>
         </div>
         <div class="camp-edicio">
             <label for="add-data">Data (YYYY-MM-DD):</label>
@@ -426,6 +465,8 @@ async function mostrarModalAfegirEntrega() {
     
     document.body.appendChild(modal);
     
+    // Inicialitza l'autocompletat per al camp d'article
+    setupAutocomplete('add-article');
     // Event listeners
     document.getElementById('btn-cancelar-afegir').addEventListener('click', () => {
         document.body.removeChild(modal);
@@ -459,6 +500,22 @@ async function afegirNouEntrega(modal) {
         
         if (!nouEntrega.article || !nouEntrega.usuari) {
             throw new Error('Els camps Article i Usuari són obligatoris.');
+        }
+
+        // Comprova si l'article és nou i l'afegeix a la configuració
+        const articleValue = nouEntrega.article.trim();
+        if (articleValue && !articlesUnics.has(articleValue)) {
+            try {
+                const configRef = doc(db, "configuracio", "tipus_article");
+                await updateDoc(configRef, {
+                    Articles: arrayUnion(articleValue)
+                });
+                articlesUnics.add(articleValue); // Actualitza la llista local
+                console.log(`Nou article "${articleValue}" afegit a la configuració.`);
+            } catch (configError) {
+                // No atura el procés si falla, només avisa
+                console.warn("No s'ha pogut actualitzar la configuració d'articles:", configError);
+            }
         }
 
         // Afegeix a Firebase
@@ -515,7 +572,9 @@ function mostrarModalEdicio(id, dades) {
         </div>
         <div class="camp-edicio">
             <label for="edit-article">Article:</label>
-            <input type="text" id="edit-article" value="${dades.article || ''}" required>
+            <div class="autocomplete-container">
+                <input type="text" id="edit-article" value="${dades.article || ''}" required autocomplete="off">
+            </div>
         </div>
         <div class="camp-edicio">
             <label for="edit-usuari">Usuari:</label>
@@ -523,7 +582,12 @@ function mostrarModalEdicio(id, dades) {
         </div>
         <div class="camp-edicio">
             <label for="edit-departament">Departament:</label>
-            <input type="text" id="edit-departament" value="${dades.departament || ''}">
+            <select id="edit-departament">
+                <option value="">-- Selecciona un departament --</option>
+                ${departamentsUnics.map(dep => 
+                    `<option value="${dep}" ${dades.departament === dep ? 'selected' : ''}>${dep}</option>`
+                ).join('')}
+            </select>
         </div>
         <div class="camp-edicio">
             <label for="edit-data">Data (YYYY-MM-DD):</label>
@@ -557,6 +621,9 @@ function mostrarModalEdicio(id, dades) {
     
     document.body.appendChild(modal);
     
+    // Inicialitza l'autocompletat per al camp d'article
+    setupAutocomplete('edit-article');
+
     // Event listeners
     document.getElementById('btn-cancelar-edicio').addEventListener('click', () => {
         document.body.removeChild(modal);
@@ -591,6 +658,22 @@ async function guardarCanvisEntrega(id, modal) {
             throw new Error('Els camps Article i Usuari són obligatoris.');
         }
         
+        // Comprova si l'article és nou i l'afegeix a la configuració
+        const articleValue = dadesActualitzades.article.trim();
+        if (articleValue && !articlesUnics.has(articleValue)) {
+            try {
+                const configRef = doc(db, "configuracio", "tipus_article");
+                await updateDoc(configRef, {
+                    Articles: arrayUnion(articleValue)
+                });
+                articlesUnics.add(articleValue); // Actualitza la llista local
+                console.log(`Nou article "${articleValue}" afegit a la configuració.`);
+            } catch (configError) {
+                // No atura el procés si falla, només avisa
+                console.warn("No s'ha pogut actualitzar la configuració d'articles:", configError);
+            }
+        }
+
         // Actualitza a Firebase
         const docRef = doc(db, COLLECCIO_ENTREGUES, id.toString());
         await updateDoc(docRef, dadesActualitzades);
@@ -606,6 +689,68 @@ async function guardarCanvisEntrega(id, modal) {
     } finally {
         amagarLoader();
     }
+}
+
+// Funció per configurar l'autocompletat d'articles
+function setupAutocomplete(inputId) {
+    const input = document.getElementById(inputId);
+    const container = input.parentElement;
+
+    let dropdown = container.querySelector('.autocomplete-items');
+    if (dropdown) dropdown.remove();
+
+    dropdown = document.createElement('div');
+    dropdown.className = 'autocomplete-items';
+    container.appendChild(dropdown);
+
+    const articlesArray = Array.from(articlesUnics).sort();
+
+    const showSuggestions = (value) => {
+        dropdown.innerHTML = '';
+        if (!value) {
+            dropdown.style.display = 'none';
+            return;
+        }
+
+        const filtered = articlesArray.filter(item => item.toLowerCase().includes(value.toLowerCase()));
+
+        if (!filtered.length) {
+            dropdown.style.display = 'none';
+            return;
+        }
+
+        filtered.forEach(item => {
+            const div = document.createElement('div');
+            div.innerHTML = item.replace(new RegExp(value, 'gi'), '<strong>$&</strong>');
+            div.addEventListener('click', () => {
+                input.value = item;
+                dropdown.style.display = 'none';
+            });
+            dropdown.appendChild(div);
+        });
+
+        dropdown.style.display = 'block';
+    };
+
+    input.addEventListener('input', () => {
+        showSuggestions(input.value);
+    });
+
+    input.addEventListener('focus', () => {
+        // Mostra tots els articles al fer focus si el camp està buit
+        if (!input.value) {
+            showSuggestions('*'); // Un valor que no coincideixi per mostrar tot
+        } else {
+            showSuggestions(input.value);
+        }
+    });
+
+    // Tanca el desplegable si es clica fora
+    document.addEventListener('click', (e) => {
+        if (e.target !== input) {
+            dropdown.style.display = 'none';
+        }
+    });
 }
 
 

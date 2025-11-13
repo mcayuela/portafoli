@@ -501,7 +501,7 @@ function exportarACSV(dades) {
     const any = now.getFullYear();
     const hores = String(now.getHours()).padStart(2, '0');
     const minuts = String(now.getMinutes()).padStart(2, '0');
-    const nomFitxer = `Inventari_${dia}-${mes}-${any}_${hores}h${minuts}m.csv`;
+    const nomFitxer = `Inventari_${dia}-${mes}-${any}_${hores}h${minuts}.csv`;
 
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);

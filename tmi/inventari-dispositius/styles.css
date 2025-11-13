@@ -1473,3 +1473,52 @@ body:has(#dispositiu-titol) #site-header {
         width: 100%;
     }
 }
+
+/* Estils per a l'autocompletat personalitzat */
+.autocomplete-container {
+    position: relative;
+}
+
+.autocomplete-items {
+    position: absolute;
+    border: 1px solid #e0e7ef;
+    border-top: none;
+    z-index: 99;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    display: none; /* Amagat per defecte */
+}
+
+.autocomplete-items div {
+    padding: 10px 12px;
+    cursor: pointer;
+    background-color: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    color: #333;
+}
+
+.autocomplete-items div:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-items div:hover {
+    background-color: #f0f8fb;
+}
+
+.autocomplete-items strong {
+    font-weight: 700;
+    color: #222d32;
+}
+
+/* Ajust per a l'input quan el desplegable està obert */
+.autocomplete-container input:focus {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
