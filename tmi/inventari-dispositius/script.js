@@ -477,7 +477,15 @@ function exportarACSV(dades) {
     };
 
     // Converteix les dades a format CSV
-    const filesCSV = dades.map(fila => capcaleres.map(capcalera => escapa(fila[capcalera] || '')).join(','));
+    const filesCSV = dades.map(fila => {
+        // Mapeja manualment per assegurar que les claus són correctes
+        const filaCSV = [
+            escapa(fila.id), escapa(fila.fqdn), escapa(fila.usuari),
+            escapa(fila.departament), escapa(fila.model), escapa(fila.tipusDispositiu),
+            escapa(fila.dataAdquisicio)
+        ].join(',');
+        return filaCSV;
+    });
     
     // Afegeix la fila de capçaleres al principi
     const contingutCSV = [capcaleres.join(',')].concat(filesCSV).join('\n');
@@ -485,9 +493,19 @@ function exportarACSV(dades) {
     // Crea i descarrega l'arxiu
     const blob = new Blob([contingutCSV], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
+
+    // Genera el nom de l'arxiu dinàmicament
+    const now = new Date();
+    const dia = String(now.getDate()).padStart(2, '0');
+    const mes = String(now.getMonth() + 1).padStart(2, '0');
+    const any = now.getFullYear();
+    const hores = String(now.getHours()).padStart(2, '0');
+    const minuts = String(now.getMinutes()).padStart(2, '0');
+    const nomFitxer = `Inventari_${dia}-${mes}-${any}_${hores}h${minuts}m.csv`;
+
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", "inventari.csv");
+    link.setAttribute("download", nomFitxer);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();

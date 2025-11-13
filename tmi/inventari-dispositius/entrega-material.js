@@ -315,9 +315,19 @@ function exportarEntreguesACSV(dades) {
     // Crea i descarrega l'arxiu
     const blob = new Blob([contingutCSV], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
+
+    // Genera el nom de l'arxiu dinàmicament
+    const now = new Date();
+    const dia = String(now.getDate()).padStart(2, '0');
+    const mes = String(now.getMonth() + 1).padStart(2, '0');
+    const any = now.getFullYear();
+    const hores = String(now.getHours()).padStart(2, '0');
+    const minuts = String(now.getMinutes()).padStart(2, '0');
+    const nomFitxer = `Entregues_${dia}-${mes}-${any}_${hores}h${minuts}m.csv`;
+
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", "entregues.csv");
+    link.setAttribute("download", nomFitxer);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
