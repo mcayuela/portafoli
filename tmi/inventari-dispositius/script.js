@@ -23,6 +23,13 @@ let paginaActual = 1;
 let resultatsFiltrats = [];
 const RESULTATS_PER_PAGINA = 50;
 
+// Variables per al filtre de data
+let filtreDataActiu = {
+    tipus: 'dataCreacio', // 'dataCreacio' o 'dataUltimaEdicio'
+    inici: null,
+    fi: null
+};
+
 const cercador = document.getElementById('buscador');
 const selectTipus = document.querySelector('.filtreTipus');
 const resultats = document.getElementById('resultats');
@@ -50,9 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        console.log("Usuari autenticat:", user.email);
         carregarDades();
     } else {
+        // Si no estem a la pàgina de login, redirigim
         window.location.href = 'login.html';
     }
 });
@@ -73,7 +80,9 @@ async function carregarDades() {
                 model: data.model || '',
                 tipusDispositiu: 'PC',
                 dataAdquisicio: data.dataAdquisicio || '',
-                codiTeamViewer: data.codiTeamViewer || '' // NOU CAMP
+                codiTeamViewer: data.codiTeamViewer || '', // NOU CAMP
+                dataCreacio: data.dataCreacio || '',
+                dataUltimaEdicio: data.dataUltimaEdicio || ''
             });
         });
 
@@ -89,7 +98,9 @@ async function carregarDades() {
                 departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || '',
                 tipusDispositiu: 'Mòbil',
-                dataAdquisicio: data.dataAdquisicio || ''
+                dataAdquisicio: data.dataAdquisicio || '',
+                dataCreacio: data.dataCreacio || '',
+                dataUltimaEdicio: data.dataUltimaEdicio || ''
             });
         });
 
@@ -105,7 +116,9 @@ async function carregarDades() {
                 departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || data.nom || '',
                 tipusDispositiu: 'Monitor',
-                dataAdquisicio: data.dataAdquisicio || ''
+                dataAdquisicio: data.dataAdquisicio || '',
+                dataCreacio: data.dataCreacio || '',
+                dataUltimaEdicio: data.dataUltimaEdicio || ''
             });
         });
 
@@ -121,7 +134,9 @@ async function carregarDades() {
                 departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || data.nom || '',
                 tipusDispositiu: 'Impressora',
-                dataAdquisicio: data.dataAdquisicio || ''
+                dataAdquisicio: data.dataAdquisicio || '',
+                dataCreacio: data.dataCreacio || '',
+                dataUltimaEdicio: data.dataUltimaEdicio || ''
             });
         });
 
@@ -137,7 +152,9 @@ async function carregarDades() {
                 departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || data.nom || '',
                 tipusDispositiu: data.tipus || 'Altres',
-                dataAdquisicio: data.dataAdquisicio || ''
+                dataAdquisicio: data.dataAdquisicio || '',
+                dataCreacio: data.dataCreacio || '',
+                dataUltimaEdicio: data.dataUltimaEdicio || ''
             });
         });
 
@@ -191,6 +208,26 @@ function filtraITipus(tipus) {
     const valorCercador = cercador.value.trim().toLowerCase();
     resultatsFiltrats = filtraPerText(dadesFiltrades, valorCercador);
     paginaActual = 1;
+
+    // Aplica el filtre de data si està actiu
+    if (filtreDataActiu.inici && filtreDataActiu.fi) {
+        resultatsFiltrats = resultatsFiltrats.filter(d => {
+            const dataDispositiuStr = d[filtreDataActiu.tipus];
+            if (!dataDispositiuStr) return false;
+            try {
+                const dataDispositiu = new Date(dataDispositiuStr);
+                // Ajustem les hores per incloure tot el dia
+                const inici = new Date(filtreDataActiu.inici);
+                inici.setHours(0, 0, 0, 0);
+                const fi = new Date(filtreDataActiu.fi);
+                fi.setHours(23, 59, 59, 999);
+                return dataDispositiu >= inici && dataDispositiu <= fi;
+            } catch (e) {
+                return false;
+            }
+        });
+    }
+
     mostrarResultats(resultatsFiltrats, paginaActual);
 }
 
@@ -281,12 +318,24 @@ function mostrarResultats(filtrats, pagina = 1) {
                 <th>Model</th>
                 <th>Tipus</th>
                 <th>Data Adquisició</th>
+                <th>Data Creació</th>
+                <th>Última Edició</th>
                 ${modeEditor ? '<th class="col-accions">Accions</th>' : ''}
             </tr>
         </thead>
         <tbody>
     `;
     
+    const formataDataHora = (dataString) => {
+        if (!dataString) return '';
+        try {
+            const data = new Date(dataString);
+            return data.toLocaleString('ca-ES');
+        } catch (e) {
+            return dataString;
+        }
+    };
+
     for (const item of paginaDades) {
         // Formata la data si existeix
         let dataFormatada = '';
@@ -300,13 +349,15 @@ function mostrarResultats(filtrats, pagina = 1) {
         }
         
         html += `<tr>
-            <td><a href="dispositiu.html?id=${item.id}" class="link-dispositiu">${item.id || ''}</a></td>
+            <td><a href="dispositiu.html?id=${item.id}&tipus=${item.tipusDispositiu}" class="link-dispositiu">${item.id || ''}</a></td>
             <td><a href="dispositiu.html?id=${item.id}" class="link-dispositiu">${item.fqdn || ''}</a></td>
             <td>${item.usuari || 'N/A'}</td>
             <td>${item.departament || 'N/A'}</td>
             <td>${item.model || ''}</td>
             <td>${item.tipusDispositiu || ''}</td>
             <td>${dataFormatada}</td>
+            <td>${formataDataHora(item.dataCreacio)}</td>
+            <td>${formataDataHora(item.dataUltimaEdicio)}</td>
             ${modeEditor ? `<td class="accions-cell">
                 <button class="btn-editar" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" title="Editar dispositiu">✎</button>
                 <button class="btn-imprimir" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" data-model="${item.model || ''}" data-data="${item.dataAdquisicio || ''}" title="Imprimir etiqueta">🖨️</button>
@@ -372,6 +423,173 @@ function mostrarResultats(filtrats, pagina = 1) {
         });
     }
 }
+
+// --- LÒGICA DEL FILTRE DE DATA I CALENDARI ---
+
+const btnObrirFiltreData = document.getElementById('btn-obrir-filtre-data');
+const modalFiltreData = document.getElementById('modal-filtre-data');
+const btnCancelarFiltre = document.getElementById('btn-cancelar-filtre-data');
+const btnAplicarFiltre = document.getElementById('btn-aplicar-filtre-data');
+const btnNetejarFiltre = document.getElementById('btn-netejar-filtre-data');
+const btnFiltreTipusCreacio = document.getElementById('btn-filtre-tipus-creacio');
+const btnFiltreTipusEdicio = document.getElementById('btn-filtre-tipus-edicio');
+
+
+let dataCalendari = new Date();
+let dataIniciSeleccionada = filtreDataActiu.inici;
+let dataFiSeleccionada = filtreDataActiu.fi;
+let seleccionantInici = true;
+
+function renderitzaCalendari() {
+    const diesContainer = document.getElementById('calendari-dies');
+    const mesAnyText = document.getElementById('calendari-mes-any');
+
+    dataCalendari.setDate(1);
+    const mes = dataCalendari.getMonth();
+    const any = dataCalendari.getFullYear();
+
+    mesAnyText.textContent = `${dataCalendari.toLocaleString('ca-ES', { month: 'long' })} ${any}`;
+
+    const primerDiaMes = (dataCalendari.getDay() + 6) % 7; // Dll=0, Dm=1...
+    const diesEnMes = new Date(any, mes + 1, 0).getDate();
+
+    diesContainer.innerHTML = '';
+
+    for (let i = 0; i < primerDiaMes; i++) {
+        diesContainer.innerHTML += `<div class="dia-buit"></div>`;
+    }
+
+    for (let i = 1; i <= diesEnMes; i++) {
+        const diaDiv = document.createElement('div');
+        diaDiv.textContent = i;
+        const dataActual = new Date(any, mes, i);
+
+        // Classes per estils
+        if (dataActual.toDateString() === new Date().toDateString()) {
+            diaDiv.classList.add('dia-avui');
+        }
+        if (dataIniciSeleccionada && dataActual.getTime() === dataIniciSeleccionada.getTime()) {
+            diaDiv.classList.add('dia-inici');
+        }
+        if (dataFiSeleccionada && dataActual.getTime() === dataFiSeleccionada.getTime()) {
+            diaDiv.classList.add('dia-fi');
+        }
+        if (dataIniciSeleccionada && dataFiSeleccionada && dataActual > dataIniciSeleccionada && dataActual < dataFiSeleccionada) {
+            diaDiv.classList.add('dia-rang');
+        }
+
+        diaDiv.addEventListener('click', () => {
+            seleccionarData(dataActual);
+        });
+        diesContainer.appendChild(diaDiv);
+    }
+    actualitzarTextDatesSeleccionades();
+}
+
+function seleccionarData(data) {
+    if (seleccionantInici || data < dataIniciSeleccionada) {
+        dataIniciSeleccionada = data;
+        dataFiSeleccionada = null;
+        seleccionantInici = false;
+    } else {
+        dataFiSeleccionada = data;
+        seleccionantInici = true;
+    }
+    renderitzaCalendari();
+}
+
+function actualitzarTextDatesSeleccionades() {
+    document.getElementById('data-inici-seleccionada').textContent = dataIniciSeleccionada ? dataIniciSeleccionada.toLocaleDateString('ca-ES') : '--';
+    document.getElementById('data-fi-seleccionada').textContent = dataFiSeleccionada ? dataFiSeleccionada.toLocaleDateString('ca-ES') : '--';
+}
+
+btnObrirFiltreData.addEventListener('click', () => {
+    modalFiltreData.style.display = 'flex';
+    // Restaura l'estat del modal a l'estat del filtre actiu
+    dataIniciSeleccionada = filtreDataActiu.inici;
+    dataFiSeleccionada = filtreDataActiu.fi;
+    
+    // Actualitza l'estat dels botons de selecció de tipus de data
+    btnFiltreTipusCreacio.classList.toggle('seleccionat', filtreDataActiu.tipus === 'dataCreacio');
+    btnFiltreTipusEdicio.classList.toggle('seleccionat', filtreDataActiu.tipus === 'dataUltimaEdicio');
+    if (!btnFiltreTipusCreacio.classList.contains('seleccionat') && !btnFiltreTipusEdicio.classList.contains('seleccionat')) {
+        btnFiltreTipusCreacio.classList.add('seleccionat'); // Selecciona creació per defecte
+    }
+
+    seleccionantInici = !(dataIniciSeleccionada && dataFiSeleccionada);
+    dataCalendari = dataIniciSeleccionada ? new Date(dataIniciSeleccionada) : new Date();
+    renderitzaCalendari();
+});
+
+btnCancelarFiltre.addEventListener('click', () => {
+    modalFiltreData.style.display = 'none';
+});
+
+btnAplicarFiltre.addEventListener('click', () => {
+    if (dataIniciSeleccionada && !dataFiSeleccionada) {
+        dataFiSeleccionada = dataIniciSeleccionada; // Si només hi ha una data, el rang és d'un dia
+    }
+
+    if (dataIniciSeleccionada && dataFiSeleccionada) {
+        filtreDataActiu.inici = dataIniciSeleccionada;
+        filtreDataActiu.fi = dataFiSeleccionada;
+        filtreDataActiu.tipus = document.querySelector('.opcions-data-btn-group .seleccionat').dataset.tipus;
+        btnObrirFiltreData.style.borderColor = '#007bff'; // Indica que el filtre està actiu
+        btnObrirFiltreData.style.fontWeight = 'bold';
+    } else {
+        // Si no hi ha dates seleccionades, neteja el filtre
+        filtreDataActiu.inici = null;
+        filtreDataActiu.fi = null;
+        btnObrirFiltreData.style.borderColor = '';
+        btnObrirFiltreData.style.fontWeight = '';
+    }
+    
+    filtraITipus(selectTipus.value);
+    modalFiltreData.style.display = 'none';
+});
+
+btnNetejarFiltre.addEventListener('click', () => {
+    dataIniciSeleccionada = null;
+    dataFiSeleccionada = null;
+    seleccionantInici = true;
+    
+    // Neteja també el filtre actiu
+    filtreDataActiu.inici = null;
+    filtreDataActiu.fi = null;
+    btnObrirFiltreData.style.borderColor = '';
+    btnObrirFiltreData.style.fontWeight = '';
+
+    renderitzaCalendari();
+    filtraITipus(selectTipus.value); // Re-filtra sense data
+});
+
+btnFiltreTipusCreacio.addEventListener('click', () => {
+    btnFiltreTipusCreacio.classList.add('seleccionat');
+    btnFiltreTipusEdicio.classList.remove('seleccionat');
+});
+
+btnFiltreTipusEdicio.addEventListener('click', () => {
+    btnFiltreTipusEdicio.classList.add('seleccionat');
+    btnFiltreTipusCreacio.classList.remove('seleccionat');
+});
+
+
+document.getElementById('btn-mes-anterior').addEventListener('click', () => {
+    dataCalendari.setMonth(dataCalendari.getMonth() - 1);
+    renderitzaCalendari();
+});
+
+document.getElementById('btn-mes-seguent').addEventListener('click', () => {
+    dataCalendari.setMonth(dataCalendari.getMonth() + 1);
+    renderitzaCalendari();
+});
+
+modalFiltreData.addEventListener('click', (e) => {
+    if (e.target === modalFiltreData) {
+        modalFiltreData.style.display = 'none';
+    }
+});
+
 
 // Mostra modal de confirmació per borrar
 function mostrarModalConfirmacio(id, tipus) {
@@ -739,7 +957,8 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
                 memoriaRAM: document.getElementById('edit-ram').value,
                 emmagatzematge: document.getElementById('edit-emmagatzematge').value, // Corregit: era dataAdquisicio
                 codiTeamViewer: document.getElementById('edit-teamviewer').value, // NOU CAMP
-                dataAdquisicio: document.getElementById('edit-data').value
+                dataAdquisicio: document.getElementById('edit-data').value,
+                dataUltimaEdicio: new Date().toISOString()
             };
         } else if (tipus === 'Mòbil') {
             dadesActualitzades = {
@@ -752,7 +971,8 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
                 imei1: document.getElementById('edit-imei1').value,
                 imei2: document.getElementById('edit-imei2').value,
                 mailRegistre: document.getElementById('edit-mail').value,
-                dataAdquisicio: document.getElementById('edit-data').value
+                dataAdquisicio: document.getElementById('edit-data').value,
+                dataUltimaEdicio: new Date().toISOString()
             };
         } else {
             dadesActualitzades = {
@@ -761,7 +981,8 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
                 departament: document.getElementById('edit-departament').value, // AFEGEIX AQUESTA LÍNIA
                 model: document.getElementById('edit-model').value,
                 tipus: document.getElementById('edit-tipus').value,
-                dataAdquisicio: document.getElementById('edit-data').value
+                dataAdquisicio: document.getElementById('edit-data').value,
+                dataUltimaEdicio: new Date().toISOString()
             };
         }
         
@@ -1066,6 +1287,8 @@ async function afegirNouDispositiu(tipus, modal) {
         let nouDispositiu = {};
         let col·leccio = '';
         
+        const dataActual = new Date().toISOString();
+
         if (tipus === 'PC') {
             col·leccio = 'pcs';
             nouDispositiu = {
@@ -1080,7 +1303,9 @@ async function afegirNouDispositiu(tipus, modal) {
                 memoriaRAM: document.getElementById('add-ram').value,
                 emmagatzematge: document.getElementById('add-emmagatzematge').value, // Corregit: era dataAdquisicio
                 codiTeamViewer: document.getElementById('add-teamviewer').value, // NOU CAMP
-                dataAdquisicio: document.getElementById('add-data').value
+                dataAdquisicio: document.getElementById('add-data').value,
+                dataCreacio: dataActual,
+                dataUltimaEdicio: dataActual
             };
         } else if (tipus === 'Mòbil') {
             col·leccio = 'mobils';
@@ -1094,7 +1319,9 @@ async function afegirNouDispositiu(tipus, modal) {
                 imei1: document.getElementById('add-imei1').value,
                 imei2: document.getElementById('add-imei2').value,
                 mailRegistre: document.getElementById('add-mail').value,
-                dataAdquisicio: document.getElementById('add-data').value
+                dataAdquisicio: document.getElementById('add-data').value,
+                dataCreacio: dataActual,
+                dataUltimaEdicio: dataActual
             };
         } else if (tipus === 'Monitor') {
             col·leccio = 'monitors';
@@ -1104,7 +1331,9 @@ async function afegirNouDispositiu(tipus, modal) {
                 departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
                 tipus: 'Monitor',
-                dataAdquisicio: document.getElementById('add-data').value
+                dataAdquisicio: document.getElementById('add-data').value,
+                dataCreacio: dataActual,
+                dataUltimaEdicio: dataActual
             };
         } else if (tipus === 'Impressora') {
             col·leccio = 'impressores';
@@ -1114,7 +1343,9 @@ async function afegirNouDispositiu(tipus, modal) {
                 departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
                 tipus: 'Impressora',
-                dataAdquisicio: document.getElementById('add-data').value
+                dataAdquisicio: document.getElementById('add-data').value,
+                dataCreacio: dataActual,
+                dataUltimaEdicio: dataActual
             };
         } else {
             col·leccio = 'altresDispositius';
@@ -1124,7 +1355,9 @@ async function afegirNouDispositiu(tipus, modal) {
                 departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
                 tipus: document.getElementById('add-tipus').value,
-                dataAdquisicio: document.getElementById('add-data').value
+                dataAdquisicio: document.getElementById('add-data').value,
+                dataCreacio: dataActual,
+                dataUltimaEdicio: dataActual
             };
         }
         

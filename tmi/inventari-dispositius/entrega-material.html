@@ -17,23 +17,124 @@
       </div>
     </header>
     <main>
-        <div class="contenidor-principal-superior">
-          <div class="grup-filtres-cercador">
-            <input id="buscador" class="buscador" placeholder="Cerca per ID, article, usuari..." />
-            <select id="filtre-tipus-entrega" class="filtreTipus">
-              <option value="">Tots els tipus</option>
-              <option value="Normal">Normal</option>
-              <option value="Prèstec">Prèstec</option>
-            </select>
-            <span id="contenidor-subfiltre"></span>
-          </div>
-          <div class="contador-dispositius">Entregues: 0</div>
+        <div class="main-controls">
+            <div class="filtres">
+                <input type="text" id="buscador" class="buscador" placeholder="Cerca a les Entregues de TMI">
+                <select id="filtre-tipus-entrega" class="filtreTipus">
+                    <option value="">Tots els tipus</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Prèstec">Prèstec</option>
+                </select>
+                <button id="btn-obrir-filtre-data" class="filtreTipus">📅</button>
+            </div>
+            <div class="contador-dispositius">Entregues: 0</div>
         </div>
         <div id="resultats"></div>
     </main>
     <footer>
         <div id="paginacio-footer"></div>
     </footer>
+
+    <!-- Modal per al filtre de dates -->
+    <div id="modal-filtre-data" class="modal-overlay" style="display: none;">
+        <div class="modal-filtre-data">
+            <h3 class="modal-titol">Filtre per Data</h3>
+            <div class="filtre-data-controls">
+                <div class="opcions-data-btn-group">
+                    <button data-tipus="data" class="seleccionat">Data d'Entrega</button>
+                </div>
+                <div class="calendari-container">
+                    <div class="calendari-header">
+                        <button id="btn-mes-anterior">‹</button>
+                        <span id="calendari-mes-any"></span>
+                        <button id="btn-mes-seguent">›</button>
+                    </div>
+                    <div class="calendari-dies-setmana">
+                        <div>Dl</div><div>Dm</div><div>Dc</div><div>Dj</div><div>Dv</div><div>Ds</div><div>Dg</div>
+                    </div>
+                    <div id="calendari-dies" class="calendari-dies"></div>
+                </div>
+                <div class="dates-seleccionades">
+                    <p>Inici: <span id="data-inici-seleccionada">--</span></p>
+                    <p>Fi: <span id="data-fi-seleccionada">--</span></p>
+                </div>
+            </div>
+            <div class="modal-botons">
+                <button id="btn-aplicar-filtre-data" class="btn-guardar">Aplicar</button>
+                <button id="btn-netejar-filtre-data" class="btn-netejar">Netejar</button>
+                <button id="btn-cancelar-filtre-data" class="btn-cancelar">Tancar</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Estils per al botó de filtre de data */
+        #btn-obrir-filtre-data {
+            appearance: none; -webkit-appearance: none; background-image: none; cursor: pointer;
+            padding-left: 10px; padding-right: 10px; line-height: normal;
+            width: auto; min-width: 0; 
+        }
+        /* Estils per al modal de filtre de data */
+        .modal-filtre-data {
+            background: white; padding: 25px; border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); width: 380px; max-width: 90%;
+        }
+        .opcions-data-btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .opcions-data-btn-group button {
+            flex-grow: 1; border: none; padding: 10px; border-radius: 8px;
+            color: white; font-weight: bold; cursor: pointer; transition: background-color 0.2s;
+            background-color: rgba(180, 180, 180, 0.7);
+        }
+        .opcions-data-btn-group button.seleccionat { background-color: rgba(0, 0, 0, 0.7); }
+        .calendari-container { user-select: none; border-top: 1px solid #eee; padding-top: 15px; }
+        .calendari-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .calendari-header button { background: none; border: none; font-size: 20px; cursor: pointer; }
+        .calendari-mes-any { font-weight: bold; }
+        .calendari-dies-setmana, .calendari-dies { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+        .calendari-dies-setmana div { font-weight: bold; font-size: 0.8em; color: #666; }
+        .calendari-dies div {
+            padding: 8px 0; cursor: pointer; border-radius: 6px;
+            transition: background-color 0.2s; margin: 1px;
+        }
+        .calendari-dies div:not(.dia-buit):hover { background-color: #f0f0f0; }
+        .dia-buit { cursor: default; }
+        .dia-avui { font-weight: bold; border: 1px solid #007bff; box-sizing: border-box; }
+        .dia-inici { background-color: #007bff !important; color: white; }
+        .dia-fi { background-color: #dc3545 !important; color: white; }
+        .dia-rang { background-color: rgba(0, 123, 255, 0.15); border-radius: 0; margin: 1px 0; }
+        .dates-seleccionades {
+            display: flex; justify-content: space-around; margin-top: 15px;
+            padding-top: 10px; border-top: 1px solid #eee;
+        }
+        .modal-botons { display: flex; justify-content: space-between; gap: 10px; }
+        .modal-botons button {
+            flex-grow: 1; border: none; padding: 10px; border-radius: 8px;
+            color: white; font-weight: bold; cursor: pointer; transition: opacity 0.2s;
+        }
+        #btn-aplicar-filtre-data { background-color: rgba(0, 0, 0, 0.7); }
+        #btn-aplicar-filtre-data:hover { background-color: rgba(0, 0, 0, 0.9); }
+        .btn-netejar { background-color: rgba(255, 165, 0, 0.7); }
+        .btn-netejar:hover { background-color: rgba(255, 165, 0, 0.9); }
+        #btn-cancelar-filtre-data { background-color: rgba(220, 53, 69, 0.7); }
+        #btn-cancelar-filtre-data:hover { background-color: rgba(220, 53, 69, 0.9); }
+
+        /* Estil per a les files de préstec */
+        .fila-prestec {
+            background-color: #fff3cd; /* Groc pàl·lid per destacar */
+        }
+        .fila-prestec:hover {
+            background-color: #ffeeba; /* Un groc una mica més fosc per a l'efecte hover */
+        }
+        /* No s'aplica cap estil especial als préstecs retornats, es veuran com files normals */
+
+        /* Ajust per a la capçalera de controls */
+        .main-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+
     <div id="global-loader" class="global-loader">
         <div class="loader-content">
             <div class="spinner"></div>

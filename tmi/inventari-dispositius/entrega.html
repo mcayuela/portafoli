@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detall d'Entrega - Inventari TMI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loader global -->
+    <div id="global-loader" class="global-loader hidden">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <p class="loader-text">Carregant...</p>
+        </div>
+    </div>
+
+    <!-- Header igual que l'index -->
+    <header id="site-header">
+        <div class="logo-esquerra">
+            <img src="/images/logo_tmi_sensefons.png" alt="Logo esquerra" />
+        </div>
+        <a class="titol-principal" href="index.html">Inventari Dispositius - TMI</a>
+        <div class="logo-dreta">
+            <img src="/images/logo_tmi_sensefons.png" alt="Logo dreta" />
+        </div>
+    </header>
+
+    <!-- Contingut principal -->
+    <div class="container">
+        <!-- Loading -->
+        <div id="loading" style="display: block;">
+            <p>Carregant informació de l'entrega...</p>
+        </div>
+
+        <!-- Error -->
+        <div id="error" style="display: none;">
+            <h2>Entrega no trobada</h2>
+            <p>No s'ha pogut trobar l'entrega amb l'ID especificat.</p>
+            <a href="entrega-material.html" class="btn-tornar">← Tornar a les entregues</a>
+        </div>
+
+        <!-- Contingut de l'entrega -->
+        <div id="content" style="display: none;">
+            <div class="dispositiu-header">
+                <h2 id="entrega-titol">Carregant...</h2>
+                <a href="entrega-material.html" class="btn-tornar">← Tornar a les entregues</a>
+            </div>
+
+            <div class="dispositiu-container">
+                <!-- Informació de l'entrega -->
+                <div class="dispositiu-info">
+                    <h3>Informació de l'Entrega</h3>
+                    
+                    <div class="camps-tipus" style="display: block;">
+                        <div class="camp-info">
+                            <label>ID:</label>
+                            <span id="entrega-id">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Article:</label>
+                            <span id="entrega-article">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Usuari:</label>
+                            <span id="entrega-usuari">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Departament:</label>
+                            <span id="entrega-departament">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Tipus:</label>
+                            <span id="entrega-tipus">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Data d'Entrega:</label>
+                            <span id="entrega-data">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Data de Creació:</label>
+                            <span id="entrega-data-creacio">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Última Edició:</label>
+                            <span id="entrega-data-edicio">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Notes:</label>
+                            <p id="entrega-notes" class="camp-notes-detall">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="entrega.js"></script>
+</body>
+</html>

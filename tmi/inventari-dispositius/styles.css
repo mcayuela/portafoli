@@ -525,6 +525,11 @@ main {
     background-color: rgba(255, 165, 0, 0.2) !important;
 }
 
+/* Estil per a la fila de préstec retornat */
+.fila-prestec-retornat td {
+    background-color: rgba(40, 167, 69, 0.15) !important;
+}
+
 .fila-filtres-contador {
     display: flex;
     align-items: center;
@@ -715,9 +720,16 @@ main {
 }
 
 .accions-cell {
-    text-align: center;
+    /* Canviat a flex per un millor control d'alineació */
+    display: flex;
+    justify-content: flex-end; /* Alinea el grup de botons a la dreta */
+    align-items: center;
     white-space: nowrap;
-    padding: 8px !important;
+    padding: 8px 16px !important;
+}
+
+.grup-botons-accions {
+    display: flex;
 }
 
 /* Botó d'editar */
@@ -733,7 +745,7 @@ main {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-right: 4px;
+    margin-left: 6px; /* Marge només a l'esquerra per separació */
     transition: background-color 0.3s ease;
 }
 
@@ -755,13 +767,55 @@ main {
     align-items: center;
     justify-content: center;
     transition: background-color 0.3s ease;
-    margin-left: 4px;
+    margin-left: 6px; /* Marge només a l'esquerra */
 }
 
 .btn-borrar:hover {
     background: #c0392b;
 }
 
+/* Botó de retornar préstec */
+.btn-retornar {
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px; /* Marge només a l'esquerra */
+    transition: background-color 0.3s ease;
+}
+.btn-retornar:hover {
+    background: #218838;
+}
+
+/* Botó de desfer retorn */
+.btn-desfer-retorn {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px; /* Marge només a l'esquerra */
+    transition: background-color 0.3s ease;
+    padding-bottom: 2px; /* Ajust per centrar la fletxa */
+}
+.btn-desfer-retorn:hover {
+    background: #0056b3;
+}
 /* Botó d'impressió */
 .btn-imprimir {
     background: #27ae60;
@@ -927,6 +981,12 @@ main {
     cursor: not-allowed;
 }
 
+/* Ajust per fer el camp d'article més ample */
+.camp-edicio:has(#add-article),
+.camp-edicio:has(#edit-article) {
+    grid-column: 1 / -1;
+}
+
 .camp-edicio select {
     cursor: pointer;
 }
@@ -1028,9 +1088,15 @@ main {
 
 .dispositiu-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Per defecte, una columna (per a entregues) */
     gap: 30px;
     min-height: 400px;
+}
+
+/* Quan hi ha secció de notes, dues columnes (per a dispositius) */
+.dispositiu-container:has(.dispositiu-notes) {
+    grid-template-columns: 1fr 1fr;
 }
 
 /* Informació del dispositiu */
