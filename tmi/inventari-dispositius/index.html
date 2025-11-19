@@ -10,20 +10,22 @@
 </head>
 <body>
     <header id="site-header">
-      <div class="logo-esquerra">
-        <img src="/images/logo_tmi_sensefons.png" alt="Logo esquerra" />
-      </div>
-      <a class="titol-principal" href="index.html">Inventari Dispositius - TMI</a>
-      <div class="logo-dreta">
-        <img src="/images/logo_tmi_sensefons.png" alt="Logo dreta" />
-      </div>
+        <div class="logo-esquerra">
+            <img src="/images/logo_tmi_sensefons.png" alt="Logo esquerra" />
+        </div>
+        <a class="titol-principal" href="index.html">Inventari Dispositius - TMI</a>
+        <div class="logo-dreta">
+            <img src="/images/logo_tmi_sensefons.png" alt="Logo dreta" />
+        </div>
     </header>
     <main>
         <div class="main-controls">
             <div class="filtres">
                 <input type="text" id="buscador" class="buscador" placeholder="Cerca a l'Inventari TMI">
-                <select class="filtreTipus"></select>
-                <button id="btn-obrir-filtre-data" class="filtreTipus">📅</button>
+                <div class="grup-selectors">
+                    <select class="filtreTipus"></select> 
+                    <button id="btn-obrir-filtre-data" class="filtreTipus">📅</button>
+                </div>
             </div>
             <div class="contador-dispositius"></div>
         </div>
@@ -66,6 +68,11 @@
     </div>
 
     <style>
+        /* Ajust per a la capçalera */
+        header#site-header {
+            padding: 10px 20px; /* Reduïm el padding lateral */
+        }
+
         /* Estils per al botó de filtre de data */
         #btn-obrir-filtre-data {
             appearance: none; /* Elimina estils per defecte del navegador */
@@ -170,8 +177,9 @@
 
         /* Ajust per a l'espaiat dels filtres */
         .filtres {
-            justify-content: flex-start; /* Alinea els elements a l'inici */
-            gap: 10px; /* Redueix l'espai entre elements */
+            display: flex; /* Canviat per alinear elements en fila */
+            gap: 10px;
+            align-items: center;
         }
 
         /* Nou contenidor per a filtres i botons */
@@ -179,6 +187,93 @@
             display: flex;
             justify-content: space-between; /* Alinea els grups a cada extrem */
             align-items: center; /* Alinea verticalment els elements */
+        }
+        .grup-selectors {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Contenidor de la taula per a scroll horitzontal */
+        #resultats {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Scroll suau en iOS */
+        }
+
+        /* Estils per a dispositius mòbils */
+        @media (max-width: 768px) {
+            #site-header {
+                flex-direction: row; /* Alineació horitzontal */
+                align-items: center;
+                text-align: center;
+                justify-content: space-between;
+                padding: 5px 0; /* Eliminem padding lateral per ample complet */
+            }
+            .logo-esquerra img, .logo-dreta img {
+                display: block;
+                height: 36px; /* Icones més petites */
+                width: 36px;
+            }
+            .logo-esquerra { padding-left: 15px; } /* Afegim padding als logos */
+            .logo-dreta { padding-right: 15px; }
+            .titol-principal {
+                margin: 10px 0;
+                font-size: 0; /* Amaguem el text original */
+                order: 0; /* Mantenim el títol al centre si cal */
+                flex-grow: 1;
+            }
+            .titol-principal::before {
+                content: "Inventari\A Dispositius"; /* \A per salt de línia */
+                white-space: pre; /* Respecta els salts de línia del content */
+                font-size: 0.9rem; /* Mida de font ajustada */
+                font-weight: 600;
+                line-height: 1.2; /* Espai entre línies */
+            }
+            .main-controls {
+                flex-direction: column; /* Apila els elements verticalment */
+                align-items: stretch; /* Fa que els elements ocupin tot l'amp                gap: 10px;
+            }
+            .filtres {
+                flex-direction: column; /* Apila cercador i selectors */
+                align-items: stretch;
+                width: 100%;      /* Ocupa l'ample disponible fins al màxim */
+                margin: 0 auto;   /* Centra el bloc de filtres */
+                gap: 10px;
+            }
+            .main-controls {
+                max-width: 350px; /* Amplada màxima per als controls */
+            }
+            .buscador {
+                width: 100%; /* Assegura que el cercador ocupi tot l'ample */
+            }
+            .grup-selectors {
+                width: 100%;
+            }
+            select.filtreTipus {
+                color: transparent; /* Amaga el text */
+                text-indent: -999px; /* Mou el text fora de la vista */
+                flex-grow: 0; /* No permetis que creixi */
+                width: 40px; /* Amplada fixa per al selector */
+                padding: 0 5px; /* Redueix el padding per ajustar la fletxa */
+            }
+            .grup-selectors > * {
+                flex-grow: 0; /* Evita que els elements creixin */
+            }
+            #btn-obrir-filtre-data {
+                width: 40px; /* Amplada fixa per al botó de calendari */
+            }
+            .modal-filtre-data {
+                width: 95%;
+                padding: 15px;
+            }
+            .opcions-data-btn-group, .modal-botons {
+                flex-direction: column;
+            }
+            main {
+                margin-left: 20px; /* Més marge als costats */
+                margin-right: 20px; /* Més marge als costats */
+                padding-top: 0px !important;
+                margin-top: 20px !important;
+            }
         }
     </style>
     <!-- Loader global -->

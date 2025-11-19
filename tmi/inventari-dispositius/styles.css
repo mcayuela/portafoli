@@ -295,22 +295,6 @@ main {
     background-color: #f0f0f0;
 }
 
-/* Responsive per als selectors */
-@media (max-width: 750px) {
-    .filtreDepartament,
-    .filtreSubdepartament {
-        width: 100%;
-        margin-left: 0;
-    }
-}
-
-@media (max-width: 650px) {
-    .filtreDepartament,
-    .filtreSubdepartament {
-        width: 100%;
-    }
-}
-
 .llista-resultats {
     display: flex;
     flex-direction: column;
@@ -580,56 +564,6 @@ main {
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
-}
-
-@media (max-width: 750px) {
-    .filtreDepartament {
-        width: 100%;
-        margin-left: 1;
-    }
-    main {
-        padding-left: 0px;
-    }
-    ul {
-        font-size: 0.8rem;
-    }
-    .paginacio_info {
-        font-size: 0.8rem;
-    }
-    header {
-        margin-right: 50px;
-    }
-    .buscador::placeholder {
-        font-size: 0.8rem;
-    }
-
-}
-
-@media (max-width: 650px) {
-    .contenidor-principal-superior {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-    .grup-filtres-cercador {
-        justify-content: flex-start;
-    }
-    .contador-contactes {
-        text-align: left;
-        margin-left: 0;
-    }
-}
-
-@media (max-width: 500px) {
-    h1, h2 {
-        text-align: center;
-    }
-    ul {
-        padding-left: 0;
-    }
-    .paginacio {
-        gap: 15px;
-    }
 }
 
 .filtreSubdepartament {
