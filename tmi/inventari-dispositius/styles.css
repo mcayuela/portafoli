@@ -11,7 +11,7 @@ body {
 
 #site-header {
     height: var(--header-h, 80px);
-    padding: 0 16px;
+    padding: 10px 20px;
     position: sticky;
     top: 0;
     z-index: 20;
@@ -23,26 +23,20 @@ body {
     border-bottom: 1px solid rgba(37, 150, 190, 0.15);
 }
 
-header#site-header {
-    padding: 10px 40px;
-    background: rgb(255, 255, 255);
-    backdrop-filter: blur(15px);
-}
-
 #site-header img {
-    height: 60px;
-    width: 60px;
+    height: 50px;
+    width: 50px;
     object-fit: cover;
     display: block;
 }
 
 .logo-esquerra img,
 .logo-dreta img {
-    height: 48px;
+    height: 40px;
 }
 
 .titol-principal {
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     font-weight: 600;
     color: #222d32;
     text-decoration: none;
@@ -57,16 +51,22 @@ header#site-header {
 
 @media (max-width: 600px) {
     #site-header {
-        flex-direction: column;
-        padding: 10px 10px;
+        padding: 10px 20px;
     }
     .logo-esquerra img,
     .logo-dreta img {
         height: 36px;
     }
     .titol-principal {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         margin: 10px 0;
+    }
+    .dispositiu-header {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+        justify-content: space-between;
+    
     }
 }
 
@@ -473,7 +473,7 @@ main {
 .taula-resultats {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 24px;
+    margin-top: 20px;
     background: #fff;
     border-radius: 8px;
     overflow: hidden;
@@ -589,14 +589,6 @@ main {
 }
 .filtreSubdepartament option:hover {
     background-color: #222d32;
-}
-
-/* Header amb botó editor */
-.header-resultats {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: -10px;
 }
 
 .comptador-text {
@@ -983,6 +975,190 @@ main {
     }
 }
 
+h3.modal-titol {
+    margin-top: 7px;
+    font-size: 1.5rem;
+}
+
+/* Contenidor per al comptador i botons d'escriptori */
+.header-resultats {
+    display: flex; /* Canviat per alinear elements en fila */
+    justify-content: space-between; /* Alinea els grups a cada extrem */
+    align-items: center; /* Centra verticalment els elements */
+    gap: 10px;
+    margin-bottom: 10px; /* Espaiat inferior */
+    flex-wrap: wrap; /* Permet que els elements es moguin a la línia següent si no hi ha espai */
+}
+
+/* Estils responsius per a la pàgina de dispositiu */
+@media (max-width: 768px) {
+    .header-resultats {
+        justify-content: flex-end; /* Alinea el comptador a la dreta */
+    }
+    .contador-dispositius {
+        font-size: 0.9rem; /* Fa la lletra una mica més petita */
+        padding-right: 5px; /* Afegeix un petit marge a la dreta */
+        margin-top: 5px; /* Espai respecte als filtres */        
+    }
+    .botons-header { display: none !important; } /* Amaga els botons d'escriptori en mòbil */
+    .dispositiu-container {
+        grid-template-columns: 1fr; /* Apila les seccions verticalment */
+        gap: 20px;
+    }
+    a.btn-tornar {
+        margin-right: 0;
+        text-align: center;
+        font-size: 0.9rem;
+        padding: 7px 10px;
+        margin: 8px 16px;
+    }
+    h2#dispositiu-titol {
+        font-size: 0.9rem; /* Fa la lletra una mica més petita */
+        padding-right: 5px; /* Afegeix un petit marge a la dreta */
+        margin-top: 5px; /* Espai respecte als filtres */
+        display: none; /* Amaga temporalment el comptador en mòbil */
+    }
+    .botons-header { display: none !important; } /* Amaga els botons d'escriptori en mòbil */
+    div.dispositiu-header {
+        margin-top: -18px;
+        margin-bottom: 0px;
+    }
+    /* Ajustos generals del layout */
+    main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 5px;
+        padding: 0 0 0 0 !important; /* Assegurem que no hi hagi padding lateral */
+    }
+
+    /* Capçalera del dispositiu */
+    .dispositiu-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    #dispositiu-titol {
+        margin-left: 0;
+        text-align: center;
+        font-size: 1.3rem;
+    }
+
+    .btn-tornar {
+        margin-right: 0;
+        text-align: center;
+    }
+
+    /* Contenidor principal (info i notes) */
+    .dispositiu-container {
+        grid-template-columns: 2fr; /* Apila les seccions verticalment */
+        gap: 20px;
+    }
+
+    .dispositiu-info, .dispositiu-notes {
+        margin: 0;
+        padding: 20px;
+    }
+
+    /* Camps d'informació */
+    .camp-info {
+        grid-template-columns: 1fr; /* Apila label i valor */
+        gap: 5px;
+        padding: 10px 0;
+    }
+
+    .camp-info label {
+        color: #222d32;
+    }
+
+    /* Estil del títol principal a la capçalera per a mòbil */
+    .inventari-page #site-header .titol-principal,
+    .entregues-page #site-header .titol-principal {
+        font-size: 0; /* Amaga el text original */
+    }
+
+    .inventari-page #site-header .titol-principal::before {
+        content: "Inventari\A Dispositius"; /* \A per salt de línia */
+        white-space: pre;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #222d32; /* Assegurem el color del text */
+    }
+
+    .entregues-page #site-header .titol-principal::before {
+        content: "Gestió d'\A Entregues"; /* \A per salt de línia */
+        white-space: pre;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #222d32; /* Assegurem el color del text */
+    }
+    
+    /* Unifiquem el comptador per a mòbil */
+    .contador-dispositius {
+        justify-self: flex-end; /* Alinea el comptador a la dreta */
+        text-align: right;
+    }
+
+    /* Marges per als controls principals i resultats en mòbil */
+    .main-controls {
+        margin-left: 15px !important;
+        margin-right: 15px !important;
+        margin-top: 10px !important;
+        max-width: calc(100% - 30px); /* Evita que s'estengui massa */
+        flex-wrap: wrap; /* Permet que els filtres passin a la línia següent */
+        justify-content: center; /* Centra els filtres quan s'emboliquen */
+        margin-bottom: 10px; /* Afegim un marge inferior per separar de la taula */
+    }
+
+    #resultats {
+        margin-left: 15px !important;
+        margin-right: 15px !important;
+        margin-top: 10px !important; /* Reduït el marge superior per a un millor ajust */
+        width: calc(100% - 30px); /* Ocupa tota l'amplada menys els marges */
+        box-sizing: border-box; /* Assegura que el padding/border no afecti l'amplada */
+    }
+
+    .buscador {
+        width: 120px; /* Redueix l'amplada del cercador */
+    }
+
+    .filtreTipus select {
+        width: 42px !important;
+        padding: 0;
+        background-position: center;
+        font-size: 0;
+        color: transparent;
+    }
+
+    .filtreTipus #btn-mode-editor-mobil {
+        font-size: 1rem !important; /* Restaura la mida de font per a les opcions */
+    }
+
+    #btn-obrir-filtre-data {
+        padding-bottom: 2px;
+    }
+
+    #btn-obrir-filtre-data, #btn-mode-editor-mobil {
+        width: 42px; /* Mateixa amplada que el filtre */
+        height: 42px; /* Mateixa alçada que el filtre */
+        padding: 2px; /* Padding per a l'emoji */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+#dispositiu-titol {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #222d32;
+    margin-left: 33px;
+    padding: 0px;
+    font-weight: bold;
+}
+
 /* Estils per a la pàgina individual del dispositiu */
 
 /* Pàgina individual del dispositiu */
@@ -994,14 +1170,12 @@ main {
     border-bottom: 2px solid #eaf4fa;
 }
 
-#dispositiu-titol {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #222d32;
-    margin-left: 33px;
-    padding: 0px;
-    font-weight: bold;
+.contenidor-taula-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Scroll suau en iOS */
+    width: 100%;
 }
+
 
 .btn-tornar {
     background: #222d32;
@@ -1022,25 +1196,25 @@ main {
 
 .dispositiu-container {
     display: grid;
-    grid-template-columns: 1fr;
-    grid-template-columns: 1fr; /* Per defecte, una columna (per a entregues) */
+    grid-template-columns: 1fr; /* Assegurem una sola columna */
     gap: 30px;
     min-height: 400px;
 }
 
 /* Quan hi ha secció de notes, dues columnes (per a dispositius) */
 .dispositiu-container:has(.dispositiu-notes) {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr; /* Canviat a una sola columna */
 }
 
 /* Informació del dispositiu */
 .dispositiu-info {
     background: white;
     padding: 25px;
-    margin-left: 30px;
     margin-bottom: 30px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow-x: auto; /* Afegeix scroll horitzontal si és necessari */
+    -webkit-overflow-scrolling: touch; /* Scroll suau en iOS */
 }
 
 .dispositiu-info h3 {
@@ -1080,10 +1254,11 @@ main {
 .dispositiu-notes {
     background: white;
     padding: 25px;
-    margin-right: 30px;
     margin-bottom: 30px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow-x: auto; /* Afegeix scroll horitzontal si és necessari */
+    -webkit-overflow-scrolling: touch; /* Scroll suau en iOS */
 }
 
 .notes-header {
@@ -1393,24 +1568,8 @@ main {
 /* Container específic per la pàgina del dispositiu */
 .container:not(#site-header .container) {
     max-width: 1500px;
-    min-width: 1200px;
     padding: 0;
     margin: 20px auto;
-}
-
-/* Assegurar que el header del dispositiu sigui igual a l'index */
-body:has(#dispositiu-titol) #site-header {
-    padding: 10px 40px;
-    background: rgb(255, 255, 255);
-    backdrop-filter: blur(15px);
-    height: var(--header-h, 80px);
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(37, 150, 190, 0.15);
 }
 
 .filtreTipus {
@@ -1458,6 +1617,21 @@ body:has(#dispositiu-titol) #site-header {
 
 .filtreTipus option:hover {
     background-color: #f0f0f0;
+}
+
+/* Ajustos per als botons de filtre (calendari, editor) */
+.filtreTipus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box; /* Assegura que el padding i border s'incloguin a l'amplada/alçada */
+}
+
+/* Estil específic per als botons amb emojis */
+#btn-obrir-filtre-data, #btn-mode-editor-mobil {
+    padding: 2px; /* Marge intern de 2px al voltant de l'emoji */
+    font-size: 1.2rem; /* Mida de l'emoji */
+    background-image: none; /* Elimina la fletxa de selector heretada */
 }
 
 /* Responsive per al selector */
@@ -1521,4 +1695,164 @@ body:has(#dispositiu-titol) #site-header {
 .autocomplete-container input:focus {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+}
+
+/* Estil per al botó de mode editor mòbil quan està actiu */
+#btn-mode-editor-mobil.actiu {
+    background-color: #ffc107; /* Taronja */
+    border-color: #e0a800;
+}
+
+/* Estils per al modal d'accions de l'editor */
+.modal-accions {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 320px; /* Reduïm l'amplada màxima */
+    text-align: center;
+    display: flex; /* Per controlar l'espaiat intern */
+    flex-direction: row;
+}
+.botons-accions-principals {
+    display: flex;
+    flex-direction: row;
+    gap: 12px; /* Reduïm l'espai entre botons */
+}
+.btn-accio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px; /* Reduïm el padding */
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95em; /* Lletra una mica més petita */
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    background-color: #f0f0f0;
+    color: #333;
+}
+.btn-accio:hover {
+    background-color: #e0e0e0;
+}
+.btn-accio span {
+    font-size: 1.2em; /* Reduïm la mida de la icona */
+}
+.btn-accio.actiu {
+    background-color: #ffc107; /* Taronja per indicar que està actiu */
+    color: black;
+}
+
+/* Estils per al botó de filtre de data */
+#btn-obrir-filtre-data {
+    appearance: none; /* Elimina estils per defecte del navegador */
+    -webkit-appearance: none;
+    background-image: none; /* Elimina la fletxa de fons si n'hi ha */
+    cursor: pointer;
+    padding-top: 6px; /* Espai intern mínim */
+    line-height: 1; /* Evita alçada extra */
+    width: auto; /* Permet que l'amplada s'ajusti al contingut */
+    min-width: 0; /* Sobreescriu qualsevol amplada mínima heretada */
+    padding-left: 10px;  /* Espai intern esquerre */
+    padding-right: 10px; /* Espai intern dret */
+    line-height: normal; /* Restaura l'alçada de línia per defecte */
+}
+
+/* Estils per al modal de filtre de data */
+.modal-filtre-data {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    width: 380px;
+    max-width: 90%;
+}
+.opcions-data-btn-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.opcions-data-btn-group button {
+    flex-grow: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    background-color: rgba(180, 180, 180, 0.7); /* Gris fluixet */
+}
+.opcions-data-btn-group button.seleccionat { background-color: rgba(0, 0, 0, 0.7); /* Negre */ }
+.calendari-container { user-select: none; border-top: 1px solid #eee; padding-top: 15px; }
+.calendari-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.calendari-header button { background: none; border: none; font-size: 20px; cursor: pointer; }
+.calendari-mes-any { font-weight: bold; }
+.calendari-dies-setmana, .calendari-dies { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+.calendari-dies-setmana div { font-weight: bold; font-size: 0.8em; color: #666; }
+.calendari-dies div {
+    padding: 8px 0;
+    cursor: pointer;
+    border-radius: 6px; /* Cantonades lleugerament arrodonides */
+    transition: background-color 0.2s;
+    margin: 1px;
+}
+.calendari-dies div:not(.dia-buit):hover { background-color: #f0f0f0; }
+.dia-buit { cursor: default; }
+.dia-avui { font-weight: bold; border: 1px solid #007bff; box-sizing: border-box; }
+.dia-inici { background-color: #007bff !important; color: white; }
+.dia-fi { background-color: #dc3545 !important; color: white; }
+.dia-rang { background-color: rgba(0, 123, 255, 0.15); border-radius: 0; margin: 1px 0; }
+.dates-seleccionades {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.btn-netejar {
+    background-color: rgba(255, 165, 0, 0.7); /* Taronja amb 70% opacitat */
+}
+.btn-netejar:hover {
+    background-color: rgba(255, 165, 0, 0.9);
+}
+
+/* Ajust per a l'espaiat dels filtres */
+.filtres {
+    display: flex; /* Canviat per alinear elements en fila */
+    gap: 10px;
+    align-items: center;
+}
+
+/* Nou contenidor per a filtres i botons */
+.main-controls {
+    display: flex;
+    justify-content: space-between; /* Alinea els grups a cada extrem */
+    align-items: center; /* Centra verticalment els elements */
+    flex-wrap: wrap; /* Permet que els elements es moguin a la línia següent si no hi ha espai */
+    margin-bottom: 10px; /* Espaiat inferior */
+}
+.grup-selectors {
+    display: flex;
+    gap: 10px;
+}
+
+/* Contenidor de la taula per a scroll horitzontal */
+#resultats {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Scroll suau en iOS */
+}
+
+/* Assegura que la taula en edició no es comprimeixi i tingui scroll */
+.edit-mode-table {
+    min-width: 800px; /* Amplada mínima per evitar que es talli el contingut */
+    width: 100%;
+}
+
+@media (min-width: 769px) {
+    #btn-mode-editor-mobil { display: none; } /* Amaga el botó en escriptori */
 }

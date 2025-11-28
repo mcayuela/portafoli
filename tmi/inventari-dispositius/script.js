@@ -34,6 +34,7 @@ const cercador = document.getElementById('buscador');
 const selectTipus = document.querySelector('.filtreTipus');
 const resultats = document.getElementById('resultats');
 const contadorDispositius = document.querySelector('.contador-dispositius');
+const btnModeEditorMobil = document.getElementById('btn-mode-editor-mobil');
 let modeEditor = false;
 
 function mostrarLoader() {
@@ -53,6 +54,9 @@ function amagarLoader() {
 // Mostrar loader quan carrega la pàgina
 document.addEventListener('DOMContentLoaded', () => {
     mostrarLoader();
+
+    // Inicialitza els listeners per al modal d'accions mòbil
+    inicialitzarModalAccionsEditor();
 });
 
 onAuthStateChanged(auth, (user) => {
@@ -252,6 +256,15 @@ cercador.addEventListener('input', function() {
     filtraITipus(tipus);
 });
 
+// Funció per activar/desactivar el mode editor
+function toggleEditMode() {
+    modeEditor = !modeEditor;
+    if (btnModeEditorMobil) {
+        btnModeEditorMobil.classList.toggle('actiu', modeEditor);
+    }
+    mostrarResultats(resultatsFiltrats, paginaActual); // Refresca la vista
+}
+
 // Mostra resultats
 function mostrarResultats(filtrats, pagina = 1) {
     resultats.innerHTML = '';
@@ -261,7 +274,7 @@ function mostrarResultats(filtrats, pagina = 1) {
         <div class="header-resultats">
             <span class="comptador-text">Dispositius: ${filtrats.length}</span>
             <div class="botons-header">
-                ${modeEditor ? `
+                ${modeEditor ? ` 
                     <button id="btn-afegir-dispositiu" class="btn-afegir">
                         <span class="btn-afegir-text">+ Afegir dispositiu</span>
                     </button>
@@ -280,23 +293,23 @@ function mostrarResultats(filtrats, pagina = 1) {
     `;
     contadorDispositius.innerHTML = headerHtml;
     
-    // Event listener per al botó d'afegir (només si està en mode editor)
-    if (modeEditor) {
-        document.getElementById('btn-afegir-dispositiu').addEventListener('click', () => {
-            mostrarModalSeleccioDispositiu();
-        });
-
-        // Event listener per al botó d'exportar (només si està en mode editor)
-        document.getElementById('btn-exportar-csv').addEventListener('click', () => {
-            exportarACSV(filtrats);
-        });
+    // Assignem events als botons que acabem de crear
+    const btnModeEditor = document.getElementById('btn-mode-editor');
+    if (btnModeEditor) {
+        btnModeEditor.addEventListener('click', toggleEditMode);
     }
-    
-    // Event listener per al botó editor
-    document.getElementById('btn-mode-editor').addEventListener('click', () => {
-        modeEditor = !modeEditor;
-        mostrarResultats(filtrats, pagina); // Refresca la vista
-    });
+
+    if (modeEditor) {
+        const btnAfegir = document.getElementById('btn-afegir-dispositiu');
+        if (btnAfegir) {
+            btnAfegir.addEventListener('click', mostrarModalSeleccioDispositiu);
+        }
+
+        const btnExportar = document.getElementById('btn-exportar-csv');
+        if (btnExportar) {
+            btnExportar.addEventListener('click', () => exportarACSV(filtrats));
+        }
+    }
 
     if (!filtrats.length) {
         resultats.innerHTML = '<div>No s\'han trobat resultats.</div>';
@@ -421,6 +434,50 @@ function mostrarResultats(filtrats, pagina = 1) {
                 }
             });
         });
+    }
+}
+
+// --- LÒGICA DEL MODAL D'ACCIONS DE L'EDITOR (MÒBIL) ---
+
+function inicialitzarModalAccionsEditor() {
+    const modal = document.getElementById('modal-accions-editor');
+    if (!modal) return;
+
+    const btnObrir = document.getElementById('btn-mode-editor-mobil');
+    const btnTancar = document.getElementById('btn-tancar-accions');
+    const btnAccioAfegir = document.getElementById('btn-accio-afegir');
+    const btnAccioExportar = document.getElementById('btn-accio-exportar');
+    const btnAccioEntregues = document.getElementById('btn-accio-entregues');
+    const btnAccioEditarTaula = document.getElementById('btn-accio-editar-taula');
+
+    btnObrir.addEventListener('click', () => {
+        // Actualitza l'estat del botó abans de mostrar el modal
+        btnAccioEditarTaula.classList.toggle('actiu', modeEditor);
+        btnAccioEditarTaula.innerHTML = `<span>✏️</span> ${modeEditor ? 'Desactivar Edició' : 'Activar Edició a la Taula'}`;
+        modal.style.display = 'flex';
+    });
+
+    btnTancar.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    btnAccioAfegir.addEventListener('click', () => {
+        mostrarModalSeleccioDispositiu();
+        modal.style.display = 'none';
+    });
+
+    btnAccioExportar.addEventListener('click', () => exportarACSV(resultatsFiltrats));
+    btnAccioEntregues.addEventListener('click', () => window.location.href = 'entrega-material.html');
+
+    // Afegeix el listener per al botó d'editar taula
+    if (btnAccioEditarTaula) {
+        btnAccioEditarTaula.addEventListener('click', toggleEditMode);
     }
 }
 
