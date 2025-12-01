@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roaming - TMI</title>
+    <link rel="icon" href="/images/logo_tmi_sensefons.png" type="image/png" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header id="site-header">
+        <div class="logo-esquerra">
+            <img src="/images/logo_tmi_sensefons.png" alt="Logo esquerra" />
+        </div>
+            <a class="titol-principal" href="index.html">Roaming - TMI</a>
+        <div class="logo-dreta">
+            <img src="/images/logo_tmi_sensefons.png" alt="Logo dreta" />
+        </div>
+    </header>
+    <main>
+        <div class="contenidor-principal-superior">
+            <div class="grup-filtres-cercador">
+                <input id="buscador" class="buscador" placeholder="Cerca..." />
+                <span id="contenidor-subfiltre"></span>
+            </div>
+            <div class="contador-contactes"></div>
+        </div>
+        <div id="map"></div>
+    </main>
+    <footer>
+        <div id="paginacio-footer"></div>
+    </footer>
+</body>
+<script type="text/javascript" src="mapdata.js"></script>		
+<script type="text/javascript" src="worldmap.js"></script>
+<script src="script.js"></script>
+</html>

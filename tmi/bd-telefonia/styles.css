@@ -564,3 +564,45 @@ select option:hover {
 .filtreSubdepartament option:hover {
     background-color: #222d32;
 }
+
+/* Contenidor principal per al mapa i el text */
+.contenidor-mapa-text {
+    display: flex;
+    gap: 24px; /* Espai entre el mapa i el text */
+    margin-top: 30px;
+    align-items: flex-start; /* Alinea els elements a la part superior */
+}
+
+/* Columna que conté el mapa (2/3) */
+.columna-mapa {
+    flex: 2; /* Ocupa 2 parts de l'espai */
+    min-width: 0; /* Important per al correcte funcionament de flexbox */
+}
+
+/* Columna que conté el text (1/3) */
+.columna-text {
+    flex: 1; /* Ocupa 1 part de l'espai */
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(37,150,190,0.07);
+}
+
+/* El mapa dins de la seva columna */
+#map {
+    width: 100% !important; /* El mapa s'ajusta a la seva columna */
+    height: 600px !important;
+    margin-top: 50px;
+}
+
+/* Media query per a pantalles més petites */
+@media (max-width: 950px) {
+    .contenidor-mapa-text {
+        flex-direction: column;
+    }
+}
+
+#map_holder div[title="For evaluation use only."], 
+#map_holder a[title="For evaluation use only."] {
+    display: none !important;
+}
