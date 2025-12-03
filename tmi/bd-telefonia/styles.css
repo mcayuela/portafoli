@@ -593,6 +593,7 @@ select option:hover {
     width: 100% !important; /* El mapa s'ajusta a la seva columna */
     height: 600px !important;
     margin-top: 50px;
+    border: red 2px solid;
 }
 
 /* Media query per a pantalles més petites */
@@ -605,4 +606,10 @@ select option:hover {
 #map_holder div[title="For evaluation use only."], 
 #map_holder a[title="For evaluation use only."] {
     display: none !important;
+}
+
+#text-adicional {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #00aeff;
 }

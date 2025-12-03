@@ -5,6 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dispositiu - Inventari TMI</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* --- NOUS ESTATS PER A LA PÀGINA DE DETALL --- */
+
+        /* Disseny de dues columnes */
+        .dispositiu-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Dues columnes horitzontals */
+            gap: 30px; /* Espai entre columnes */
+            align-items: flex-start;
+        }
+
+        /* En pantalles petites, torna a una sola columna */
+        @media (max-width: 900px) {
+            .dispositiu-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Estil base per a tots els botons */
+        .btn-editar-dispositiu, .btn-guardar, .btn-cancelar, .btn-tornar, .btn-afegir-nota {
+            display: inline-block;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            text-align: center;
+        }
+
+        .btn-editar-dispositiu:hover, .btn-guardar:hover, .btn-cancelar:hover, .btn-tornar:hover, .btn-afegir-nota:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Colors específics per a cada botó */
+
+        /* Botó Guardar (blau corporatiu) */
+        .btn-guardar {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-guardar:hover { background-color: #0069d9; }
+
+        /* Botó Tornar (gris) */
+        .btn-tornar {
+            background-color: #343a40;
+            color: white;
+        }
+        .btn-tornar:hover { background-color: #23272b; }
+
+        /* Botons generals (gris clar) */
+        .btn-editar-dispositiu,
+        .btn-cancelar,
+        .btn-afegir-nota {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-editar-dispositiu:hover,
+        .btn-cancelar:hover,
+        .btn-afegir-nota:hover {
+            background-color: #5a6268;
+        }
+
+        /* El botó de cancel·lar dins d'un modal pot tenir un color diferent si es vol,
+           però per mantenir la consistència, el deixem gris. Si el vols vermell,
+           descomenta les següents línies:
+        .btn-cancelar { background-color: #dc3545; }
+        .btn-cancelar:hover { background-color: #c82333; }
+        */
+
+    </style>
 </head>
 <body>
     <!-- Loader global -->
@@ -44,7 +118,12 @@
         <div id="content" style="display: none;">
             <div class="dispositiu-header">
                 <h2 id="dispositiu-titol">Carregant...</h2>
-                <a href="index.html" class="btn-tornar">← Tornar a l'inventari</a>
+                <div class="header-botons">
+                    <button id="btn-editar-dispositiu" class="btn-editar-dispositiu">✏️ Editar</button>
+                    <button id="btn-guardar-canvis" class="btn-guardar hidden">Guardar</button>
+                    <button id="btn-cancelar-edicio" class="btn-cancelar hidden">Cancel·lar</button>
+                    <a href="index.html" class="btn-tornar">← Tornar</a>
+                </div>
             </div>
 
             <div class="dispositiu-container">
@@ -177,6 +256,23 @@
                     <div id="llista-notes"></div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal per al comentari d'edició -->
+    <div id="modal-comentari-edicio" class="modal-overlay" style="display: none;">
+        <div class="modal-nota">
+            <h3 class="modal-titol-nota">Explicació dels Canvis</h3>
+            <form id="form-comentari" class="form-nota">
+                <div class="camp-nota">
+                    <label for="comentari-descripcio">És obligatori deixar un comentari per desar els canvis:</label>
+                    <textarea id="comentari-descripcio" rows="4" required placeholder="Ex: S'ha actualitzat el processador i la RAM."></textarea>
+                </div>
+                <div class="modal-botons">
+                    <button type="submit" class="btn-guardar">Guardar Canvis</button>
+                    <button type="button" id="btn-cancelar-comentari" class="btn-cancelar">Cancel·lar</button>
+                </div>
+            </form>
         </div>
     </div>
 

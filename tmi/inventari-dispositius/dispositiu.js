@@ -23,6 +23,10 @@ let tipusActual = '';
 // Elements del DOM
 let globalLoader, loading, content, error, dispositiuTitol, llistaNotes, noNotes;
 let btnAfegirNota, modalAfegirNota, formNota, btnCancelarNota, templateNota;
+let btnEditarDispositiu, btnGuardarCanvis, btnCancelarEdicio;
+let modalComentariEdicio, formComentari, btnCancelarComentari;
+
+let modeEdicio = false;
 
 // FUNCIONS DEL LOADER
 function mostrarLoader() {
@@ -52,12 +56,23 @@ document.addEventListener('DOMContentLoaded', () => {
     formNota = document.getElementById('form-nota');
     btnCancelarNota = document.getElementById('btn-cancelar-nota');
     templateNota = document.getElementById('template-nota');
+    btnEditarDispositiu = document.getElementById('btn-editar-dispositiu');
+    btnGuardarCanvis = document.getElementById('btn-guardar-canvis');
+    btnCancelarEdicio = document.getElementById('btn-cancelar-edicio');
+    modalComentariEdicio = document.getElementById('modal-comentari-edicio');
+    formComentari = document.getElementById('form-comentari');
+    btnCancelarComentari = document.getElementById('btn-cancelar-comentari');
 
     // Event listeners
     if (btnAfegirNota) btnAfegirNota.addEventListener('click', mostrarModalAfegirNota);
     if (btnCancelarNota) btnCancelarNota.addEventListener('click', tancarModalNota);
     if (formNota) formNota.addEventListener('submit', handleSubmitNota);
     if (modalAfegirNota) modalAfegirNota.addEventListener('click', handleClickForaModal);
+    if (btnEditarDispositiu) btnEditarDispositiu.addEventListener('click', () => activarModeEdicio(true));
+    if (btnCancelarEdicio) btnCancelarEdicio.addEventListener('click', () => activarModeEdicio(false));
+    if (btnGuardarCanvis) btnGuardarCanvis.addEventListener('click', demanarComentariPerGuardar);
+    if (formComentari) formComentari.addEventListener('submit', handleGuardarCanvis);
+    if (btnCancelarComentari) btnCancelarComentari.addEventListener('click', () => modalComentariEdicio.style.display = 'none');
 
     mostrarLoader();
 
@@ -102,12 +117,12 @@ function mostrarModalLogin() {
 // Obté l'ID del dispositiu des de la URL
 function obtenirIdDispositiu() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('id');
+    return { id: urlParams.get('id'), tipus: urlParams.get('tipus') };
 }
 
 // Carrega les dades del dispositiu
 async function carregarDispositiu() {
-    const id = obtenirIdDispositiu();
+    const { id, tipus } = obtenirIdDispositiu();
     console.log("Buscant dispositiu amb ID:", id);
     
     if (!id) {
@@ -118,40 +133,28 @@ async function carregarDispositiu() {
     }
 
     try {
-        // Cerca a totes les col·leccions
-        const col·leccions = [
-            { nom: 'pcs', tipus: 'PC' },
-            { nom: 'mobils', tipus: 'Mòbil' },
-            { nom: 'monitors', tipus: 'Monitor' },
-            { nom: 'impressores', tipus: 'Impressora' },
-            { nom: 'altresDispositius', tipus: 'Altres' }
-        ];
+        const col·leccio = obtenirCol·leccio(tipus);
+        console.log(`Buscant a la col·lecció: ${col·leccio} amb tipus: ${tipus}`);
 
-        for (const col of col·leccions) {
-            console.log(`Buscant a la col·lecció: ${col.nom}`);
-            
-            const docRef = doc(db, col.nom, id);
-            const docSnap = await getDoc(docRef);
-            
-            if (docSnap.exists) {
-                console.log(`Trobat a ${col.nom}:`, docSnap.data());
-                dispositiuActual = docSnap.data();
-                tipusActual = col.tipus === 'Altres' ? dispositiuActual.tipus : col.tipus;
-                mostrarDispositiu();
-                amagarLoader();
-                return;
-            }
+        const docRef = doc(db, col·leccio, id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            console.log(`Trobat a ${col·leccio}:`, docSnap.data());
+            dispositiuActual = { ...docSnap.data(), id: docSnap.id }; // Assegurem que l'ID està a l'objecte
+            tipusActual = tipus; // Utilitzem el tipus de la URL
+            mostrarDispositiu();
+        } else {
+            console.log("Dispositiu no trobat a la col·lecció especificada.");
+            mostrarError();
         }
-
-        console.log("Dispositiu no trobat a cap col·lecció");
-        mostrarError();
-        amagarLoader();
     } catch (error) {
         console.error('Error carregant dispositiu:', error);
         mostrarError();
         amagarLoader();
     }
 }
+
 
 // Mostra la informació del dispositiu
 function mostrarDispositiu() {
@@ -168,6 +171,7 @@ function mostrarDispositiu() {
     
     // Notes
     mostrarNotes();
+    amagarLoader();
 }
 
 // Mostra els camps del dispositiu segons el tipus
@@ -221,6 +225,25 @@ function mostrarCampsDispositiu() {
             if (element) element.textContent = camps[id] || 'N/A';
         });
         
+    } else if (tipusActual === 'Impressora') {
+        const campsImpressora = document.getElementById('camps-impressora');
+        if (campsImpressora) campsImpressora.style.display = 'block';
+
+        // Omple els camps de la impressora
+        const camps = {
+            'impressora-id': dispositiuActual.id,
+            'impressora-nom': dispositiuActual.nom,
+            'impressora-model': dispositiuActual.model,
+            'impressora-sn': dispositiuActual.sn,
+            'impressora-departament': dispositiuActual.departament,
+            'impressora-data': formatarData(dispositiuActual.dataAdquisicio)
+        };
+
+        Object.keys(camps).forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = camps[id] || 'N/A';
+        });
+
     } else {
         const campsAltres = document.getElementById('camps-altres');
         if (campsAltres) campsAltres.style.display = 'block';
@@ -230,7 +253,7 @@ function mostrarCampsDispositiu() {
             'altres-id': dispositiuActual.id,
             'altres-nom': dispositiuActual.nom,
             'altres-model': dispositiuActual.model,
-            'altres-tipus': dispositiuActual.tipus || tipusActual,
+            'altres-tipus': tipusActual,
             'altres-data': formatarData(dispositiuActual.dataAdquisicio)
         };
         
@@ -379,6 +402,153 @@ async function eliminarNota(index) {
     }
 }
 
+// --- LÒGICA D'EDICIÓ DEL DISPOSITIU ---
+
+function activarModeEdicio(activar) {
+    modeEdicio = activar;
+    const contenidorCamps = document.querySelector('.dispositiu-info');
+    const campsSpan = contenidorCamps.querySelectorAll('span[id]');
+
+    campsSpan.forEach(span => {
+        const esCampId = span.id.endsWith('-id');
+        if (esCampId) return; // No fem editable el camp ID
+
+        if (activar) {
+            const valorActual = span.textContent === 'N/A' ? '' : span.textContent;
+            let input;
+
+            if (span.id.endsWith('-data')) {
+                input = document.createElement('input');
+                input.type = 'date';
+                // Convertim format dd/mm/yyyy a yyyy-mm-dd per l'input
+                if (valorActual) {
+                    const parts = valorActual.split('/');
+                    if (parts.length === 3) {
+                        input.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    }
+                }
+            } else {
+                input = document.createElement('input');
+                input.type = 'text';
+                input.value = valorActual;
+            }
+            
+            input.id = span.id; // Mantenim el mateix ID
+            input.className = 'input-edicio';
+            span.replaceWith(input);
+        } else {
+            // Tornar a span (cancelar)
+            const input = document.getElementById(span.id);
+            const nouSpan = document.createElement('span');
+            nouSpan.id = span.id;
+            // Busquem el valor original a l'objecte dispositiuActual
+            const clau = span.id.split('-').slice(1).join('-');
+            const clauCamelCase = clau.replace(/-([a-z])/g, g => g[1].toUpperCase());
+            nouSpan.textContent = dispositiuActual[clauCamelCase] || dispositiuActual[span.id.split('-')[1]] || 'N/A';
+            if (span.id.endsWith('-data')) {
+                nouSpan.textContent = formatarData(dispositiuActual.dataAdquisicio);
+            }
+            input.replaceWith(nouSpan);
+        }
+    });
+
+    // Canvia la visibilitat dels botons
+    btnEditarDispositiu.classList.toggle('hidden', activar);
+    btnGuardarCanvis.classList.toggle('hidden', !activar);
+    btnCancelarEdicio.classList.toggle('hidden', !activar);
+}
+
+function demanarComentariPerGuardar() {
+    // Comprovem si hi ha hagut canvis reals
+    const inputs = document.querySelectorAll('.input-edicio');
+    let canvisDetectats = false;
+    inputs.forEach(input => {
+        const clau = input.id.split('-').slice(1).join('-');
+        const clauCamelCase = clau.replace(/-([a-z])/g, g => g[1].toUpperCase());
+        let valorOriginal = dispositiuActual[clauCamelCase] || dispositiuActual[input.id.split('-')[1]] || '';
+        let valorActual = input.value;
+
+        if (input.type === 'date') {
+            valorOriginal = formatarData(valorOriginal, 'yyyy-mm-dd');
+        }
+
+        if (String(valorOriginal) !== valorActual) {
+            canvisDetectats = true;
+        }
+    });
+
+    if (!canvisDetectats) {
+        alert("No s'han detectat canvis per guardar.");
+        activarModeEdicio(false); // Surt del mode edició
+        return;
+    }
+
+    // Si hi ha canvis, mostra el modal per al comentari
+    modalComentariEdicio.style.display = 'flex';
+    document.getElementById('comentari-descripcio').value = ''; // Neteja el camp
+}
+
+async function handleGuardarCanvis(e) {
+    e.preventDefault();
+    const comentari = document.getElementById('comentari-descripcio').value.trim();
+
+    if (!comentari) {
+        alert("El comentari és obligatori per desar els canvis.");
+        return;
+    }
+
+    mostrarLoader();
+    modalComentariEdicio.style.display = 'none';
+
+    try {
+        const dadesActualitzades = {};
+        const inputs = document.querySelectorAll('.input-edicio');
+
+        inputs.forEach(input => {
+            const clau = input.id.split('-').slice(1).join('-');
+            const clauCamelCase = clau.replace(/-([a-z])/g, g => g[1].toUpperCase());
+            dadesActualitzades[clauCamelCase] = input.value;
+        });
+
+        // Canviem el nom de la clau FQDN si existeix
+        if (dadesActualitzades.hasOwnProperty('fqdn')) {
+            dadesActualitzades.FQDN = dadesActualitzades.fqdn;
+            delete dadesActualitzades.fqdn;
+        }
+
+        // Afegim la data d'última edició
+        dadesActualitzades.dataUltimaEdicio = new Date().toISOString();
+
+        // Creem la nota amb el comentari
+        const novaNota = {
+            titol: "Edició de Dispositiu",
+            descripcio: comentari,
+            data: new Date().toISOString(),
+            usuari: auth.currentUser.email
+        };
+
+        // Afegim la nota a l'array de notes per actualitzar
+        dadesActualitzades.notes = arrayUnion(novaNota);
+
+        const col·leccio = obtenirCol·leccio(tipusActual);
+        const docRef = doc(db, col·leccio, dispositiuActual.id);
+
+        await updateDoc(docRef, dadesActualitzades);
+
+        // Recarreguem les dades per mostrar la informació actualitzada
+        await carregarDispositiu();
+        
+        // Sortim del mode edició
+        activarModeEdicio(false);
+
+    } catch (error) {
+        console.error("Error guardant els canvis:", error);
+        alert("S'ha produït un error en desar els canvis.");
+        amagarLoader();
+    }
+}
+
+
 // Funcions auxiliars
 function obtenirCol·leccio(tipus) {
     switch (tipus) {
@@ -390,12 +560,18 @@ function obtenirCol·leccio(tipus) {
     }
 }
 
-function formatarData(dataString) {
+function formatarData(dataString, format = 'dd/mm/yyyy') {
     if (!dataString) return 'N/A';
     try {
         const data = new Date(dataString);
+        if (format === 'dd/mm/yyyy') {
+            return data.toLocaleDateString('ca-ES');
+        } else if (format === 'yyyy-mm-dd') {
+            return data.toISOString().split('T')[0];
+        }
         return data.toLocaleDateString('ca-ES');
     } catch (e) {
+        console.warn(`Error formatant data: ${dataString}`, e);
         return dataString;
     }
 }
@@ -403,69 +579,4 @@ function formatarData(dataString) {
 function mostrarError() {
     if (loading) loading.style.display = 'none';
     if (error) error.style.display = 'block';
-}
-
-// Dins de guardarCanvisDispositiu per PC:
-if (tipus === 'PC') {
-    dadesActualitzades = {
-        id: document.getElementById('edit-id').value,
-        FQDN: document.getElementById('edit-fqdn').value,
-        usuari: document.getElementById('edit-usuari').value,
-        departament: document.getElementById('edit-departament').value, // AFEGEIX
-        model: document.getElementById('edit-model').value,
-        processador: document.getElementById('edit-processador').value,
-        targetaGrafica: document.getElementById('edit-targeta-grafica').value,
-        sistemaOperatiu: document.getElementById('edit-so').value,
-        memoriaRAM: document.getElementById('edit-ram').value,
-        emmagatzematge: document.getElementById('edit-emmagatzematge').value,
-        dataAdquisicio: document.getElementById('edit-data').value
-    };
-} else if (tipus === 'Mòbil') {
-    dadesActualitzades = {
-        id: document.getElementById('edit-id').value,
-        departament: document.getElementById('edit-departament').value, // AFEGEIX
-        model: document.getElementById('edit-model').value,
-        memoriaRAM: document.getElementById('edit-ram').value,
-        memoriaInterna: document.getElementById('edit-interna').value,
-        sn: document.getElementById('edit-sn').value,
-        imei1: document.getElementById('edit-imei1').value,
-        imei2: document.getElementById('edit-imei2').value,
-        mailRegistre: document.getElementById('edit-mail').value,
-        dataAdquisicio: document.getElementById('edit-data').value
-    };
-} else {
-    dadesActualitzades = {
-        id: document.getElementById('edit-id').value,
-        nom: document.getElementById('edit-nom').value,
-        departament: document.getElementById('edit-departament').value, // AFEGEIX
-        model: document.getElementById('edit-model').value,
-        tipus: document.getElementById('edit-tipus').value,
-        dataAdquisicio: document.getElementById('edit-data').value
-    };
-}
-
-// També cal afegir departament als modals d'edició dins del dispositiu.js
-// Copia les mateixes funcions mostrarModalEdicio i guardarCanvisDispositiu del script.js
-
-// Per exemple, dins de mostrarModalEdicio per PC:
-if (tipus === 'PC') {
-    campsHTML = `
-        <div class="camp-edicio">
-            <label for="edit-id">ID:</label>
-            <input type="text" id="edit-id" value="${dades.id || ''}" readonly>
-        </div>
-        <div class="camp-edicio">
-            <label for="edit-fqdn">FQDN:</label>
-            <input type="text" id="edit-fqdn" value="${dades.FQDN || ''}" required>
-        </div>
-        <div class="camp-edicio">
-            <label for="edit-usuari">Usuari:</label>
-            <input type="text" id="edit-usuari" value="${dades.usuari || ''}">
-        </div>
-        <div class="camp-edicio">
-            <label for="edit-departament">Departament:</label>
-            <input type="text" id="edit-departament" value="${dades.departament || ''}">
-        </div>
-        <!-- Rest dels camps igual -->
-    `;
 }

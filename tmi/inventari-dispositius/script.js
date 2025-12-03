@@ -140,6 +140,7 @@ async function carregarDades() {
                 tipusDispositiu: 'Impressora',
                 dataAdquisicio: data.dataAdquisicio || '',
                 dataCreacio: data.dataCreacio || '',
+                sn: data.sn || '', // NOU CAMP
                 dataUltimaEdicio: data.dataUltimaEdicio || ''
             });
         });
@@ -930,6 +931,33 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
                 <input type="date" id="edit-data" value="${dades.dataAdquisicio || ''}">
             </div>
         `;
+    } else if (tipus === 'Impressora') {
+        campsHTML = `
+            <div class="camp-edicio">
+                <label for="edit-id">ID:</label>
+                <input type="text" id="edit-id" value="${dades.id || ''}" readonly>
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-nom">Nom:</label>
+                <input type="text" id="edit-nom" value="${dades.nom || ''}" required>
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-departament">Departament:</label>
+                <input type="text" id="edit-departament" value="${dades.departament || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-model">Model:</label>
+                <input type="text" id="edit-model" value="${dades.model || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-sn">SN:</label>
+                <input type="text" id="edit-sn" value="${dades.sn || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-data">Data d'Adquisició:</label>
+                <input type="date" id="edit-data" value="${dades.dataAdquisicio || ''}">
+            </div>
+        `;
     } else {
         campsHTML = `
             <div class="camp-edicio">
@@ -1031,6 +1059,18 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
                 dataAdquisicio: document.getElementById('edit-data').value,
                 dataUltimaEdicio: new Date().toISOString()
             };
+        } else if (tipus === 'Impressora') {
+            dadesActualitzades = {
+                id: document.getElementById('edit-id').value,
+                nom: document.getElementById('edit-nom').value,
+                departament: document.getElementById('edit-departament').value,
+                model: document.getElementById('edit-model').value,
+                sn: document.getElementById('edit-sn').value, // NOU CAMP
+                tipus: 'Impressora',
+                dataAdquisicio: document.getElementById('edit-data').value,
+                dataUltimaEdicio: new Date().toISOString()
+            };
+            col·leccio = 'impressores'; // Assegurem la col·lecció correcta
         } else {
             dadesActualitzades = {
                 id: document.getElementById('edit-id').value,
@@ -1245,6 +1285,10 @@ function mostrarModalAfegirDispositiu(tipus) {
                 <input type="text" id="add-model">
             </div>
             <div class="camp-edicio">
+                <label for="add-sn">SN:</label>
+                <input type="text" id="add-sn">
+            </div>
+            <div class="camp-edicio">
                 <label for="add-data">Data d'Adquisició:</label>
                 <input type="date" id="add-data">
             </div>
@@ -1266,6 +1310,10 @@ function mostrarModalAfegirDispositiu(tipus) {
             <div class="camp-edicio">
                 <label for="add-model">Model:</label>
                 <input type="text" id="add-model">
+            </div>
+            <div class="camp-edicio">
+                <label for="add-sn">SN:</label>
+                <input type="text" id="add-sn">
             </div>
             <div class="camp-edicio">
                 <label for="add-data">Data d'Adquisició:</label>
@@ -1399,6 +1447,7 @@ async function afegirNouDispositiu(tipus, modal) {
                 nom: document.getElementById('add-nom').value,
                 departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
+                sn: document.getElementById('add-sn').value, // NOU CAMP
                 tipus: 'Impressora',
                 dataAdquisicio: document.getElementById('add-data').value,
                 dataCreacio: dataActual,

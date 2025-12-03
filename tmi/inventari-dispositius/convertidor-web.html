@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertidor d'Imatge a Base64 i JPG</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+            text-align: center;
+        }
+        .upload-section {
+            text-align: center;
+            padding: 30px;
+            border: 2px dashed #007bff;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .upload-section:hover {
+            background-color: #e9f5ff;
+        }
+        .upload-section p {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #555;
+        }
+        input[type="file"] {
+            display: none; /* L'input està ocult, l'activem amb el label */
+        }
+        .results {
+            margin-top: 25px;
+            display: none; /* Ocult per defecte fins que hi hagi resultats */
+        }
+        h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+            resize: vertical;
+            background-color: #fdfdfd;
+        }
+        .download-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin-top: 15px;
+            background-color: #28a745;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .download-button:hover {
+            background-color: #218838;
+        }
+        #preview-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #preview-container img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer; /* Canvia el cursor per indicar que es pot fer clic */
+            transition: opacity 0.2s;
+        }
+        #preview-container img:hover {
+            opacity: 0.8;
+        }
+
+        /* Estils per al Modal d'Imatge */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            overflow: hidden; /* Evita el desplaçament de la pàgina de fons */
+        }
+
+        .modal-contingut {
+            position: relative;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .modal-contingut img {
+            max-width: 90vw;
+            max-height: 90vh;
+            transition: transform 0.2s ease-in-out;
+            cursor: grab;
+        }
+        .modal-contingut img:active {
+            cursor: grabbing;
+        }
+
+        .modal-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1001;
+        }
+
+        .modal-controls button {
+            background-color: rgba(40, 40, 40, 0.7);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            transition: background-color 0.2s;
+        }
+        .modal-controls button:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Imatge a Base64 (JPG)</h1>
+
+        <!-- Aquesta és la zona on l'usuari fa clic per pujar la imatge -->
+        <label for="pujadaImatge" class="upload-section" id="upload-label">
+            <p>Fes clic o arrossega una imatge aquí</p>
+        </label>
+        <input type="file" id="pujadaImatge" accept="image/*">
+
+        <!-- Aquesta secció apareixerà quan es processi la imatge -->
+        <div class="results" id="resultats">
+            <div id="preview-container">
+                <h3>Previsualització (com a JPG)</h3>
+                <img id="imatge-preview" alt="Previsualització de la imatge">
+            </div>
+            
+            <h3>Codi Base64 (format JPG)</h3>
+            <textarea id="textBase64" readonly title="Codi Base64 de la imatge en format JPG"></textarea>
+            
+            <a id="btnDescarregar" class="download-button" download="imatge.jpg">
+                Descarregar Imatge en JPG
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal per ampliar la imatge -->
+    <div id="modal-imatge" class="modal-overlay" style="display: none;">
+        <div class="modal-controls">
+            <button id="btn-zoom-in" title="Ampliar">+</button>
+            <button id="btn-zoom-out" title="Reduir">-</button>
+            <button id="btn-tancar-modal" title="Tancar">×</button>
+        </div>
+        <div class="modal-contingut">
+            <img id="imatge-ampliada" alt="Imatge ampliada">
+        </div>
+    </div>
+
+    <script>
+        // Obtenim els elements del DOM que necessitarem
+        const inputImatge = document.getElementById('pujadaImatge');
+        const zonaResultats = document.getElementById('resultats');
+        const textBase64 = document.getElementById('textBase64');
+        const btnDescarregar = document.getElementById('btnDescarregar');
+        const previewImatge = document.getElementById('imatge-preview');
+        const uploadLabel = document.getElementById('upload-label');
+
+        // Elements del modal
+        const modalImatge = document.getElementById('modal-imatge');
+        const imatgeAmpliada = document.getElementById('imatge-ampliada');
+        const btnTancarModal = document.getElementById('btn-tancar-modal');
+        const btnZoomIn = document.getElementById('btn-zoom-in');
+        const btnZoomOut = document.getElementById('btn-zoom-out');
+
+        // Afegim un 'listener' per quan l'usuari seleccioni un fitxer
+        inputImatge.addEventListener('change', (event) => {
+            const fitxer = event.target.files[0];
+            
+            if (fitxer) {
+                // Creem un objecte per llegir el fitxer
+                const reader = new FileReader();
+
+                // Aquesta funció s'executarà quan el fitxer s'hagi llegit
+                reader.onload = (e) => {
+                    // Creem un objecte Imatge per poder dibuixar-la en un canvas
+                    const img = new Image();
+                    img.onload = () => {
+                        // Creem un element <canvas> a la memòria (no és visible a la pàgina)
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        // Ajustem la mida del canvas a la de la imatge
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+
+                        // Dibuixem la imatge sobre el canvas. Això és clau per poder
+                        // canviar el format a JPG.
+                        ctx.drawImage(img, 0, 0);
+
+                        // Convertim el contingut del canvas a una URL de dades en format JPG.
+                        // El segon paràmetre (0.9) és la qualitat del JPG (de 0 a 1).
+                        const dataUrlJpg = canvas.toDataURL('image/jpeg', 0.9);
+
+                        // Mostrem la previsualització
+                        previewImatge.src = dataUrlJpg;
+                        
+                        // Mostrem el codi Base64 a l'àrea de text
+                        // Traiem la capçalera "data:image/jpeg;base64," per mostrar només el codi pur.
+                        textBase64.value = dataUrlJpg.split(',')[1];
+
+                        // Assignem la URL de dades al botó de descàrrega
+                        btnDescarregar.href = dataUrlJpg;
+
+                        // Fem visible la secció de resultats
+                        zonaResultats.style.display = 'block';
+                        uploadLabel.style.display = 'none'; // Ocultem la zona de pujada
+                    };
+                    
+                    // Assignem la imatge original (llegida pel FileReader) a l'objecte Imatge
+                    // Això dispararà l'esdeveniment img.onload de dalt
+                    img.src = e.target.result;
+                };
+
+                // Comencem a llegir el fitxer seleccionat per l'usuari com una URL de dades
+                reader.readAsDataURL(fitxer);
+            }
+        });
+
+        // --- Lògica del Modal d'Imatge ---
+        let nivellZoom = 1;
+
+        // Obrir el modal
+        previewImatge.addEventListener('click', () => {
+            imatgeAmpliada.src = previewImatge.src;
+            nivellZoom = 1; // Resetejem el zoom
+            imatgeAmpliada.style.transform = 'scale(1)';
+            modalImatge.style.display = 'flex';
+        });
+
+        // Tancar el modal
+        function tancarModal() {
+            modalImatge.style.display = 'none';
+        }
+
+        btnTancarModal.addEventListener('click', tancarModal);
+        modalImatge.addEventListener('click', (e) => {
+            // Si es fa clic a fora de la imatge (al fons), es tanca el modal
+            if (e.target === modalImatge) {
+                tancarModal();
+            }
+        });
+
+        // Controls de zoom
+        btnZoomIn.addEventListener('click', () => {
+            nivellZoom += 0.1;
+            imatgeAmpliada.style.transform = `scale(${nivellZoom})`;
+        });
+
+        btnZoomOut.addEventListener('click', () => {
+            if (nivellZoom > 0.2) { // Evitem que la imatge es faci massa petita
+                nivellZoom -= 0.1;
+                imatgeAmpliada.style.transform = `scale(${nivellZoom})`;
+            }
+        });
+    </script>
+
+</body>
+</html>

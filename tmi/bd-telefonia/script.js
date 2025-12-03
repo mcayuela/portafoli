@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Creem la columna per al text
         const columnaText = document.createElement('div');
         columnaText.className = 'columna-text';
-        columnaText.innerHTML = `<h2>Informació Addicional</h2>`;
+        columnaText.innerHTML = `<h2 id=text-addicional>Informació Addicional</h2>`;
 
         zonesAmbCodis = [
             { id: 'zona-eee', titol: 'Zona EEE + UK:', contingut: 'Alemanya, Àustria, Bèlgica, Bulgària, Croàcia, Xipre, Dinamarca, Eslovàquia, Eslovènia, Espanya, Estònia, Finlàndia, França, Grècia, Hongria, Irlanda, Islàndia, Itàlia, Letònia, Liechtenstein, Lituània, Luxemburg, Malta, Noruega, Països Baixos, Polònia, Portugal, Regne Unit, República Txeca, Romania, Suècia.' },
