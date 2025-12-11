@@ -591,9 +591,10 @@ select option:hover {
 /* El mapa dins de la seva columna */
 #map {
     width: 100% !important; /* El mapa s'ajusta a la seva columna */
-    height: 600px !important;
+    height: auto !important;
     margin-top: 50px;
-    border: red 2px solid;
+    overflow: hidden;
+    line-height: 0;
 }
 
 /* Media query per a pantalles més petites */
@@ -612,4 +613,180 @@ select option:hover {
     font-size: 1rem;
     line-height: 1.6;
     color: #00aeff;
+}
+
+/* --- Estils per a les zones desplegables (Acordió) --- */
+
+.zona-desplegable { 
+    border: 1px solid #e0e7ef; 
+    border-radius: 5px; 
+    margin-bottom: 10px; 
+    overflow: hidden; 
+}
+
+.zona-titol { 
+    padding: 12px 15px; 
+    background-color: #f7f9fb; 
+    color: #222d32; 
+    font-weight: 600; 
+    cursor: pointer; 
+    /* Per al triangle: */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.zona-titol:hover { 
+    background-color: #e9e9e9; 
+}
+
+/* Contingut amagat per defecte */
+.zona-contingut { 
+    padding: 0 15px; /* Padding horitzontal, zero vertical */
+    max-height: 0; 
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out; 
+    background-color: #ffffff;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Contingut visible */
+.zona-desplegable.actiu .zona-contingut { 
+    max-height: 500px; /* Altura suficient per al contingut */
+    padding: 15px; /* Padding vertical per mostrar el contingut */
+    transition: max-height 0.5s ease-in, padding 0.5s ease-in;
+    border-top: 1px solid #e0e7ef;
+}
+
+/* Estil del triangle (▼/▲) */
+.zona-titol b::after {
+    content: ' ▼'; /* Fletxa cap avall */
+    font-weight: normal;
+    font-size: 0.9rem;
+    margin-left: 10px;
+    transition: transform 0.3s;
+}
+
+.zona-desplegable.actiu .zona-titol b::after {
+    content: ' ▲'; /* Fletxa cap amunt */
+}
+
+/* Assegurem que el contenidor-mapa-text s'aplica correctament */
+.contenidor-mapa-text {
+    display: flex;
+    gap: 24px;
+    margin-top: 30px;
+    align-items: flex-start;
+}
+
+.columna-mapa {
+    flex: 2;
+    min-width: 0;
+}
+
+.columna-text {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(37,150,190,0.07);
+}
+
+.columna-text h2 {
+    /* Ajusta l'h2 perquè no tingui el padding-left que té per defecte al teu codi */
+    padding-left: 0 !important;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* Media Query per a dispositius mòbils */
+@media (max-width: 950px) {
+    .contenidor-mapa-text {
+        flex-direction: column;
+    }
+}
+
+/* Assegurem que l'estructura de les columnes sigui correcta per a la imatge */
+.contenidor-mapa-text {
+    display: flex;
+    gap: 24px;
+    margin-top: 30px;
+    align-items: flex-start;
+}
+
+.columna-mapa {
+    flex: 2;
+    min-width: 0;
+}
+
+.columna-text {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(37,150,190,0.07);
+}
+
+.columna-text h2 {
+    /* Ajusta l'h2 perquè no tingui el padding-left que té per defecte al teu codi */
+    padding-left: 0 !important;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* --- Estils per a les zones desplegables (Acordió) --- */
+
+.zona-desplegable { 
+    border: 1px solid #e0e7ef; 
+    border-radius: 5px; 
+    margin-bottom: 10px; 
+    overflow: hidden; /* **AQUEST ÉS CRÍTIC** */
+}
+
+.zona-titol { 
+    padding: 12px 15px; 
+    background-color: #f7f9fb; 
+    color: #222d32; 
+    font-weight: 600; 
+    cursor: pointer; /* Feedback visual */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.zona-titol:hover { 
+    background-color: #e9e9e9; 
+}
+
+/* Contingut amagat per defecte */
+.zona-contingut { 
+    /* Amagat amb max-height 0 */
+    max-height: 0; 
+    overflow: hidden;
+    padding: 0 15px; /* Padding horitzontal, 0 vertical */
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out; /* Transició suau */
+    background-color: #ffffff;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Contingut visible */
+.zona-desplegable.actiu .zona-contingut { 
+    max-height: 2000px; /* **VALOR MOLT GRAN** per assegurar que el contingut llarg es vegi */
+    padding: 15px; /* APLICAR EL PADDING VERTICAL AQUÍ */
+    border-top: 1px solid #e0e7ef;
+    transition: max-height 0.4s ease-in, padding 0.4s ease-in;
+}
+
+/* Estil del triangle (▼/▲) */
+.zona-titol b::after {
+    content: ' ▼'; 
+    font-weight: normal;
+    font-size: 0.9rem;
+    margin-left: 10px;
+}
+
+.zona-desplegable.actiu .zona-titol b::after {
+    content: ' ▲';
 }
