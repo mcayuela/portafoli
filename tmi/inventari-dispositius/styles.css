@@ -622,8 +622,7 @@ main {
     font-size: 14px;
     transition: background-color 0.3s ease;
     min-width: 120px; /* Mida fixa per evitar canvis */
-    text-align: center;
-    margin-right: 10px;
+    text-align: center
 }
 
 
@@ -986,7 +985,6 @@ h3.modal-titol {
     justify-content: space-between; /* Alinea els grups a cada extrem */
     align-items: center; /* Centra verticalment els elements */
     gap: 10px;
-    margin-bottom: 10px; /* Espaiat inferior */
     flex-wrap: wrap; /* Permet que els elements es moguin a la línia següent si no hi ha espai */
 }
 
