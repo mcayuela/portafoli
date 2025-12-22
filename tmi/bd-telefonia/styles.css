@@ -157,6 +157,7 @@ a:hover {
     border-radius: 5px;
     font-size: 1rem;
     opacity: 0.7;
+    vertical-align: middle;
 }
 
 .buscador::placeholder {
@@ -166,6 +167,26 @@ a:hover {
 .buscador:focus {
     outline: none;
     border-color: #222d32;
+}
+
+.btn-cerca {
+    padding: 10px 20px;
+    background-color: #222d32;
+    color: white;
+    border: 2px solid rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-left: 8px;
+    vertical-align: middle;
+    transition: background-color 0.2s, border-color 0.2s;
+    opacity: 0.9;
+}
+
+.btn-cerca:hover {
+    background-color: #444;
+    border-color: #222d32;
+    opacity: 1;
 }
 
 .resultat-item {
@@ -738,7 +759,8 @@ select option:hover {
 /* --- Estils per a les zones desplegables (Acordió) --- */
 
 .zona-desplegable { 
-    border: 1px solid #e0e7ef; 
+    border: 1px solid #e0e7ef;
+    border-left-width: 5px; 
     border-radius: 5px; 
     margin-bottom: 10px; 
     overflow: hidden; /* **AQUEST ÉS CRÍTIC** */
@@ -789,4 +811,84 @@ select option:hover {
 
 .zona-desplegable.actiu .zona-titol b::after {
     content: ' ▲';
+}
+
+/* Estils per a la pàgina de Roaming (mapa) */
+.grup-filtres-cercador {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+.buscador {
+    height: 40px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+    outline: none;
+    box-sizing: border-box;
+    margin-right: -8px;
+}
+.btn-cercar {
+    height: 40px;
+    width: 40px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-sizing: border-box;
+}
+.btn-cercar:hover, .btn-cercar.active-search {
+    background-color: #f0f0f0;
+}
+
+#map-container {
+    position: relative;
+}
+#no-results-message {
+    display: none; /* Amagat per defecte */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 20px 30px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #555;
+    z-index: 10;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.suggeriments-box {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 250px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 0 0 4px 4px;
+}
+.suggeriment-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+.suggeriment-item:last-child {
+    border-bottom: none;
+}
+.suggeriment-item:hover {
+    background-color: #f0f0f0;
 }

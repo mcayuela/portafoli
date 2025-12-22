@@ -3,7 +3,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebas
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Configuració Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDqsy5zE7YnUuMt80ZskvvUVFjIiVTdOB8",
     authDomain: "inventari-pc-s.firebaseapp.com",
@@ -22,55 +21,44 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginBtn = document.getElementById("loginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
   const msg = document.getElementById("msg");
+  
+  // Elements per controlar la visibilitat
   const loginContainer = document.getElementById("login-container");
   const mainContent = document.getElementById("main-content");
   const authLoader = document.getElementById("auth-loader");
 
-  // Amaga tot al principi
-  loginContainer.style.display = "none";
-  mainContent.style.display = "none";
-  if (authLoader) authLoader.style.display = "block";
-
   // LOGIN
-  loginBtn.addEventListener("click", () => {
-    signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-      .then(userCredential => {
-        msg.textContent = "Sessió iniciada com " + userCredential.user.email;
-      })
-      .catch(error => {
-        msg.textContent = "Error: " + error.message;
-      });
-  });
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+      signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
+        .then(() => {
+          if (msg) msg.textContent = "Sessió iniciada.";
+        })
+        .catch(error => {
+          if (msg) msg.textContent = "Error: " + error.message;
+        });
+    });
+  }
 
   // LOGOUT
-  logoutBtn.addEventListener("click", () => {
-    signOut(auth).then(() => {
-      msg.textContent = "Sessió tancada";
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      signOut(auth);
     });
-  });
+  }
 
-  // CONTROL D'ESTAT DE SESSIÓ
+  // ESTAT DE LA SESSIÓ
   onAuthStateChanged(auth, (user) => {
     if (authLoader) authLoader.style.display = "none";
+    
     if (user) {
-      msg.textContent = "Connectat com: " + user.email;
-      loginBtn.style.display = "none";
-      logoutBtn.style.display = "inline-block";
-      loginContainer.style.display = "none";
-      mainContent.style.display = "";
+      if (loginContainer) loginContainer.style.display = "none";
+      if (mainContent) mainContent.style.display = "block";
+      if (logoutBtn) logoutBtn.style.display = "block";
     } else {
-      msg.textContent = "No hi ha cap sessió activa";
-      loginBtn.style.display = "inline-block";
-      logoutBtn.style.display = "none";
-      loginContainer.style.display = "";
-      mainContent.style.display = "none";
+      if (loginContainer) loginContainer.style.display = "block";
+      if (mainContent) mainContent.style.display = "none";
+      if (logoutBtn) logoutBtn.style.display = "none";
     }
-  });
-
-  emailInput.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") loginBtn.click();
-  });
-  passwordInput.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") loginBtn.click();
   });
 });
