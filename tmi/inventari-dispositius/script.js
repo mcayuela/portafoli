@@ -1,7 +1,6 @@
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 // Configuració Firebase
 const firebaseConfig = {
@@ -16,7 +15,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
 let dispositius = [];
 let paginaActual = 1;
@@ -57,15 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Inicialitza els listeners per al modal d'accions mòbil
     inicialitzarModalAccionsEditor();
-});
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        carregarDades();
-    } else {
-        // Si no estem a la pàgina de login, redirigim
-        window.location.href = 'login.html';
-    }
+    
+    carregarDades();
 });
 
 // Carrega dades de Firebase

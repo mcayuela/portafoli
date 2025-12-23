@@ -1,6 +1,5 @@
 // Configuració Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -15,7 +14,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
 let dispositiuActual = null;
 let tipusActual = '';
@@ -76,43 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     mostrarLoader();
 
-    // Comprova autenticació
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            console.log("Usuario autenticado:", user.email);
-            carregarDispositiu();
-        } else {
-            amagarLoader();
-            mostrarModalLogin();
-        }
-    });
+    carregarDispositiu();
 });
-
-function mostrarModalLogin() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-login';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h3>Inicia sessió per veure el dispositiu</h3>
-            <input type="email" id="login-email" placeholder="Correu electrònic" />
-            <input type="password" id="login-password" placeholder="Contrasenya" />
-            <button id="login-btn">Entrar</button>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    modal.querySelector('#login-btn').onclick = async () => {
-        const email = modal.querySelector('#login-email').value;
-        const password = modal.querySelector('#login-password').value;
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            document.body.removeChild(modal);
-            // No cal cridar a carregarDispositiu() aquí, onAuthStateChanged ho farà.
-        } catch (err) {
-            alert('Credencials incorrectes');
-        }
-    };
-}
 
 // Obté l'ID del dispositiu des de la URL
 function obtenirIdDispositiu() {
@@ -524,7 +487,7 @@ async function handleGuardarCanvis(e) {
             titol: "Edició de Dispositiu",
             descripcio: comentari,
             data: new Date().toISOString(),
-            usuari: auth.currentUser.email
+            usuari: "Admin"
         };
 
         // Afegim la nota a l'array de notes per actualitzar

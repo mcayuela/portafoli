@@ -1,7 +1,6 @@
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 // Configuració Firebase
 const firebaseConfig = {
@@ -16,7 +15,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
 let entregues = [];
 let resultatsFiltrats = [];
@@ -42,15 +40,6 @@ function mostrarLoader() {
 function amagarLoader() {
     document.getElementById('global-loader')?.classList.add('hidden');
 }
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        carregarDades();
-    } else {
-        // CANVI: Redirigim a index.html perquè login.html no existeix
-        window.location.href = 'index.html';
-    }
-});
 
 async function carregarDades() {
     mostrarLoader();
@@ -211,4 +200,6 @@ function mostrarResultats(dades) {
 cercador.addEventListener('input', aplicarFiltres);
 selectTipus.addEventListener('change', aplicarFiltres);
 
-document.addEventListener('DOMContentLoaded', mostrarLoader);
+document.addEventListener('DOMContentLoaded', () => {
+    carregarDades();
+});

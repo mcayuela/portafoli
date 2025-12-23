@@ -1,7 +1,6 @@
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 // Configuració Firebase
 const firebaseConfig = {
@@ -16,7 +15,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
 const COLLECCIO_ENTREGUES = "entregues";
 
@@ -44,44 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     mostrarLoader();
 
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            console.log("Usuari autenticat:", user.email);
-            carregarEntrega();
-        } else {
-            amagarLoader();
-            mostrarModalLogin();
-        }
-    });
+    carregarEntrega();
 });
-
-function mostrarModalLogin() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-login';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h3>Inicia sessió per veure l'entrega</h3>
-            <input type="email" id="login-email" placeholder="Correu electrònic" />
-            <input type="password" id="login-password" placeholder="Contrasenya" />
-            <button id="login-btn">Entrar</button>
-            <p id="login-error-msg" style="color: red; display: none;"></p>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    modal.querySelector('#login-btn').onclick = async () => {
-        const email = modal.querySelector('#login-email').value;
-        const password = modal.querySelector('#login-password').value;
-        const errorMsg = modal.querySelector('#login-error-msg');
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            document.body.removeChild(modal);
-        } catch (err) {
-            errorMsg.textContent = 'Credencials incorrectes.';
-            errorMsg.style.display = 'block';
-        }
-    };
-}
 
 function obtenirIdEntrega() {
     const urlParams = new URLSearchParams(window.location.search);
