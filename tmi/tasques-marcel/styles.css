@@ -30,8 +30,7 @@ body {
 }
 
 #site-header {
-    width: auto;
-    height: 80px !important;
+    height: var(--header-h, 80px);
     padding: 0 16px;
     position: sticky;
     top: 0;
@@ -129,7 +128,8 @@ a:hover {
   width: 100%;
   max-width: 1280px;
   margin: 12px auto 80px;
-  padding: 0 16px;
+  padding: 0 20px;
+  align-items: flex-start;
 }
 
 .calendar-box,
@@ -144,16 +144,17 @@ a:hover {
 
 .calendar-box {
   flex: 2;
-  min-width: 0;
+  max-width: 1000px; /* Limita l'amplada per fer-lo més quadrat */
   background: #eaf6fa;
 }
 
 #right-col {
-  flex: 1;
-  min-width: 360px;
+  flex: 0 0 380px; /* Amplada fixa per la columna lateral */
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: sticky;
+  top: 90px; /* Opcional: fa que la columna baixi amb l'scroll */
 }
 
 @media (max-width: 980px) {
@@ -291,7 +292,8 @@ a:hover {
   border: 2px solid var(--brand);
   background: #fff;
   padding: 10px;
-  min-height: 84px;
+  aspect-ratio: 1 / 1; /* Força que els dies siguin quadrats */
+  min-height: 0;
   border-radius: var(--radius-sm);
   cursor: pointer;
   position: relative;
@@ -899,26 +901,6 @@ body {
     flex-direction: column;
 }
 
-#site-header {
-    height: var(--header-h, 80px);
-    padding: 0 16px;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: rgba(244, 247, 249, 0.55);
-    backdrop-filter: blur(15px);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(37, 150, 190, 0.15);
-}
-
-#site-header img {
-    height: 60px;
-    width: 60px;
-    object-fit: cover;
-    display: block;
-}
 
 .titol-principal {
     font-size: 1.5rem;
@@ -1521,20 +1503,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Header corporatiu */
-#site-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    padding: 10px 40px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    margin-bottom: 30px;
-}
-.logo-esquerra img,
-.logo-dreta img {
-    height: 48px;
-}
 
 .titol-principal:hover {
     text-decoration: underline;

@@ -15,37 +15,7 @@
       <img src="images/logo_tmi_sensefons.png" alt="Logo dreta">
     </header>
 
-    <div id="auth-loader-overlay" style="display:none;">
-      <div id="auth-loader"></div>
-    </div>
-
-    <div id="login-overlay">
-      <div id="login-container">
-        <h2>Inicia sessió</h2>
-        <div class="float-field">
-          <input type="email" id="email" class="float-input" placeholder=" " autocomplete="username">
-          <label for="email" class="float-label">Correu electrònic</label>
-        </div>
-        <div class="float-field">
-          <input type="password" id="password" class="float-input" placeholder=" " autocomplete="current-password">
-          <label for="password" class="float-label">Contrasenya</label>
-        </div>
-        <button id="loginBtn">Login</button>
-        <button id="logoutBtn" style="display:none;">Logout</button>
-        
-        <!-- Loader overlay per autenticació -->
-        <div id="auth-loader-overlay" style="display:none;">
-          <div id="auth-loader"></div>
-        </div>
-        
-        <p id="msg"></p>
-      </div>
-    </div>
-
-    <!-- Afegit: contenidor principal ocult per defecte -->
-    <div id="main-content" style="display:none;">
-      <div id="calendar-container">
-
+    <div id="calendar-container">
         <!-- Columna esquerra: Calendari -->
         <div class="calendar-box">
           <div id="calendar-controls">
@@ -84,6 +54,7 @@
             </div>
           </div>
         </div>
+    </div>
       </div>
 
       <!-- Modal de cerca de tasques -->
@@ -101,7 +72,6 @@
       </div>
     </div>
 
-    <script type="module" src="login.js"></script>
     <script type="module" src="script.js"></script>
   </body>
 </html>

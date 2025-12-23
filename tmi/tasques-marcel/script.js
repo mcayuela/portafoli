@@ -7,7 +7,6 @@ import { getFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot } fr
 // Configuració Firebase CALENDARI
 const calendarConfig = {
   apiKey: "AIzaSyCam7ES3CavgOsdEwv2Dznwesds72FyJnY",
-  authDomain: "calendarimarcel.firebaseapp.com",
   projectId: "calendarimarcel",
   storageBucket: "calendarimarcel.appspot.com",
   messagingSenderId: "63306452640",

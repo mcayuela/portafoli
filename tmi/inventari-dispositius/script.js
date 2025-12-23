@@ -5,7 +5,6 @@ import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion, 
 // Configuració Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyDqsy5zE7YnUuMt80ZskvvUVFjIiVTdOB8",
-    authDomain: "inventari-pc-s.firebaseapp.com",
     projectId: "inventari-pc-s",
     storageBucket: "inventari-pc-s.firebasestorage.app",
     messagingSenderId: "998595234302",
