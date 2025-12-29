@@ -21,10 +21,6 @@ let tipusActual = '';
 // Elements del DOM
 let globalLoader, loading, content, error, dispositiuTitol, llistaNotes, noNotes;
 let btnAfegirNota, modalAfegirNota, formNota, btnCancelarNota, templateNota;
-let btnEditarDispositiu, btnGuardarCanvis, btnCancelarEdicio;
-let modalComentariEdicio, formComentari, btnCancelarComentari;
-
-let modeEdicio = false;
 
 // FUNCIONS DEL LOADER
 function mostrarLoader() {
@@ -54,23 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
     formNota = document.getElementById('form-nota');
     btnCancelarNota = document.getElementById('btn-cancelar-nota');
     templateNota = document.getElementById('template-nota');
-    btnEditarDispositiu = document.getElementById('btn-editar-dispositiu');
-    btnGuardarCanvis = document.getElementById('btn-guardar-canvis');
-    btnCancelarEdicio = document.getElementById('btn-cancelar-edicio');
-    modalComentariEdicio = document.getElementById('modal-comentari-edicio');
-    formComentari = document.getElementById('form-comentari');
-    btnCancelarComentari = document.getElementById('btn-cancelar-comentari');
 
     // Event listeners
     if (btnAfegirNota) btnAfegirNota.addEventListener('click', mostrarModalAfegirNota);
     if (btnCancelarNota) btnCancelarNota.addEventListener('click', tancarModalNota);
     if (formNota) formNota.addEventListener('submit', handleSubmitNota);
     if (modalAfegirNota) modalAfegirNota.addEventListener('click', handleClickForaModal);
-    if (btnEditarDispositiu) btnEditarDispositiu.addEventListener('click', () => activarModeEdicio(true));
-    if (btnCancelarEdicio) btnCancelarEdicio.addEventListener('click', () => activarModeEdicio(false));
-    if (btnGuardarCanvis) btnGuardarCanvis.addEventListener('click', demanarComentariPerGuardar);
-    if (formComentari) formComentari.addEventListener('submit', handleGuardarCanvis);
-    if (btnCancelarComentari) btnCancelarComentari.addEventListener('click', () => modalComentariEdicio.style.display = 'none');
 
     mostrarLoader();
 
@@ -152,6 +137,7 @@ function mostrarCampsDispositiu() {
             'pc-fqdn': dispositiuActual.FQDN,
             'pc-usuari': dispositiuActual.usuari,
             'pc-model': dispositiuActual.model,
+            'pc-sn': dispositiuActual.sn,
             'pc-processador': dispositiuActual.processador,
             'pc-targeta-grafica': dispositiuActual.targetaGrafica,
             'pc-so': dispositiuActual.sistemaOperatiu,
@@ -216,6 +202,7 @@ function mostrarCampsDispositiu() {
             'altres-id': dispositiuActual.id,
             'altres-nom': dispositiuActual.nom,
             'altres-model': dispositiuActual.model,
+            'altres-sn': dispositiuActual.sn,
             'altres-tipus': tipusActual,
             'altres-data': formatarData(dispositiuActual.dataAdquisicio)
         };
@@ -364,153 +351,6 @@ async function eliminarNota(index) {
         amagarLoader();
     }
 }
-
-// --- LÒGICA D'EDICIÓ DEL DISPOSITIU ---
-
-function activarModeEdicio(activar) {
-    modeEdicio = activar;
-    const contenidorCamps = document.querySelector('.dispositiu-info');
-    const campsSpan = contenidorCamps.querySelectorAll('span[id]');
-
-    campsSpan.forEach(span => {
-        const esCampId = span.id.endsWith('-id');
-        if (esCampId) return; // No fem editable el camp ID
-
-        if (activar) {
-            const valorActual = span.textContent === 'N/A' ? '' : span.textContent;
-            let input;
-
-            if (span.id.endsWith('-data')) {
-                input = document.createElement('input');
-                input.type = 'date';
-                // Convertim format dd/mm/yyyy a yyyy-mm-dd per l'input
-                if (valorActual) {
-                    const parts = valorActual.split('/');
-                    if (parts.length === 3) {
-                        input.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                    }
-                }
-            } else {
-                input = document.createElement('input');
-                input.type = 'text';
-                input.value = valorActual;
-            }
-            
-            input.id = span.id; // Mantenim el mateix ID
-            input.className = 'input-edicio';
-            span.replaceWith(input);
-        } else {
-            // Tornar a span (cancelar)
-            const input = document.getElementById(span.id);
-            const nouSpan = document.createElement('span');
-            nouSpan.id = span.id;
-            // Busquem el valor original a l'objecte dispositiuActual
-            const clau = span.id.split('-').slice(1).join('-');
-            const clauCamelCase = clau.replace(/-([a-z])/g, g => g[1].toUpperCase());
-            nouSpan.textContent = dispositiuActual[clauCamelCase] || dispositiuActual[span.id.split('-')[1]] || 'N/A';
-            if (span.id.endsWith('-data')) {
-                nouSpan.textContent = formatarData(dispositiuActual.dataAdquisicio);
-            }
-            input.replaceWith(nouSpan);
-        }
-    });
-
-    // Canvia la visibilitat dels botons
-    btnEditarDispositiu.classList.toggle('hidden', activar);
-    btnGuardarCanvis.classList.toggle('hidden', !activar);
-    btnCancelarEdicio.classList.toggle('hidden', !activar);
-}
-
-function demanarComentariPerGuardar() {
-    // Comprovem si hi ha hagut canvis reals
-    const inputs = document.querySelectorAll('.input-edicio');
-    let canvisDetectats = false;
-    inputs.forEach(input => {
-        const clau = input.id.split('-').slice(1).join('-');
-        const clauCamelCase = clau.replace(/-([a-z])/g, g => g[1].toUpperCase());
-        let valorOriginal = dispositiuActual[clauCamelCase] || dispositiuActual[input.id.split('-')[1]] || '';
-        let valorActual = input.value;
-
-        if (input.type === 'date') {
-            valorOriginal = formatarData(valorOriginal, 'yyyy-mm-dd');
-        }
-
-        if (String(valorOriginal) !== valorActual) {
-            canvisDetectats = true;
-        }
-    });
-
-    if (!canvisDetectats) {
-        alert("No s'han detectat canvis per guardar.");
-        activarModeEdicio(false); // Surt del mode edició
-        return;
-    }
-
-    // Si hi ha canvis, mostra el modal per al comentari
-    modalComentariEdicio.style.display = 'flex';
-    document.getElementById('comentari-descripcio').value = ''; // Neteja el camp
-}
-
-async function handleGuardarCanvis(e) {
-    e.preventDefault();
-    const comentari = document.getElementById('comentari-descripcio').value.trim();
-
-    if (!comentari) {
-        alert("El comentari és obligatori per desar els canvis.");
-        return;
-    }
-
-    mostrarLoader();
-    modalComentariEdicio.style.display = 'none';
-
-    try {
-        const dadesActualitzades = {};
-        const inputs = document.querySelectorAll('.input-edicio');
-
-        inputs.forEach(input => {
-            const clau = input.id.split('-').slice(1).join('-');
-            const clauCamelCase = clau.replace(/-([a-z])/g, g => g[1].toUpperCase());
-            dadesActualitzades[clauCamelCase] = input.value;
-        });
-
-        // Canviem el nom de la clau FQDN si existeix
-        if (dadesActualitzades.hasOwnProperty('fqdn')) {
-            dadesActualitzades.FQDN = dadesActualitzades.fqdn;
-            delete dadesActualitzades.fqdn;
-        }
-
-        // Afegim la data d'última edició
-        dadesActualitzades.dataUltimaEdicio = new Date().toISOString();
-
-        // Creem la nota amb el comentari
-        const novaNota = {
-            titol: "Edició de Dispositiu",
-            descripcio: comentari,
-            data: new Date().toISOString(),
-            usuari: "Admin"
-        };
-
-        // Afegim la nota a l'array de notes per actualitzar
-        dadesActualitzades.notes = arrayUnion(novaNota);
-
-        const col·leccio = obtenirCol·leccio(tipusActual);
-        const docRef = doc(db, col·leccio, dispositiuActual.id);
-
-        await updateDoc(docRef, dadesActualitzades);
-
-        // Recarreguem les dades per mostrar la informació actualitzada
-        await carregarDispositiu();
-        
-        // Sortim del mode edició
-        activarModeEdicio(false);
-
-    } catch (error) {
-        console.error("Error guardant els canvis:", error);
-        alert("S'ha produït un error en desar els canvis.");
-        amagarLoader();
-    }
-}
-
 
 // Funcions auxiliars
 function obtenirCol·leccio(tipus) {

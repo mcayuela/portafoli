@@ -76,6 +76,7 @@ async function carregarDades() {
                 dataAdquisicio: data.dataAdquisicio || '',
                 codiTeamViewer: data.codiTeamViewer || '', // NOU CAMP
                 dataCreacio: data.dataCreacio || '',
+                sn: data.sn || '',
                 dataUltimaEdicio: data.dataUltimaEdicio || ''
             });
         });
@@ -94,6 +95,7 @@ async function carregarDades() {
                 tipusDispositiu: 'Mòbil',
                 dataAdquisicio: data.dataAdquisicio || '',
                 dataCreacio: data.dataCreacio || '',
+                sn: data.sn || '',
                 dataUltimaEdicio: data.dataUltimaEdicio || ''
             });
         });
@@ -112,6 +114,7 @@ async function carregarDades() {
                 tipusDispositiu: 'Monitor',
                 dataAdquisicio: data.dataAdquisicio || '',
                 dataCreacio: data.dataCreacio || '',
+                sn: data.sn || '',
                 dataUltimaEdicio: data.dataUltimaEdicio || ''
             });
         });
@@ -149,6 +152,7 @@ async function carregarDades() {
                 tipusDispositiu: data.tipus || 'Altres',
                 dataAdquisicio: data.dataAdquisicio || '',
                 dataCreacio: data.dataCreacio || '',
+                sn: data.sn || '',
                 dataUltimaEdicio: data.dataUltimaEdicio || ''
             });
         });
@@ -854,6 +858,10 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
                 <input type="text" id="edit-model" value="${dades.model || ''}">
             </div>
             <div class="camp-edicio">
+                <label for="edit-sn">SN:</label>
+                <input type="text" id="edit-sn" value="${dades.sn || ''}">
+            </div>
+            <div class="camp-edicio">
                 <label for="edit-processador">Processador:</label>
                 <input type="text" id="edit-processador" value="${dades.processador || ''}">
             </div>
@@ -871,7 +879,7 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
             </div>
             <div class="camp-edicio">
                 <label for="edit-emmagatzematge">Emmagatzematge:</label>
-                <input type="text" id="edit-emmagatzematge" value="${dades.dataAdquisicio || ''}">
+                <input type="text" id="edit-emmagatzematge" value="${dades.emmagatzematge || ''}">
             </div>
             <div class="camp-edicio">
                 <label for="edit-data">Data d'Adquisició:</label>
@@ -967,6 +975,10 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
                 <input type="text" id="edit-model" value="${dades.model || ''}">
             </div>
             <div class="camp-edicio">
+                <label for="edit-sn">SN:</label>
+                <input type="text" id="edit-sn" value="${dades.sn || ''}">
+            </div>
+            <div class="camp-edicio">
                 <label for="edit-tipus">Tipus:</label>
                 <select id="edit-tipus">
                     <option value="Monitor" ${dades.tipus === 'Monitor' ? 'selected' : ''}>Monitor</option>
@@ -1003,7 +1015,7 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
     
     document.getElementById('form-edicio-dispositiu').addEventListener('submit', (e) => {
         e.preventDefault();
-        guardarCanvisDispositiu(id, tipus, col·leccio, modal);
+        guardarCanvisDispositiu(id, tipus, col·leccio, modal, dades);
     });
     
     // Tancar modal clicant fora
@@ -1015,7 +1027,7 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
 }
 
 // Guarda els canvis del dispositiu
-async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
+async function guardarCanvisDispositiu(id, tipus, col·leccio, modal, dadesOriginals) {
     try {
         let dadesActualitzades = {};
         
@@ -1026,6 +1038,7 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
                 usuari: document.getElementById('edit-usuari').value,
                 departament: document.getElementById('edit-departament').value, // AFEGEIX AQUESTA LÍNIA
                 model: document.getElementById('edit-model').value,
+                sn: document.getElementById('edit-sn').value,
                 processador: document.getElementById('edit-processador').value,
                 targetaGrafica: document.getElementById('edit-targeta-grafica').value,
                 sistemaOperatiu: document.getElementById('edit-so').value,
@@ -1067,12 +1080,51 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
                 nom: document.getElementById('edit-nom').value,
                 departament: document.getElementById('edit-departament').value, // AFEGEIX AQUESTA LÍNIA
                 model: document.getElementById('edit-model').value,
+                sn: document.getElementById('edit-sn').value,
                 tipus: document.getElementById('edit-tipus').value,
                 dataAdquisicio: document.getElementById('edit-data').value,
                 dataUltimaEdicio: new Date().toISOString()
             };
         }
         
+        // --- DETECCIÓ DE CANVIS I JUSTIFICACIÓ ---
+        let hiHaCanvis = false;
+        const campsIgnorats = ['dataUltimaEdicio', 'notes', 'dataCreacio'];
+
+        for (const key in dadesActualitzades) {
+            if (campsIgnorats.includes(key)) continue;
+
+            let valorOriginal = dadesOriginals[key];
+            let valorNou = dadesActualitzades[key];
+
+            // Normalització per comparació (undefined/null a string buit)
+            if (valorOriginal === undefined || valorOriginal === null) valorOriginal = '';
+            if (valorNou === undefined || valorNou === null) valorNou = '';
+
+            if (String(valorOriginal) !== String(valorNou)) {
+                hiHaCanvis = true;
+                break;
+            }
+        }
+
+        if (!hiHaCanvis) {
+            alert("No s'han detectat canvis respecte a les dades originals.");
+            return;
+        }
+
+        // Demanar justificació
+        const motiu = await demanarJustificacioCanvi();
+        if (!motiu) return; // L'usuari ha cancel·lat
+
+        // Afegir la nota de canvi
+        const novaNota = {
+            titol: "Edició de Camps",
+            descripcio: motiu,
+            data: new Date().toISOString()
+        };
+        
+        dadesActualitzades.notes = arrayUnion(novaNota);
+
         // Actualitza a Firebase
         const docRef = doc(db, col·leccio, id.toString());
         await updateDoc(docRef, dadesActualitzades);
@@ -1090,6 +1142,48 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal) {
         console.error('Error actualitzant dispositiu:', error);
         alert(`Error actualitzant el dispositiu: ${error.message}`);
     }
+}
+
+// Funció auxiliar per demanar la justificació
+function demanarJustificacioCanvi() {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.style.zIndex = '2000'; // Per sobre del modal d'edició
+        modal.innerHTML = `
+            <div class="modal-nota">
+                <h3 class="modal-titol-nota">Justificació del Canvi</h3>
+                <p style="margin-bottom: 15px; color: #666;">S'han detectat canvis. És obligatori indicar el motiu:</p>
+                <div class="camp-nota">
+                    <textarea id="input-justificacio" rows="4" placeholder="Ex: Actualització de RAM i canvi d'usuari..." style="width: 100%; padding: 10px; border: 2px solid #e0e7ef; border-radius: 6px; resize: vertical;" required></textarea>
+                </div>
+                <div class="modal-botons" style="margin-top: 20px;">
+                    <button id="btn-confirmar-justificacio" class="btn-guardar">Confirmar i Guardar</button>
+                    <button id="btn-cancelar-justificacio" class="btn-cancelar">Cancel·lar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        const btnConfirmar = modal.querySelector('#btn-confirmar-justificacio');
+        const btnCancelar = modal.querySelector('#btn-cancelar-justificacio');
+        const input = modal.querySelector('#input-justificacio');
+
+        btnConfirmar.addEventListener('click', () => {
+            const text = input.value.trim();
+            if (!text) {
+                alert("Has d'escriure un motiu per poder guardar.");
+                return;
+            }
+            document.body.removeChild(modal);
+            resolve(text);
+        });
+
+        btnCancelar.addEventListener('click', () => {
+            document.body.removeChild(modal);
+            resolve(null);
+        });
+    });
 }
 
 // Mostra modal de selecció de tipus de dispositiu
@@ -1187,6 +1281,10 @@ function mostrarModalAfegirDispositiu(tipus) {
             <div class="camp-edicio">
                 <label for="add-model">Model:</label>
                 <input type="text" id="add-model">
+            </div>
+            <div class="camp-edicio">
+                <label for="add-sn">SN:</label>
+                <input type="text" id="add-sn">
             </div>
             <div class="camp-edicio">
                 <label for="add-processador">Processador:</label>
@@ -1329,6 +1427,10 @@ function mostrarModalAfegirDispositiu(tipus) {
                 <input type="text" id="add-model">
             </div>
             <div class="camp-edicio">
+                <label for="add-sn">SN:</label>
+                <input type="text" id="add-sn">
+            </div>
+            <div class="camp-edicio">
                 <label for="add-tipus">Tipus:</label>
                 <select id="add-tipus">
                     <option value="Monitor" ${tipus === 'Monitor' ? 'selected' : ''}>Monitor</option>
@@ -1392,6 +1494,7 @@ async function afegirNouDispositiu(tipus, modal) {
                 usuari: document.getElementById('add-usuari').value,
                 departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
+                sn: document.getElementById('add-sn').value,
                 processador: document.getElementById('add-processador').value,
                 targetaGrafica: document.getElementById('add-targeta-grafica').value,
                 sistemaOperatiu: document.getElementById('add-so').value,
@@ -1425,6 +1528,7 @@ async function afegirNouDispositiu(tipus, modal) {
                 nom: document.getElementById('add-nom').value,
                 departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
+                sn: document.getElementById('add-sn').value,
                 tipus: 'Monitor',
                 dataAdquisicio: document.getElementById('add-data').value,
                 dataCreacio: dataActual,
@@ -1450,6 +1554,7 @@ async function afegirNouDispositiu(tipus, modal) {
                 nom: document.getElementById('add-nom').value,
                 departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
+                sn: document.getElementById('add-sn').value,
                 tipus: document.getElementById('add-tipus').value,
                 dataAdquisicio: document.getElementById('add-data').value,
                 dataCreacio: dataActual,

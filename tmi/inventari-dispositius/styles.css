@@ -84,7 +84,6 @@ h2 {
     font-weight: 500;
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 1.25rem;
-    margin-top: 30px;
     padding-left: 40px;
 }
 /* Paginació */
@@ -611,6 +610,19 @@ main {
     text-align: center;
 }
 
+a.btn-editor {
+    background: rgb(34, 45, 50, 0.8);
+    color: white;
+    border: none;
+    padding: 0.15cm 16px !important;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    min-width: 120px; /* Mida fixa per evitar canvis */
+    text-align: center;
+}
+
 .btn-afegir {
     background: rgb(34, 45, 50, 0.8);
     color: white;
@@ -645,12 +657,12 @@ main {
 }
 
 .accions-cell {
-    /* Canviat a flex per un millor control d'alineació */
     display: flex;
-    justify-content: flex-end; /* Alinea el grup de botons a la dreta */
-    align-items: center;
-    white-space: nowrap;
-    padding: 8px 16px !important;
+    justify-content: center; /* Centra els botons horizontalment */
+    align-items: center;     /* Centra els botons verticalment */
+    gap: 6px;                /* Espai controlat entre botons */
+    padding: 0 10px !important; /* MANTÉN EL PADDING VERTICAL A 0 */
+    height: 48px;            /* Força l'alçada per quadrar amb la resta */
 }
 
 .grup-botons-accions {
@@ -988,6 +1000,14 @@ h3.modal-titol {
     flex-wrap: wrap; /* Permet que els elements es moguin a la línia següent si no hi ha espai */
 }
 
+a.btn-tornar {
+    margin-right: 0;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 5px 15px;
+    margin: 8px 16px;
+}
+
 /* Estils responsius per a la pàgina de dispositiu */
 @media (max-width: 768px) {
     .header-resultats {
@@ -1194,14 +1214,15 @@ h3.modal-titol {
 
 .dispositiu-container {
     display: grid;
-    grid-template-columns: 1fr; /* Assegurem una sola columna */
+    grid-template-columns: 1fr 1fr;
     gap: 30px;
     min-height: 400px;
+    align-items: start;
 }
 
 /* Quan hi ha secció de notes, dues columnes (per a dispositius) */
 .dispositiu-container:has(.dispositiu-notes) {
-    grid-template-columns: 1fr; /* Canviat a una sola columna */
+    grid-template-columns: 1fr 1fr;
 }
 
 /* Informació del dispositiu */
@@ -1853,4 +1874,14 @@ h3.modal-titol {
 
 @media (min-width: 769px) {
     #btn-mode-editor-mobil { display: none; } /* Amaga el botó en escriptori */
+}
+
+.taula-resultats td {
+    vertical-align: middle;  /* Centra el text respecte als botons */
+    white-space: nowrap;     /* Evita que la data es trenqui en dues línies */
+    line-height: 1.2;        /* Ajusta l'espai entre línies si n'hi hagués */
+}
+
+.taula-resultats tr {
+    height: 48px;            /* Fixem l'alçada de totes les files igual */
 }
