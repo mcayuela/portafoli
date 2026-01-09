@@ -16,6 +16,29 @@
     <img src="/images/logo_tmi_sensefons.png" alt="Logo dreta" />
   </div>
 </header>
+
+  <!-- Contenidor del Login (visible per defecte fins que es comprovi l'auth) -->
+  <div id="login-container" style="display: none; max-width: 400px; margin: 50px auto; padding: 20px; text-align: center; border: 1px solid #ccc; border-radius: 8px; background: #f9f9f9;">
+    <h2>Inici de Sessió TMI</h2>
+    <form id="login-form">
+      <div style="margin-bottom: 15px;">
+        <input type="email" id="email" placeholder="Correu electrònic" required style="width: 100%; padding: 10px; margin-top: 5px;">
+      </div>
+      <div style="margin-bottom: 15px;">
+        <input type="password" id="password" placeholder="Contrasenya" required style="width: 100%; padding: 10px; margin-top: 5px;">
+      </div>
+      <button type="submit" style="width: 100%; padding: 10px; background-color: #2596be; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">Entrar</button>
+    </form>
+    <p id="login-error" style="color: red; display: none; margin-top: 10px;"></p>
+  </div>
+
+  <!-- Loader inicial -->
+  <div id="auth-loader" style="text-align: center; margin-top: 50px;">
+    <p>Verificant credencials...</p>
+  </div>
+
+  <!-- Contenidor del Menú (ocult per defecte) -->
+  <div id="menu-tmi" style="display: none;">
   <div class="link-inventari">
     <br>
     <h2>Inventari Dispositius</h2>
@@ -39,6 +62,61 @@
     <h2>Seguiment de tasques Marcel</h2>
     <a href="tmi/tasques-marcel/index.html">Entrar-hi</a>
   </div>
+  </div>
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDqsy5zE7YnUuMt80ZskvvUVFjIiVTdOB8",
+        authDomain: "inventari-pc-s.firebaseapp.com",
+        projectId: "inventari-pc-s",
+        storageBucket: "inventari-pc-s.firebasestorage.app",
+        messagingSenderId: "998595234302",
+        appId: "1:998595234302:web:d253d36f99d82b549f18af",
+        measurementId: "G-0QM2VV5NZD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loginContainer = document.getElementById('login-container');
+    const menuTmi = document.getElementById('menu-tmi');
+    const authLoader = document.getElementById('auth-loader');
+    const loginForm = document.getElementById('login-form');
+    const errorMsg = document.getElementById('login-error');
+
+    onAuthStateChanged(auth, (user) => {
+        authLoader.style.display = 'none';
+        if (user) {
+            // Si hi ha una URL de destí guardada, hi anem
+            const urlDesti = sessionStorage.getItem('urlDesti');
+            if (urlDesti) {
+                sessionStorage.removeItem('urlDesti');
+                window.location.href = urlDesti;
+            } else {
+                // Si no, mostrem el menú normal
+                loginContainer.style.display = 'none';
+                menuTmi.style.display = 'block';
+            }
+        } else {
+            loginContainer.style.display = 'block';
+            menuTmi.style.display = 'none';
+        }
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        signInWithEmailAndPassword(auth, email, password)
+            .catch((error) => {
+                errorMsg.textContent = "Error: " + error.message;
+                errorMsg.style.display = 'block';
+            });
+    });
+  </script>
 </body>
 </html>

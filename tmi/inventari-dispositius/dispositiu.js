@@ -1,6 +1,7 @@
 // Configuració Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getFirestore, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDqsy5zE7YnUuMt80ZskvvUVFjIiVTdOB8",
@@ -14,6 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 let dispositiuActual = null;
 let tipusActual = '';
@@ -37,29 +39,36 @@ function amagarLoader() {
 
 // Inicialització quan el DOM està carregat
 document.addEventListener('DOMContentLoaded', () => {
-    // Obtenir referències dels elements DOM
-    globalLoader = document.getElementById('global-loader');
-    loading = document.getElementById('loading');
-    content = document.getElementById('content');
-    error = document.getElementById('error');
-    dispositiuTitol = document.getElementById('dispositiu-titol');
-    llistaNotes = document.getElementById('llista-notes');
-    noNotes = document.getElementById('no-notes');
-    btnAfegirNota = document.getElementById('btn-afegir-nota');
-    modalAfegirNota = document.getElementById('modal-afegir-nota');
-    formNota = document.getElementById('form-nota');
-    btnCancelarNota = document.getElementById('btn-cancelar-nota');
-    templateNota = document.getElementById('template-nota');
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Obtenir referències dels elements DOM
+            globalLoader = document.getElementById('global-loader');
+            loading = document.getElementById('loading');
+            content = document.getElementById('content');
+            error = document.getElementById('error');
+            dispositiuTitol = document.getElementById('dispositiu-titol');
+            llistaNotes = document.getElementById('llista-notes');
+            noNotes = document.getElementById('no-notes');
+            btnAfegirNota = document.getElementById('btn-afegir-nota');
+            modalAfegirNota = document.getElementById('modal-afegir-nota');
+            formNota = document.getElementById('form-nota');
+            btnCancelarNota = document.getElementById('btn-cancelar-nota');
+            templateNota = document.getElementById('template-nota');
 
-    // Event listeners
-    if (btnAfegirNota) btnAfegirNota.addEventListener('click', mostrarModalAfegirNota);
-    if (btnCancelarNota) btnCancelarNota.addEventListener('click', tancarModalNota);
-    if (formNota) formNota.addEventListener('submit', handleSubmitNota);
-    if (modalAfegirNota) modalAfegirNota.addEventListener('click', handleClickForaModal);
+            // Event listeners
+            if (btnAfegirNota) btnAfegirNota.addEventListener('click', mostrarModalAfegirNota);
+            if (btnCancelarNota) btnCancelarNota.addEventListener('click', tancarModalNota);
+            if (formNota) formNota.addEventListener('submit', handleSubmitNota);
+            if (modalAfegirNota) modalAfegirNota.addEventListener('click', handleClickForaModal);
 
-    mostrarLoader();
+            mostrarLoader();
 
-    carregarDispositiu();
+            carregarDispositiu();
+        } else {
+            sessionStorage.setItem('urlDesti', window.location.href);
+            window.location.href = "https://www.mcayuela.com/tmi";
+        }
+    });
 });
 
 // Obté l'ID del dispositiu des de la URL

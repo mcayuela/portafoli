@@ -1,6 +1,7 @@
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 // Configuració Firebase
 const firebaseConfig = {
@@ -14,6 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 let dispositius = [];
 let paginaActual = 1;
@@ -50,12 +52,17 @@ function amagarLoader() {
 
 // Mostrar loader quan carrega la pàgina
 document.addEventListener('DOMContentLoaded', () => {
-    mostrarLoader();
-
-    // Inicialitza els listeners per al modal d'accions mòbil
-    inicialitzarModalAccionsEditor();
-    
-    carregarDades();
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            mostrarLoader();
+            // Inicialitza els listeners per al modal d'accions mòbil
+            inicialitzarModalAccionsEditor();
+            carregarDades();
+        } else {
+            sessionStorage.setItem('urlDesti', window.location.href);
+            window.location.href = "https://www.mcayuela.com/tmi";
+        }
+    });
 });
 
 // Carrega dades de Firebase

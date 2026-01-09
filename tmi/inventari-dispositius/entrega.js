@@ -1,6 +1,7 @@
 // Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 // Configuració Firebase
 const firebaseConfig = {
@@ -15,6 +16,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 const COLLECCIO_ENTREGUES = "entregues";
 
@@ -34,15 +36,22 @@ function amagarLoader() {
 
 // Inicialització quan el DOM està carregat
 document.addEventListener('DOMContentLoaded', () => {
-    globalLoader = document.getElementById('global-loader');
-    loading = document.getElementById('loading');
-    content = document.getElementById('content');
-    error = document.getElementById('error');
-    entregaTitol = document.getElementById('entrega-titol');
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            globalLoader = document.getElementById('global-loader');
+            loading = document.getElementById('loading');
+            content = document.getElementById('content');
+            error = document.getElementById('error');
+            entregaTitol = document.getElementById('entrega-titol');
 
-    mostrarLoader();
+            mostrarLoader();
 
-    carregarEntrega();
+            carregarEntrega();
+        } else {
+            sessionStorage.setItem('urlDesti', window.location.href);
+            window.location.href = "https://www.mcayuela.com/tmi";
+        }
+    });
 });
 
 function obtenirIdEntrega() {
