@@ -93,10 +93,216 @@ a {
     text-decoration: none;
     font-weight: 700;
     transition: text-decoration 0.2s, color 0.2s;
-    margin-left: 50px;
 }
 
 a:hover {
     text-decoration: underline;
     color: #217aa3;
+}
+
+/* =========================================
+   Estils Login "Espectacular"
+   ========================================= */
+
+/* Fons general per a la pàgina de login */
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+#login-container {
+    background: #ffffff;
+    width: 100%;
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    text-align: center;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+}
+
+#login-container h2 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-weight: 700;
+    font-size: 28px;
+    padding-left: 0; /* Sobreescriu el padding global */
+    margin-top: 0;
+    letter-spacing: -0.5px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #eef2f7;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    background: #f8fbff;
+    color: #333;
+}
+
+.input-group input:focus {
+    border-color: #2596be;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(37, 150, 190, 0.1);
+}
+
+.login-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #2596be 0%, #1e85a8 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 10px;
+    box-shadow: 0 10px 20px rgba(37, 150, 190, 0.2);
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 25px rgba(37, 150, 190, 0.3);
+}
+
+.no-account {
+    margin-top: 25px;
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+.no-account a {
+    color: #2596be;
+    text-decoration: none;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 5px;
+    padding-left: 0; /* Sobreescriu el padding global */
+}
+
+.no-account a:hover {
+    text-decoration: underline;
+    color: #1a5c7a;
+}
+
+/* Modal Popup */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-content h3 {
+    color: #2c3e50;
+    margin-top: 0;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.modal-content p {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.email-link {
+    display: inline-block;
+    background: #f0f7fa;
+    color: #2596be;
+    font-weight: 700;
+    padding: 12px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    border: 1px dashed #2596be;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 20px; /* Sobreescriu el padding global */
+}
+
+.email-link:hover {
+    background: #e1f0f5;
+    text-decoration: none;
+}
+
+.modal-close-btn {
+    background: #e0e6ed;
+    color: #4a5568;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.modal-close-btn:hover {
+    background: #cbd5e0;
+}
+
+/* Spinner de càrrega */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(37, 150, 190, 0.1);
+    border-left-color: #2596be;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+.links-a {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-left: 50px !important; 
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

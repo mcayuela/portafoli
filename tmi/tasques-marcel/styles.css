@@ -1908,3 +1908,15 @@ body.loading #login-overlay {
   color: #e67e22;
   border-color: #ffd699;
 }
+
+/* Footer TMI */
+body::after {
+    content: "TMI Técnicas Mecánicas Ilerdenses S.L. 2026";
+    color: #888;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    display: block;
+    width: 100%;
+}

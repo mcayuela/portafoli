@@ -97,7 +97,6 @@ function mostrarDadesEntrega(id, data) {
         'entrega-usuari': data.usuari,
         'entrega-departament': data.departament,
         'entrega-tipus': data.tipus, // Corregit de tipusEntrega a tipus
-        'entrega-notes': data.notes,
         'entrega-data': formatarData(data.data),
         'entrega-data-creacio': formatarDataHora(data.dataCreacio),
         'entrega-data-edicio': formatarDataHora(data.dataUltimaEdicio)
@@ -108,6 +107,26 @@ function mostrarDadesEntrega(id, data) {
         if (element) {
             element.textContent = valor || 'N/A';
         }
+    }
+
+    // Gestió de l'estat i notes al panell lateral
+    const estatContainer = document.getElementById('estat-container');
+    const notesText = document.getElementById('entrega-notes-text');
+
+    if (data.dataRetorn) {
+        estatContainer.textContent = `RETORNAT (${formatarData(data.dataRetorn)})`;
+        estatContainer.style.backgroundColor = '#d4edda';
+        estatContainer.style.color = '#155724';
+        estatContainer.style.border = '1px solid #c3e6cb';
+    } else {
+        estatContainer.textContent = 'ENTREGAT';
+        estatContainer.style.backgroundColor = '#cce5ff';
+        estatContainer.style.color = '#004085';
+        estatContainer.style.border = '1px solid #b8daff';
+    }
+
+    if (notesText) {
+        notesText.textContent = data.notes || 'Cap nota registrada.';
     }
 }
 

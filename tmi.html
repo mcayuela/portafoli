@@ -18,23 +18,36 @@
 </header>
 
   <!-- Contenidor del Login (visible per defecte fins que es comprovi l'auth) -->
-  <div id="login-container" style="display: none; max-width: 400px; margin: 50px auto; padding: 20px; text-align: center; border: 1px solid #ccc; border-radius: 8px; background: #f9f9f9;">
+  <div id="login-container" style="display: none;">
     <h2>Inici de Sessió TMI</h2>
     <form id="login-form">
-      <div style="margin-bottom: 15px;">
-        <input type="email" id="email" placeholder="Correu electrònic" required style="width: 100%; padding: 10px; margin-top: 5px;">
+      <div class="input-group">
+        <input type="email" id="email" placeholder="Correu electrònic" required>
       </div>
-      <div style="margin-bottom: 15px;">
-        <input type="password" id="password" placeholder="Contrasenya" required style="width: 100%; padding: 10px; margin-top: 5px;">
+      <div class="input-group">
+        <input type="password" id="password" placeholder="Contrasenya" required>
       </div>
-      <button type="submit" style="width: 100%; padding: 10px; background-color: #2596be; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">Entrar</button>
+      <button type="submit" class="login-btn">Entrar</button>
     </form>
+    <div class="no-account">
+        No tens compte? <a id="request-access-link">Clica aquí</a>
+    </div>
     <p id="login-error" style="color: red; display: none; margin-top: 10px;"></p>
+  </div>
+
+  <!-- Modal Popup -->
+  <div id="access-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>Sol·licitud d'Accés</h3>
+        <p>Envia un correu a <br><a href="mailto:a.berga@tmipal.com" class="email-link">a.berga@tmipal.com</a><br> i solicita l'accés.</p>
+        <button id="close-modal-btn" class="modal-close-btn">Tancar</button>
+    </div>
   </div>
 
   <!-- Loader inicial -->
   <div id="auth-loader" style="text-align: center; margin-top: 50px;">
-    <p>Verificant credencials...</p>
+    <div class="spinner"></div>
+    <p style="margin-top: 15px; color: #666;">Verificant credencials...</p>
   </div>
 
   <!-- Contenidor del Menú (ocult per defecte) -->
@@ -42,25 +55,25 @@
   <div class="link-inventari">
     <br>
     <h2>Inventari Dispositius</h2>
-    <a href="tmi/inventari-dispositius/index.html">Entrar-hi</a>
+    <a href="tmi/inventari-dispositius/index.html" class="links-a">Entrar-hi</a>
   </div>
 
   <div class="link-bd-telefonia">
     <br>
     <h2>Base de dades telefonía</h2>
-    <a href="tmi/bd-telefonia/index.html">Entrar-hi</a>
+    <a href="tmi/bd-telefonia/index.html" class="links-a">Entrar-hi</a>
   </div>  
 
   <div class="link-roaming-telefonia">
     <br>
     <h2>Mapa Roaming telefonía</h2>
-    <a href="tmi/bd-telefonia/roaming.html">Entrar-hi</a>
+    <a href="tmi/bd-telefonia/roaming.html" class="links-a">Entrar-hi</a>
   </div>
 
   <div class="link-tasques-marcel">
     <br>
     <h2>Seguiment de tasques Marcel</h2>
-    <a href="tmi/tasques-marcel/index.html">Entrar-hi</a>
+    <a href="tmi/tasques-marcel/index.html" class="links-a">Entrar-hi</a>
   </div>
   </div>
 
@@ -86,6 +99,32 @@
     const authLoader = document.getElementById('auth-loader');
     const loginForm = document.getElementById('login-form');
     const errorMsg = document.getElementById('login-error');
+
+    // Modal logic
+    const requestAccessLink = document.getElementById('request-access-link');
+    const accessModal = document.getElementById('access-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    if (requestAccessLink) {
+        requestAccessLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            accessModal.classList.add('active');
+        });
+    }
+
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            accessModal.classList.remove('active');
+        });
+    }
+
+    if (accessModal) {
+        accessModal.addEventListener('click', (e) => {
+            if (e.target === accessModal) {
+                accessModal.classList.remove('active');
+            }
+        });
+    }
 
     onAuthStateChanged(auth, (user) => {
         authLoader.style.display = 'none';

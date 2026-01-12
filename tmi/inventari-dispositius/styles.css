@@ -1885,3 +1885,15 @@ a.btn-tornar {
 .taula-resultats tr {
     height: 48px;            /* Fixem l'alçada de totes les files igual */
 }
+
+/* Footer TMI */
+body::after {
+    content: "TMI Técnicas Mecánicas Ilerdenses S.L. 2026";
+    color: #888;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    display: block;
+    width: 100%;
+}
