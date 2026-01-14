@@ -364,7 +364,7 @@ function mostrarResultats(filtrats, pagina = 1) {
         }
         
         html += `<tr>
-            <td><a href="dispositiu.html?id=${item.id}&tipus=${item.tipusDispositiu}" class="link-dispositiu">${item.id || ''}</a></td>
+            <td><a href="dispositiu.html?id=${item.id}" class="link-dispositiu">${item.id || ''}</a></td>
             <td><a href="dispositiu.html?id=${item.id}" class="link-dispositiu">${item.fqdn || ''}</a></td>
             <td>${item.usuari || 'N/A'}</td>
             <td>${item.departament || 'N/A'}</td>

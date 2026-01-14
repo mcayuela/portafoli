@@ -74,12 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // Obté l'ID del dispositiu des de la URL
 function obtenirIdDispositiu() {
     const urlParams = new URLSearchParams(window.location.search);
-    return { id: urlParams.get('id'), tipus: urlParams.get('tipus') };
+    return urlParams.get('id');
 }
 
 // Carrega les dades del dispositiu
 async function carregarDispositiu() {
-    const { id, tipus } = obtenirIdDispositiu();
+    const id = obtenirIdDispositiu();
     console.log("Buscant dispositiu amb ID:", id);
     
     if (!id) {
@@ -89,24 +89,45 @@ async function carregarDispositiu() {
         return;
     }
 
-    try {
-        const col·leccio = obtenirCol·leccio(tipus);
-        console.log(`Buscant a la col·lecció: ${col·leccio} amb tipus: ${tipus}`);
+    // Llista de col·leccions on buscar
+    const col·leccions = [
+        { nom: 'pcs', tipus: 'PC' },
+        { nom: 'mobils', tipus: 'Mòbil' },
+        { nom: 'monitors', tipus: 'Monitor' },
+        { nom: 'impressores', tipus: 'Impressora' },
+        { nom: 'altresDispositius', tipus: 'Altres' }
+    ];
 
-        const docRef = doc(db, col·leccio, id);
-        const docSnap = await getDoc(docRef);
+    let trobat = false;
 
-        if (docSnap.exists()) {
-            console.log(`Trobat a ${col·leccio}:`, docSnap.data());
-            dispositiuActual = { ...docSnap.data(), id: docSnap.id }; // Assegurem que l'ID està a l'objecte
-            tipusActual = tipus; // Utilitzem el tipus de la URL
-            mostrarDispositiu();
-        } else {
-            console.log("Dispositiu no trobat a la col·lecció especificada.");
-            mostrarError();
+    for (const col of col·leccions) {
+        try {
+            const docRef = doc(db, col.nom, id);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                console.log(`Trobat a ${col.nom}:`, docSnap.data());
+                dispositiuActual = { ...docSnap.data(), id: docSnap.id };
+                
+                // Determinem el tipus correcte
+                if (col.nom === 'altresDispositius') {
+                    tipusActual = dispositiuActual.tipus || 'Altres';
+                } else {
+                    tipusActual = col.tipus;
+                }
+                
+                trobat = true;
+                break; // Sortim del bucle si l'hem trobat
+            }
+        } catch (error) {
+            console.error(`Error cercant a ${col.nom}:`, error);
         }
-    } catch (error) {
-        console.error('Error carregant dispositiu:', error);
+    }
+
+    if (trobat) {
+        mostrarDispositiu();
+    } else {
+        console.log("Dispositiu no trobat a cap col·lecció.");
         mostrarError();
         amagarLoader();
     }
