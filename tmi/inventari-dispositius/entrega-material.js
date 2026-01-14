@@ -27,10 +27,11 @@ let filtreDataActiu = {
     inici: null,
     fi: null
 };
+let modeEditor = false;
 
 // Elements del DOM
 const resultats = document.getElementById('resultats');
-const contador = document.querySelector('.contador-dispositius');
+const headerContainer = document.querySelector('.header-resultats');
 const buscador = document.getElementById('buscador');
 const filtreTipus = document.getElementById('filtre-tipus-entrega');
 const loader = document.getElementById('global-loader');
@@ -41,6 +42,7 @@ const modalFiltreData = document.getElementById('modal-filtre-data');
 const btnCancelarFiltre = document.getElementById('btn-cancelar-filtre-data');
 const btnAplicarFiltre = document.getElementById('btn-aplicar-filtre-data');
 const btnNetejarFiltre = document.getElementById('btn-netejar-filtre-data');
+const btnModeEditorMobil = document.getElementById('btn-mode-editor-mobil');
 
 // Inicialització
 document.addEventListener('DOMContentLoaded', () => {
@@ -48,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             carregarDades();
             inicialitzarListeners();
+            inicialitzarModalAccionsEditor();
         } else {
             window.location.href = "https://www.mcayuela.com/tmi";
         }
@@ -147,10 +150,13 @@ function filtrarResultats() {
 // Renderitzat
 function mostrarResultats() {
     // Actualitzar comptador i botons de capçalera
+    // Si headerContainer no existeix (per exemple, si l'HTML no s'ha actualitzat encara), intentem buscar-lo de nou o fallem silenciosament
+    const container = headerContainer || document.querySelector('.header-resultats');
+    
     const headerHtml = `
-        <div class="header-resultats">
-            <span class="comptador-text">Entregues: ${resultatsFiltrats.length}</span>
-            <div class="botons-header">
+        <span class="comptador-text">Entregues: ${resultatsFiltrats.length}</span>
+        <div class="botons-header">
+            ${modeEditor ? `
                 <button id="btn-afegir-entrega" class="btn-afegir">
                     <span class="btn-afegir-text">+ Nova Entrega</span>
                 </button>
@@ -160,14 +166,22 @@ function mostrarResultats() {
                 <a href="index.html" class="btn-editor">
                     <span class="btn-editor-text">Inventari</span>
                 </a>
-            </div>
+            ` : ''}
+            <button id="btn-mode-editor" class="btn-editor ${modeEditor ? 'actiu' : ''}">
+                <span class="btn-editor-text">${modeEditor ? 'Tancar Edició' : 'Mode Editor'}</span>
+            </button>
         </div>
     `;
-    if (contador) contador.innerHTML = headerHtml;
+    
+    if (container) container.innerHTML = headerHtml;
 
     // Assignar events als botons de capçalera
-    document.getElementById('btn-afegir-entrega')?.addEventListener('click', mostrarModalAfegir);
-    document.getElementById('btn-exportar-csv')?.addEventListener('click', () => exportarACSV(resultatsFiltrats));
+    document.getElementById('btn-mode-editor')?.addEventListener('click', toggleEditMode);
+    
+    if (modeEditor) {
+        document.getElementById('btn-afegir-entrega')?.addEventListener('click', mostrarModalAfegir);
+        document.getElementById('btn-exportar-csv')?.addEventListener('click', () => exportarACSV(resultatsFiltrats));
+    }
 
     if (resultatsFiltrats.length === 0) {
         resultats.innerHTML = '<div style="padding: 20px; text-align: center;">No s\'han trobat entregues.</div>';
@@ -191,7 +205,7 @@ function mostrarResultats() {
                     <th>Tipus</th>
                     <th>Data Entrega</th>
                     <th>Estat</th>
-                    <th class="col-accions">Accions</th>
+                    ${modeEditor ? '<th class="col-accions">Accions</th>' : ''}
                 </tr>
             </thead>
             <tbody>
@@ -230,12 +244,12 @@ function mostrarResultats() {
                 <td>${item.tipus || 'Normal'}</td>
                 <td>${dataEntrega}</td>
                 <td>${estatText}</td>
-                <td class="accions-cell">
+                ${modeEditor ? `<td class="accions-cell">
                     ${esPrestec && !retornat ? 
                         `<button class="btn-retornar" data-id="${item.id}" title="Marcar com a retornat">↩️</button>` : ''}
                     <button class="btn-editar" data-id="${item.id}" title="Editar">✎</button>
                     <button class="btn-borrar" data-id="${item.id}" title="Eliminar">×</button>
-                </td>
+                </td>` : ''}
             </tr>
         `;
     });
@@ -257,15 +271,17 @@ function mostrarResultats() {
     resultats.innerHTML = html;
 
     // Assignar events als botons de la taula
-    document.querySelectorAll('.btn-retornar').forEach(btn => {
-        btn.addEventListener('click', () => mostrarModalRetorn(btn.dataset.id));
-    });
-    document.querySelectorAll('.btn-editar').forEach(btn => {
-        btn.addEventListener('click', () => mostrarModalEditar(btn.dataset.id));
-    });
-    document.querySelectorAll('.btn-borrar').forEach(btn => {
-        btn.addEventListener('click', () => mostrarModalBorrar(btn.dataset.id));
-    });
+    if (modeEditor) {
+        document.querySelectorAll('.btn-retornar').forEach(btn => {
+            btn.addEventListener('click', () => mostrarModalRetorn(btn.dataset.id));
+        });
+        document.querySelectorAll('.btn-editar').forEach(btn => {
+            btn.addEventListener('click', () => mostrarModalEditar(btn.dataset.id));
+        });
+        document.querySelectorAll('.btn-borrar').forEach(btn => {
+            btn.addEventListener('click', () => mostrarModalBorrar(btn.dataset.id));
+        });
+    }
 
     // Funció global per a la paginació (necessària perquè el HTML és string)
     window.canviarPagina = (novaPagina) => {
@@ -274,6 +290,56 @@ function mostrarResultats() {
             mostrarResultats();
         }
     };
+}
+
+// Funció per activar/desactivar el mode editor
+function toggleEditMode() {
+    modeEditor = !modeEditor;
+    if (btnModeEditorMobil) {
+        btnModeEditorMobil.classList.toggle('actiu', modeEditor);
+    }
+    mostrarResultats();
+}
+
+// --- LÒGICA DEL MODAL D'ACCIONS DE L'EDITOR (MÒBIL) ---
+
+function inicialitzarModalAccionsEditor() {
+    const modal = document.getElementById('modal-accions-editor');
+    if (!modal) return;
+
+    const btnObrir = document.getElementById('btn-mode-editor-mobil');
+    const btnTancar = document.getElementById('btn-tancar-accions');
+    const btnAccioAfegir = document.getElementById('btn-accio-afegir');
+    const btnAccioExportar = document.getElementById('btn-accio-exportar');
+    const btnAccioEditarTaula = document.getElementById('btn-accio-editar-taula');
+
+    if (btnObrir) {
+        btnObrir.addEventListener('click', () => {
+            if (btnAccioEditarTaula) {
+                btnAccioEditarTaula.classList.toggle('actiu', modeEditor);
+                btnAccioEditarTaula.innerHTML = `<span>✏️</span> ${modeEditor ? 'Desactivar Edició' : 'Activar Edició a la Taula'}`;
+            }
+            modal.style.display = 'flex';
+        });
+    }
+
+    if (btnTancar) btnTancar.addEventListener('click', () => modal.style.display = 'none');
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+
+    if (btnAccioAfegir) btnAccioAfegir.addEventListener('click', () => {
+        mostrarModalAfegir();
+        modal.style.display = 'none';
+    });
+
+    if (btnAccioExportar) btnAccioExportar.addEventListener('click', () => exportarACSV(resultatsFiltrats));
+
+    if (btnAccioEditarTaula) btnAccioEditarTaula.addEventListener('click', () => {
+        toggleEditMode();
+        modal.style.display = 'none';
+    });
 }
 
 // --- MODALS ---

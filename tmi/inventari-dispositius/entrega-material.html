@@ -26,8 +26,14 @@
                     <option value="Prèstec">Prèstec</option>
                 </select>
                 <button id="btn-obrir-filtre-data" class="filtreTipus">📅</button>
+                <button id="btn-mode-editor-mobil" class="filtreTipus">✏️</button>
             </div>
-            <div class="contador-dispositius">Entregues: 0</div>
+            <div class="header-resultats">
+                <span class="contador-dispositius">Entregues: 0</span>
+                <div class="botons-header">
+                    <button id="btn-mode-editor" class="btn-editor"><span class="btn-editor-text">Mode Editor</span></button>
+                </div>
+            </div>
         </div>
         <div id="resultats"></div>
     </main>
@@ -63,6 +69,21 @@
                 <button id="btn-aplicar-filtre-data" class="btn-guardar">Aplicar</button>
                 <button id="btn-netejar-filtre-data" class="btn-netejar">Netejar</button>
                 <button id="btn-cancelar-filtre-data" class="btn-cancelar">Tancar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal per a les accions de l'editor en mòbil -->
+    <div id="modal-accions-editor" class="modal-overlay" style="display: none;">
+        <div class="modal-accions">
+            <h3 class="modal-titol">Accions d'Edició</h3>
+            <div class="botons-accions-principals">
+                <button id="btn-accio-afegir" class="btn-accio"><span>+</span> Afegir Entrega</button>
+                <button id="btn-accio-exportar" class="btn-accio"><span>📥</span> Exportar a CSV</button>
+                <button id="btn-accio-editar-taula" class="btn-accio btn-accio-toggle"><span>✏️</span> Activar Edició a la Taula</button>
+            </div>
+            <div class="modal-botons">
+                <button id="btn-tancar-accions" class="btn-cancelar">Tancar</button>
             </div>
         </div>
     </div>
