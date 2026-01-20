@@ -96,7 +96,7 @@ async function carregarDades() {
             mobils.push({
                 id: data.id,
                 fqdn: '-',
-                usuari: '',
+                usuari: data.usuari || '',
                 departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || '',
                 tipusDispositiu: 'Mòbil',
@@ -166,6 +166,14 @@ async function carregarDades() {
 
         // Combina tots els dispositius
         dispositius = [...pcs, ...mobils, ...monitors, ...impressores, ...altres];
+        
+        // Ordenar per data d'última edició descendent (el més recent a dalt)
+        dispositius.sort((a, b) => {
+            const dateA = new Date(a.dataUltimaEdicio || 0);
+            const dateB = new Date(b.dataUltimaEdicio || 0);
+            return dateB - dateA;
+        });
+
         console.log("Total dispositius carregats:", dispositius.length);
         inicialitzaFiltres();
         filtraITipus('');
@@ -900,6 +908,10 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
                 <input type="text" id="edit-id" value="${dades.id || ''}" readonly>
             </div>
             <div class="camp-edicio">
+                <label for="edit-usuari">Usuari:</label>
+                <input type="text" id="edit-usuari" value="${dades.usuari || ''}">
+            </div>
+            <div class="camp-edicio">
                 <label for="edit-departament">Departament:</label>
                 <input type="text" id="edit-departament" value="${dades.departament || ''}">
             </div>
@@ -1058,6 +1070,7 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal, dadesOrigi
         } else if (tipus === 'Mòbil') {
             dadesActualitzades = {
                 id: document.getElementById('edit-id').value,
+                usuari: document.getElementById('edit-usuari').value,
                 departament: document.getElementById('edit-departament').value, // AFEGEIX AQUESTA LÍNIA
                 model: document.getElementById('edit-model').value,
                 memoriaRAM: document.getElementById('edit-ram').value,
@@ -1254,12 +1267,37 @@ function mostrarModalSeleccioDispositiu() {
     });
 }
 
+// Funció per calcular el pròxim ID disponible segons el tipus
+function calcularProximId(tipus) {
+    let prefix = 0;
+    if (tipus === 'PC') prefix = 3000;
+    else if (tipus === 'Mòbil') prefix = 7000;
+    else if (tipus === 'Impressora') prefix = 5000;
+    else if (tipus === 'Monitor') prefix = 2000; // Rang per defecte per monitors
+    else prefix = 9000; // Rang per defecte per altres
+
+    const items = dispositius.filter(d => d.tipusDispositiu === tipus);
+    let maxId = 0;
+    items.forEach(d => {
+        const idNum = parseInt(d.id);
+        if (!isNaN(idNum) && idNum > maxId) {
+            maxId = idNum;
+        }
+    });
+
+    if (maxId < prefix) return prefix;
+    return maxId + 1;
+}
+
 // Mostra modal per afegir dispositiu segons el tipus
 function mostrarModalAfegirDispositiu(tipus) {
     const modal = document.createElement('div');
     modal.id = 'modal-afegir-dispositiu';
     modal.className = 'modal-overlay';
     
+    const nouId = calcularProximId(tipus);
+    const readonlyAttr = `value="${nouId}" readonly style="background-color: #e9ecef; cursor: not-allowed; color: #495057;"`;
+
     // Genera els camps segons el tipus de dispositiu
     let campsHTML = '';
     
@@ -1267,7 +1305,7 @@ function mostrarModalAfegirDispositiu(tipus) {
         campsHTML = `
             <div class="camp-edicio">
                 <label for="add-id">ID:</label>
-                <input type="text" id="add-id" required>
+                <input type="text" id="add-id" ${readonlyAttr} required>
             </div>
             <div class="camp-edicio">
                 <label for="add-fqdn">FQDN:</label>
@@ -1322,7 +1360,11 @@ function mostrarModalAfegirDispositiu(tipus) {
         campsHTML = `
             <div class="camp-edicio">
                 <label for="add-id">ID:</label>
-                <input type="text" id="add-id" required>
+                <input type="text" id="add-id" ${readonlyAttr} required>
+            </div>
+            <div class="camp-edicio">
+                <label for="add-usuari">Usuari:</label>
+                <input type="text" id="add-usuari">
             </div>
             <div class="camp-edicio">
                 <label for="add-departament">Departament:</label>
@@ -1365,7 +1407,7 @@ function mostrarModalAfegirDispositiu(tipus) {
         campsHTML = `
             <div class="camp-edicio">
                 <label for="add-id">ID:</label>
-                <input type="text" id="add-id" required>
+                <input type="text" id="add-id" ${readonlyAttr} required>
             </div>
             <div class="camp-edicio">
                 <label for="add-nom">Nom:</label>
@@ -1392,7 +1434,7 @@ function mostrarModalAfegirDispositiu(tipus) {
         campsHTML = `
             <div class="camp-edicio">
                 <label for="add-id">ID:</label>
-                <input type="text" id="add-id" required>
+                <input type="text" id="add-id" ${readonlyAttr} required>
             </div>
             <div class="camp-edicio">
                 <label for="add-nom">Nom:</label>
@@ -1419,7 +1461,7 @@ function mostrarModalAfegirDispositiu(tipus) {
         campsHTML = `
             <div class="camp-edicio">
                 <label for="add-id">ID:</label>
-                <input type="text" id="add-id" required>
+                <input type="text" id="add-id" ${readonlyAttr} required>
             </div>
             <div class="camp-edicio">
                 <label for="add-nom">Nom:</label>
@@ -1516,6 +1558,7 @@ async function afegirNouDispositiu(tipus, modal) {
             col·leccio = 'mobils';
             nouDispositiu = {
                 id: document.getElementById('add-id').value,
+                usuari: document.getElementById('add-usuari').value,
                 departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
                 memoriaRAM: document.getElementById('add-ram').value,

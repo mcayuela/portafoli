@@ -223,6 +223,7 @@ function mostrarCampsDispositiu() {
         // Omple els camps del mòbil
         const camps = {
             'mobil-id': dispositiuActual.id,
+            'mobil-usuari': dispositiuActual.usuari,
             'mobil-model': dispositiuActual.model,
             'mobil-ram': dispositiuActual.memoriaRAM,
             'mobil-interna': dispositiuActual.memoriaInterna,
