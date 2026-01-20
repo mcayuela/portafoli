@@ -271,6 +271,23 @@
                     </div>
                     <div id="llista-notes"></div>
                 </div>
+
+                <!-- Secció de Reparacions (3r contenidor) -->
+                <div class="dispositiu-reparacions">
+                    <div class="reparacions-header">
+                        <h3>Reparacions</h3>
+                        <button id="btn-afegir-reparacio" class="btn-afegir-nota">+ Afegir reparació</button>
+                    </div>
+                    <div id="no-reparacions" class="no-notes">
+                        No hi ha reparacions registrades.
+                    </div>
+                    <table id="taula-reparacions" class="taula-reparacions" style="display: none;">
+                        <thead>
+                            <tr><th>Nom</th><th>Inici</th><th>Fi</th><th>Accions</th></tr>
+                        </thead>
+                        <tbody id="body-reparacions"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -296,6 +313,64 @@
         </div>
     </div>
 
+    <!-- Modal per afegir reparació -->
+    <div id="modal-afegir-reparacio" class="modal-overlay" style="display: none;">
+        <div class="modal-nota"> <!-- Reutilitzem estil modal-nota -->
+            <h3 id="titol-modal-reparacio" class="modal-titol-nota">Nova Reparació</h3>
+            <form id="form-reparacio" class="form-nota">
+                <div class="camp-nota">
+                    <label for="rep-nom">Nom de la reparació:</label>
+                    <input type="text" id="rep-nom" required>
+                </div>
+                <div class="camp-nota">
+                    <label for="rep-descripcio">Descripció:</label>
+                    <textarea id="rep-descripcio" rows="3"></textarea>
+                </div>
+                <div class="camp-nota">
+                    <label for="rep-peces">Peces:</label>
+                    <input type="text" id="rep-peces" placeholder="Ex: Disc dur, RAM...">
+                </div>
+                <div class="camp-nota">
+                    <label for="rep-imatges">Imatges:</label>
+                    <input type="file" id="rep-imatges" multiple accept="image/*">
+                    <small style="color: #666;">Es convertiran automàticament a Base64.</small>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="camp-nota" style="flex: 1;">
+                        <label for="rep-data-inici">Data Inici:</label>
+                        <input type="date" id="rep-data-inici" required>
+                    </div>
+                    <div class="camp-nota" style="flex: 1;">
+                        <label for="rep-data-fi">Data Fi:</label>
+                        <input type="date" id="rep-data-fi">
+                    </div>
+                </div>
+                <div class="modal-botons">
+                    <button type="submit" class="btn-guardar">Guardar Reparació</button>
+                    <button type="button" id="btn-cancelar-reparacio" class="btn-cancelar">Cancel·lar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal per veure detalls reparació -->
+    <div id="modal-detall-reparacio" class="modal-overlay" style="display: none;">
+        <div class="modal-nota">
+            <h3 id="detall-rep-titol" class="modal-titol-nota">Detall Reparació</h3>
+            <div class="contingut-detall">
+                <p><strong>Descripció:</strong> <span id="detall-rep-descripcio"></span></p>
+                <p><strong>Peces:</strong> <span id="detall-rep-peces"></span></p>
+                <p><strong>Dates:</strong> <span id="detall-rep-dates"></span></p>
+                <div id="detall-rep-imatges" class="galeria-imatges">
+                    <!-- Les imatges es carregaran aquí -->
+                </div>
+            </div>
+            <div class="modal-botons">
+                <button type="button" id="btn-tancar-detall-rep" class="btn-cancelar">Tancar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Template per notes -->
     <template id="template-nota">
         <div class="nota-item">
@@ -311,5 +386,40 @@
     </template>
 
     <script type="module" src="dispositiu.js"></script>
+    
+    <style>
+        .galeria-imatges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .galeria-imatges img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+        }
+        .btn-eliminar-rep {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-eliminar-rep:hover {
+            background: #c0392b;
+        }
+        /* Fer les files clicables */
+        #body-reparacions tr {
+            cursor: pointer;
+        }
+        #body-reparacions tr:hover td {
+            background-color: #f1f1f1;
+        }
+    </style>
 </body>
 </html>

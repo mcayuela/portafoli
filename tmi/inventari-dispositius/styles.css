@@ -1214,7 +1214,8 @@ a.btn-tornar {
 
 .dispositiu-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr; /* Força 3 columnes */
+    grid-template-columns: 1fr 1fr 1.3fr; /* Força 3 columnes, la darrera més ampla */
     gap: 30px;
     min-height: 400px;
     align-items: start;
@@ -1222,7 +1223,8 @@ a.btn-tornar {
 
 /* Quan hi ha secció de notes, dues columnes (per a dispositius) */
 .dispositiu-container:has(.dispositiu-notes) {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1.3fr;
 }
 
 /* Informació del dispositiu */
@@ -1373,6 +1375,50 @@ a.btn-tornar {
     margin: 0;
     color: #333;
     line-height: 1.5;
+}
+
+/* --- ESTILS PER A REPARACIONS --- */
+.dispositiu-reparacions {
+    background: white;
+    padding: 25px;
+    margin-bottom: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow-x: auto;
+}
+
+.reparacions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eaf4fa;
+    padding-bottom: 15px;
+}
+
+.reparacions-header h3 {
+    margin: 0;
+    color: #222d32;
+}
+
+.taula-reparacions {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.taula-reparacions th, .taula-reparacions td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.reparacio-pendent {
+    background-color: rgba(255, 165, 0, 0.15); /* Taronja fluix */
+}
+
+.reparacio-acabada {
+    background-color: rgba(40, 167, 69, 0.15); /* Verd fluix */
 }
 
 /* Modal de notes */
