@@ -29,6 +29,9 @@ let taulaReparacions, bodyReparacions, noReparacions;
 let modalDetallReparacio, btnTancarDetallRep;
 let detallRepTitol, detallRepDescripcio, detallRepPeces, detallRepDates, detallRepImatges;
 let indexReparacioEditant = null; // Variable per controlar si estem editant
+// Variables per al visor d'imatges
+let modalImatgeFullscreen, imgFullscreen, btnZoomIn, btnZoomOut, btnDownloadImg, btnTancarImg;
+let currentZoom = 1;
 
 
 // FUNCIONS DEL LOADER
@@ -80,6 +83,14 @@ document.addEventListener('DOMContentLoaded', () => {
             detallRepDates = document.getElementById('detall-rep-dates');
             detallRepImatges = document.getElementById('detall-rep-imatges');
 
+            // Referències Visor Imatges
+            modalImatgeFullscreen = document.getElementById('modal-imatge-fullscreen');
+            imgFullscreen = document.getElementById('img-fullscreen');
+            btnZoomIn = document.getElementById('btn-zoom-in');
+            btnZoomOut = document.getElementById('btn-zoom-out');
+            btnDownloadImg = document.getElementById('btn-download-img');
+            btnTancarImg = document.getElementById('btn-tancar-img');
+
             // Event listeners
             if (btnAfegirNota) btnAfegirNota.addEventListener('click', mostrarModalAfegirNota);
             if (btnCancelarNota) btnCancelarNota.addEventListener('click', tancarModalNota);
@@ -91,6 +102,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (formReparacio) formReparacio.addEventListener('submit', handleSubmitReparacio);
             
             if (btnTancarDetallRep) btnTancarDetallRep.addEventListener('click', tancarModalDetallReparacio);
+
+            // Listeners Visor Imatges
+            if (btnZoomIn) btnZoomIn.addEventListener('click', () => ajustarZoom(0.1));
+            if (btnZoomOut) btnZoomOut.addEventListener('click', () => ajustarZoom(-0.1));
+            if (btnTancarImg) btnTancarImg.addEventListener('click', tancarModalImatge);
+            if (modalImatgeFullscreen) modalImatgeFullscreen.addEventListener('click', (e) => {
+                if (e.target === modalImatgeFullscreen || e.target.classList.contains('modal-imatge-container')) {
+                    tancarModalImatge();
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modalImatgeFullscreen && modalImatgeFullscreen.style.display === 'flex') {
+                    tancarModalImatge();
+                }
+            });
 
             mostrarLoader();
 
@@ -224,6 +250,7 @@ function mostrarCampsDispositiu() {
         const camps = {
             'mobil-id': dispositiuActual.id,
             'mobil-usuari': dispositiuActual.usuari,
+            'mobil-departament': dispositiuActual.departament,
             'mobil-model': dispositiuActual.model,
             'mobil-ram': dispositiuActual.memoriaRAM,
             'mobil-interna': dispositiuActual.memoriaInterna,
@@ -444,48 +471,58 @@ function mostrarReparacions() {
     
     reparacions.forEach((rep, index) => {
         const tr = document.createElement('tr');
+        const isAcabada = !!rep.dataFi;
         
         // Determina classe segons estat (si té data fi o no)
-        if (rep.dataFi) {
+        if (isAcabada) {
             tr.classList.add('reparacio-acabada');
         } else {
             tr.classList.add('reparacio-pendent');
         }
         
+        // Generació dels botons d'acció
+        let accionsHtml = `
+            <div class="accions-reparacio">
+                <button class="btn-accio-rep btn-download-rep" data-index="${index}" title="Descarregar informe">📄</button>
+        `;
+
+        if (!isAcabada) {
+            accionsHtml += `<button class="btn-accio-rep btn-finish-rep" data-index="${index}" title="Marcar com acabada">✅</button>`;
+        }
+
+        const disabledEdit = isAcabada ? 'disabled' : '';
+        accionsHtml += `
+                <button class="btn-accio-rep btn-editar-rep" data-index="${index}" title="Editar reparació" ${disabledEdit}>✎</button>
+                <button class="btn-accio-rep btn-eliminar-rep" data-index="${index}" title="Eliminar reparació">×</button>
+            </div>
+        `;
+
         tr.innerHTML = `
             <td><strong>${rep.nom}</strong></td>
             <td>${formatarData(rep.dataInici)}</td>
             <td>${rep.dataFi ? formatarData(rep.dataFi) : 'En curs'}</td>
-            <td style="text-align: center;">
-                <button class="btn-editar-rep" data-index="${index}" title="Editar reparació">✎</button>
-                <button class="btn-eliminar-rep" data-index="${index}" title="Eliminar reparació">×</button>
-            </td>
+            <td>${accionsHtml}</td>
         `;
         
         // Click a la fila per veure detalls (excepte si cliquem els botons d'acció)
         tr.addEventListener('click', (e) => {
-            if (!e.target.classList.contains('btn-eliminar-rep') && !e.target.classList.contains('btn-editar-rep')) {
+            if (!e.target.closest('button')) {
                 mostrarDetallReparacio(rep);
             }
         });
 
-        // Event per editar
-        const btnEditar = tr.querySelector('.btn-editar-rep');
-        if (btnEditar) {
-            btnEditar.addEventListener('click', (e) => {
-                e.stopPropagation();
-                editarReparacio(index);
-            });
-        }
+        // Assignació d'events als botons
+        const btnDownload = tr.querySelector('.btn-download-rep');
+        if (btnDownload) btnDownload.addEventListener('click', (e) => { e.stopPropagation(); generarInformeReparacio(index); });
 
-        // Event per eliminar
+        const btnFinish = tr.querySelector('.btn-finish-rep');
+        if (btnFinish) btnFinish.addEventListener('click', (e) => { e.stopPropagation(); marcarReparacioAcabada(index); });
+
+        const btnEditar = tr.querySelector('.btn-editar-rep');
+        if (btnEditar && !btnEditar.disabled) btnEditar.addEventListener('click', (e) => { e.stopPropagation(); editarReparacio(index); });
+
         const btnEliminar = tr.querySelector('.btn-eliminar-rep');
-        if (btnEliminar) {
-            btnEliminar.addEventListener('click', (e) => {
-                e.stopPropagation(); // Evita obrir el modal
-                eliminarReparacio(index);
-            });
-        }
+        if (btnEliminar) btnEliminar.addEventListener('click', (e) => { e.stopPropagation(); eliminarReparacio(index); });
         
         if (bodyReparacions) bodyReparacions.appendChild(tr);
     });
@@ -545,6 +582,7 @@ function mostrarDetallReparacio(rep) {
             rep.imatges.forEach(imgSrc => {
                 const img = document.createElement('img');
                 img.src = imgSrc;
+                img.addEventListener('click', () => obrirModalImatge(imgSrc));
                 detallRepImatges.appendChild(img);
             });
         } else if (rep.imatgesStr) {
@@ -554,6 +592,7 @@ function mostrarDetallReparacio(rep) {
                 if(imgSrc) {
                     const img = document.createElement('img');
                     img.src = imgSrc;
+                    img.addEventListener('click', () => obrirModalImatge(imgSrc));
                     detallRepImatges.appendChild(img);
                 }
             });
@@ -714,6 +753,123 @@ async function eliminarReparacio(index) {
         console.error('Error eliminant reparació:', error);
         alert('Error eliminant: ' + error.message);
         amagarLoader();
+    }
+}
+
+// --- NOVES FUNCIONS REPARACIONS ---
+
+async function marcarReparacioAcabada(index) {
+    if (!confirm("Vols marcar aquesta reparació com a acabada amb data d'avui?")) return;
+
+    try {
+        mostrarLoader();
+        const col·leccio = obtenirCol·leccio(tipusActual);
+        const docRef = doc(db, col·leccio, String(dispositiuActual.id));
+        
+        // Obtenim dades fresques
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const dades = docSnap.data();
+            let llista = Array.isArray(dades.reparacions) ? [...dades.reparacions] : [];
+            
+            if (llista[index]) {
+                // Actualitzem dataFi a avui (YYYY-MM-DD)
+                llista[index].dataFi = new Date().toISOString().split('T')[0];
+                
+                await updateDoc(docRef, { reparacions: llista });
+                
+                // Actualitzem localment
+                dispositiuActual.reparacions = llista;
+                mostrarReparacions();
+            }
+        }
+        amagarLoader();
+    } catch (error) {
+        console.error('Error marcant reparació:', error);
+        alert('Error: ' + error.message);
+        amagarLoader();
+    }
+}
+
+function generarInformeReparacio(index) {
+    const rep = dispositiuActual.reparacions[index];
+    if (!rep) return;
+
+    const finestra = window.open('', '_blank');
+    
+    let imatgesHtml = '';
+    if (rep.imatges && rep.imatges.length > 0) {
+        imatgesHtml = '<div style="margin-top:20px;"><h3>Imatges:</h3><div style="display:flex; flex-wrap:wrap; gap:10px;">';
+        rep.imatges.forEach(img => {
+            imatgesHtml += `<img src="${img}" style="max-width:300px; max-height:300px; border:1px solid #ddd;">`;
+        });
+        imatgesHtml += '</div></div>';
+    }
+
+    const contingut = `
+        <html>
+        <head>
+            <title>Informe de reparació - ${dispositiuActual.id}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
+                h1 { color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; margin-top: 0; }
+                .info-item { margin-bottom: 15px; }
+                .label { font-weight: bold; color: #555; display: inline-block; width: 120px; }
+                .desc { background: #f9f9f9; padding: 15px; border-left: 4px solid #2c3e50; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <h1>Informe de reparació - ${dispositiuActual.id}</h1>
+            <div class="info-item"><span class="label">Dispositiu:</span> ${tipusActual} - ${dispositiuActual.id}</div>
+            <div class="info-item"><span class="label">Reparació:</span> ${rep.nom}</div>
+            <div class="info-item"><span class="label">Data Inici:</span> ${formatarData(rep.dataInici)}</div>
+            <div class="info-item"><span class="label">Data Fi:</span> ${rep.dataFi ? formatarData(rep.dataFi) : 'En curs'}</div>
+            <div class="info-item"><span class="label">Peces:</span> ${rep.peces || 'Cap'}</div>
+            
+            <h3>Descripció:</h3>
+            <div class="desc">${rep.descripcio || 'Sense descripció'}</div>
+            
+            ${imatgesHtml}
+            
+            <script>window.onload = function() { window.print(); }</script>
+        </body>
+        </html>
+    `;
+
+    finestra.document.write(contingut);
+    finestra.document.close();
+}
+
+// --- FUNCIONS VISOR IMATGES ---
+
+function obrirModalImatge(src) {
+    if (modalImatgeFullscreen && imgFullscreen) {
+        imgFullscreen.src = src;
+        currentZoom = 1;
+        imgFullscreen.style.transform = `scale(${currentZoom})`;
+        
+        if (btnDownloadImg) {
+            btnDownloadImg.href = src;
+            // Intentem posar un nom d'arxiu lògic
+            btnDownloadImg.download = `reparacio_${Date.now()}.jpg`;
+        }
+        
+        modalImatgeFullscreen.style.display = 'flex';
+    }
+}
+
+function tancarModalImatge() {
+    if (modalImatgeFullscreen) {
+        modalImatgeFullscreen.style.display = 'none';
+        setTimeout(() => { if (imgFullscreen) imgFullscreen.src = ''; }, 200);
+    }
+}
+
+function ajustarZoom(delta) {
+    if (imgFullscreen) {
+        currentZoom += delta;
+        if (currentZoom < 0.1) currentZoom = 0.1;
+        imgFullscreen.style.transform = `scale(${currentZoom})`;
     }
 }
 

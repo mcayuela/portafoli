@@ -371,6 +371,19 @@
         </div>
     </div>
 
+    <!-- Modal Imatge Fullscreen -->
+    <div id="modal-imatge-fullscreen" class="modal-overlay" style="display: none; z-index: 2000;">
+        <div class="modal-imatge-controls">
+            <button id="btn-zoom-in" class="btn-control-img" title="Ampliar">+</button>
+            <button id="btn-zoom-out" class="btn-control-img" title="Reduir">-</button>
+            <a id="btn-download-img" class="btn-control-img" href="#" download="reparacio.jpg" title="Descarregar">⬇</a>
+            <button id="btn-tancar-img" class="btn-control-img btn-tancar-img" title="Tancar">×</button>
+        </div>
+        <div class="modal-imatge-container">
+            <img id="img-fullscreen" src="" alt="Detall reparació">
+        </div>
+    </div>
+
     <!-- Template per notes -->
     <template id="template-nota">
         <div class="nota-item">
@@ -395,23 +408,17 @@
             margin-top: 15px;
         }
         .galeria-imatges img {
-            max-width: 100%;
-            height: auto;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
             border: 1px solid #ddd;
             border-radius: 4px;
-            max-height: 200px;
-        }
-        .btn-eliminar-rep {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
             cursor: pointer;
-            font-size: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .btn-eliminar-rep:hover {
-            background: #c0392b;
+        .galeria-imatges img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         /* Fer les files clicables */
         #body-reparacions tr {
@@ -419,6 +426,159 @@
         }
         #body-reparacions tr:hover td {
             background-color: #f1f1f1;
+        }
+
+        /* --- Millores Estils Reparacions --- */
+        .taula-reparacions {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .taula-reparacions th {
+            background-color: #2c3e50;
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            padding: 15px;
+            letter-spacing: 0.5px;
+            border: none;
+        }
+
+        .taula-reparacions td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+            vertical-align: middle;
+        }
+
+        .taula-reparacions tr:last-child td {
+            border-bottom: none;
+        }
+
+        .taula-reparacions tr {
+            transition: all 0.2s ease;
+        }
+
+        .taula-reparacions tr:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Indicadors d'estat visuals */
+        .reparacio-pendent td:first-child {
+            border-left: 5px solid #ff9800;
+        }
+        .reparacio-pendent {
+            background-color: rgba(255, 165, 0, 0.15); /* Taronja pastel poca opacitat */
+        }
+
+        .reparacio-acabada td:first-child {
+            border-left: 5px solid #27ae60;
+        }
+        .reparacio-acabada {
+            background-color: rgba(40, 167, 69, 0.15); /* Verd pastel */
+        }
+        
+        /* Botons Accions Reparació */
+        .accions-reparacio {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        
+        .btn-accio-rep {
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            color: white;
+        }
+        
+        .btn-download-rep { background: #3498db; }
+        .btn-download-rep:hover { background: #2980b9; }
+        .btn-finish-rep { background: #2ecc71; }
+        .btn-finish-rep:hover { background: #27ae60; }
+        .btn-editar-rep { background: #f39c12; }
+        .btn-editar-rep:hover { background: #d35400; }
+        .btn-editar-rep:disabled { background: #bdc3c7; cursor: not-allowed; opacity: 0.6; }
+        .btn-eliminar-rep { background: #e74c3c; }
+        .btn-eliminar-rep:hover { background: #c0392b; }
+
+        /* --- Estils Modal Imatge Fullscreen --- */
+        #modal-imatge-fullscreen {
+            background-color: rgba(0, 0, 0, 0.92);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-imatge-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            z-index: 2001;
+        }
+        
+        .btn-control-img {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+        
+        .btn-control-img:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .btn-tancar-img:hover {
+            background: #e74c3c;
+            border-color: #e74c3c;
+            color: white;
+        }
+        
+        .modal-imatge-container {
+            width: 90%;
+            height: 85%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        #img-fullscreen {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.2s ease-out;
         }
     </style>
 </body>

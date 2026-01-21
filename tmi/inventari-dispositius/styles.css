@@ -778,6 +778,26 @@ a.btn-editor {
     transform: scale(0.95);
 }
 
+/* Botó d'informe complet */
+.btn-informe {
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    transition: background-color 0.3s ease;
+}
+.btn-informe:hover {
+    background: #2980b9;
+}
+
 /* Modal de confirmació (mantén els estils existents) */
 .modal-overlay {
     position: fixed;

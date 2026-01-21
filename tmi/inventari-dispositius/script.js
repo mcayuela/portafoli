@@ -384,6 +384,7 @@ function mostrarResultats(filtrats, pagina = 1) {
             ${modeEditor ? `<td class="accions-cell">
                 <button class="btn-editar" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" title="Editar dispositiu">✎</button>
                 <button class="btn-imprimir" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" data-model="${item.model || ''}" data-data="${item.dataAdquisicio || ''}" title="Imprimir etiqueta">🖨️</button>
+                <button class="btn-informe" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" title="Descarregar informe complet">📄</button>
                 <button class="btn-borrar" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" title="Borrar dispositiu">×</button>
             </td>` : ''}
         </tr>`;
@@ -420,6 +421,15 @@ function mostrarResultats(filtrats, pagina = 1) {
                 };
                 
                 obreQRAPestanya(dispositiu);
+            });
+        });
+
+        // EVENT LISTENER PER AL BOTÓ D'INFORME COMPLET
+        resultats.querySelectorAll('.btn-informe').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const tipus = this.dataset.tipus;
+                generarInformeCompletDispositiu(id, tipus);
             });
         });
     }
@@ -1826,4 +1836,175 @@ function obreQRAPestanya(pc) {
     win.document.open();
     win.document.write(html);
     win.document.close();
+}
+
+// --- GENERACIÓ D'INFORME COMPLET ---
+async function generarInformeCompletDispositiu(id, tipus) {
+    mostrarLoader();
+    try {
+        let col_leccio = '';
+        switch (tipus) {
+            case 'PC': col_leccio = 'pcs'; break;
+            case 'Mòbil': col_leccio = 'mobils'; break;
+            case 'Monitor': col_leccio = 'monitors'; break;
+            case 'Impressora': col_leccio = 'impressores'; break;
+            default: col_leccio = 'altresDispositius'; break;
+        }
+
+        const docRef = doc(db, col_leccio, String(id));
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) {
+            alert('No s\'han trobat les dades del dispositiu.');
+            amagarLoader();
+            return;
+        }
+
+        const dades = docSnap.data();
+        const notes = dades.notes || [];
+        const reparacions = dades.reparacions || [];
+
+        // Construcció de l'HTML
+        let html = `
+            <html>
+            <head>
+                <title>Informe Complet - ${tipus} ${id}</title>
+                <style>
+                    @page { margin: 60; }
+                    body { font-family: Arial, sans-serif; padding: 80px; color: #333; width: 100%; max-width: 100%; margin: 0; box-sizing: border-box; }
+                    h1 { color: #2c3e50; margin-bottom: 30px; margin-top: 0; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; }
+                    h2 { color: #2596be; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+                    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+                    .info-item { padding: 15px; background: #f9f9f9; border-radius: 4px; font-size: 1.1rem; }
+                    .label { font-weight: bold; color: #555; display: block; margin-bottom: 6px; font-size: 0.9em; text-transform: uppercase; }
+                    
+                    .nota-item { border-left: 4px solid #f39c12; background: #fffcf5; padding: 15px; margin-bottom: 15px; font-size: 1.05rem; }
+                    .nota-meta { font-size: 0.9em; color: #888; margin-bottom: 5px; }
+                    .nota-titol { font-weight: bold; display: block; margin-bottom: 5px; font-size: 1.1em; }
+                    
+                    .rep-item { border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin-bottom: 15px; font-size: 1.05rem; }
+                    .rep-header { display: flex; justify-content: space-between; background: #f1f1f1; padding: 10px; margin: -15px -15px 15px -15px; border-bottom: 1px solid #ddd; font-weight: bold; }
+                    .rep-status { padding: 2px 8px; border-radius: 4px; font-size: 0.8em; }
+                    .status-ok { background: #d4edda; color: #155724; }
+                    .status-pending { background: #fff3cd; color: #856404; }
+                    
+                    @media print {
+                        body { padding: 0; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Informe Complet - ${tipus} ${id}</h1>
+                
+                <h2>Informació General</h2>
+                <div class="info-grid">
+        `;
+
+        // Definició de camps i ordre segons tipus
+        let campsOrdenats = [];
+        if (tipus === 'PC') {
+            campsOrdenats = [
+                { k: 'id', l: 'ID' },
+                { k: 'FQDN', l: 'FQDN' },
+                { k: 'usuari', l: 'Usuari' },
+                { k: 'codiTeamViewer', l: 'Codi TeamViewer' },
+                { k: 'model', l: 'Model' },
+                { k: 'sn', l: 'SN' },
+                { k: 'processador', l: 'Processador' },
+                { k: 'targetaGrafica', l: 'Targeta Gràfica' },
+                { k: 'sistemaOperatiu', l: 'Sistema Operatiu' },
+                { k: 'memoriaRAM', l: 'Memòria RAM' },
+                { k: 'emmagatzematge', l: 'Emmagatzematge' },
+                { k: 'dataAdquisicio', l: "Data d'Adquisició" }
+            ];
+        } else if (tipus === 'Mòbil') {
+            campsOrdenats = [
+                { k: 'id', l: 'ID' },
+                { k: 'usuari', l: 'Usuari' },
+                { k: 'departament', l: 'Departament' },
+                { k: 'model', l: 'Model' },
+                { k: 'memoriaRAM', l: 'Memòria RAM' },
+                { k: 'memoriaInterna', l: 'Memòria Interna' },
+                { k: 'sn', l: 'SN' },
+                { k: 'imei1', l: 'IMEI 1' },
+                { k: 'imei2', l: 'IMEI 2' },
+                { k: 'mailRegistre', l: 'Mail registre' },
+                { k: 'dataAdquisicio', l: "Data d'Adquisició" }
+            ];
+        } else if (tipus === 'Impressora') {
+            campsOrdenats = [
+                { k: 'id', l: 'ID' },
+                { k: 'nom', l: 'Nom' },
+                { k: 'departament', l: 'Departament' },
+                { k: 'model', l: 'Model' },
+                { k: 'sn', l: 'SN' },
+                { k: 'dataAdquisicio', l: "Data d'Adquisició" }
+            ];
+        } else {
+            campsOrdenats = [
+                { k: 'id', l: 'ID' },
+                { k: 'nom', l: 'Nom' },
+                { k: 'departament', l: 'Departament' },
+                { k: 'model', l: 'Model' },
+                { k: 'sn', l: 'SN' },
+                { k: 'tipus', l: 'Tipus' },
+                { k: 'dataAdquisicio', l: "Data d'Adquisició" }
+            ];
+        }
+
+        campsOrdenats.forEach(camp => {
+            let valor = dades[camp.k];
+            if (camp.k === 'dataAdquisicio' && valor) {
+                try { valor = new Date(valor).toLocaleDateString('ca-ES'); } catch(e){}
+            }
+            html += `<div class="info-item"><span class="label">${camp.l}:</span> ${valor || '-'}</div>`;
+        });
+        
+        html += `</div>`;
+
+        // Notes
+        html += `<h2>Notes (${notes.length})</h2>`;
+        if (notes.length > 0) {
+            notes.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(nota => {
+                html += `
+                    <div class="nota-item">
+                        <div class="nota-titol">${nota.titol}</div>
+                        <div class="nota-meta">${new Date(nota.data).toLocaleString('ca-ES')}</div>
+                        <div>${nota.descripcio}</div>
+                    </div>`;
+            });
+        } else {
+            html += '<p>No hi ha notes registrades.</p>';
+        }
+
+        // Reparacions
+        html += `<h2>Reparacions (${reparacions.length})</h2>`;
+        if (reparacions.length > 0) {
+            reparacions.sort((a, b) => new Date(b.dataInici) - new Date(a.dataInici)).forEach(rep => {
+                const estat = rep.dataFi ? '<span class="rep-status status-ok">Acabada</span>' : '<span class="rep-status status-pending">En curs</span>';
+                html += `
+                    <div class="rep-item">
+                        <div class="rep-header"><span>${rep.nom}</span> ${estat}</div>
+                        <p><strong>Dates:</strong> ${rep.dataInici} - ${rep.dataFi || '...'}</p>
+                        <p><strong>Descripció:</strong> ${rep.descripcio || '-'}</p>
+                        <p><strong>Peces:</strong> ${rep.peces || '-'}</p>
+                    </div>`;
+            });
+        } else {
+            html += '<p>No hi ha reparacions registrades.</p>';
+        }
+
+        html += `<script>window.onload = function() { window.print(); }</script></body></html>`;
+
+        const finestra = window.open('', '_blank');
+        finestra.document.write(html);
+        finestra.document.close();
+
+    } catch (e) {
+        console.error(e);
+        alert('Error generant l\'informe: ' + e.message);
+    } finally {
+        amagarLoader();
+    }
 }
