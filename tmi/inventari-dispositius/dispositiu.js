@@ -209,7 +209,70 @@ function mostrarDispositiu() {
     
     // Reparacions
     mostrarReparacions();
+
+    // --- INTEGRACIÓ LOGS QA ---
+    mostrarLogsQA();
+
     amagarLoader();
+}
+
+// --- INTEGRACIÓ LOGS QA (NOVA FUNCIÓ) ---
+function mostrarLogsQA() {
+    const logsContainer = document.getElementById('seccio-logs-qa');
+    if (!logsContainer) return;
+
+    const logs = dispositiuActual.logs_qa || [];
+    
+    if (logs.length === 0) {
+        logsContainer.innerHTML = '<p>No hi ha logs de QA registrats per aquest dispositiu.</p>';
+        return;
+    }
+
+    let html = '<h2>Logs d\'Instal·lació i QA</h2>';
+    logs.forEach((log, index) => {
+        html += `
+            <div class="log-item" id="log-qa-${index}" style="background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #007bff; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong>Data: ${log.data}</strong>
+                    <button class="btn-guardar" style="font-size: 12px;" onclick="descarregarPDFLog(${index})">Descarregar Log PDF</button>
+                </div>
+                <p style="margin: 5px 0;"><strong>Tècnic:</strong> ${log.tecnic}</p>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; white-space: pre-wrap; font-size: 13px;">${log.contingut}</div>
+            </div>
+        `;
+    });
+    logsContainer.innerHTML = html;
+}
+
+// --- INTEGRACIÓ LOGS QA (FUNCIÓ PDF) ---
+window.descarregarPDFLog = function(index) {
+    const element = document.getElementById(`log-qa-${index}`);
+    if (!element) return;
+
+    // Fem una còpia de l'element per al PDF sense el botó de descarregar
+    const printElement = element.cloneNode(true);
+    const boto = printElement.querySelector('button');
+    if (boto) boto.remove();
+
+    // Afegim una capçalera al PDF
+    const header = document.createElement('div');
+    header.innerHTML = `<h1 style="color: #2c3e50;">Informe de QA - Dispositiu ${dispositiuActual.id}</h1><hr>`;
+    printElement.prepend(header);
+
+    const opt = {
+        margin:       0.5,
+        filename:     `Log_QA_${dispositiuActual.id}_${index}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    // Necessites tenir la llibreria html2pdf.js carregada a dispositiu.html
+    if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opt).from(printElement).save();
+    } else {
+        alert("La llibreria de PDF no està carregada. Afegeix <script src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'></script> al dispositiu.html");
+    }
 }
 
 // Mostra els camps del dispositiu segons el tipus

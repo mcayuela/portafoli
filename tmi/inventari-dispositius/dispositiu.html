@@ -6,9 +6,6 @@
     <title>Dispositiu - Inventari TMI</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* --- NOUS ESTATS PER A LA PÀGINA DE DETALL --- */
-
-        /* Estil base per a tots els botons */
         .btn-guardar, .btn-cancelar, .btn-tornar, .btn-afegir-nota {
             display: inline-block;
             padding: 8px 16px;
@@ -26,23 +23,18 @@
             transform: translateY(-1px);
         }
 
-        /* Colors específics per a cada botó */
-
-        /* Botó Guardar (blau corporatiu) */
         .btn-guardar {
             background-color: #007bff;
             color: white;
         }
         .btn-guardar:hover { background-color: #0069d9; }
 
-        /* Botó Tornar (gris) */
         .btn-tornar {
             background-color: #343a40;
             color: white;
         }
         .btn-tornar:hover { background-color: #23272b; }
 
-        /* Botons generals (gris clar) */
         .btn-cancelar,
         .btn-afegir-nota {
             background-color: #6c757d;
@@ -54,14 +46,8 @@
             background-color: #5a6268;
         }
 
-        /* El botó de cancel·lar dins d'un modal pot tenir un color diferent si es vol,
-           però per mantenir la consistència, el deixem gris. Si el vols vermell,
-           descomenta les següents línies:
-        .btn-cancelar { background-color: #dc3545; }
-        .btn-cancelar:hover { background-color: #c82333; }
-        */
-
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <!-- Loader global -->
