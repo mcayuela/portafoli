@@ -116,6 +116,7 @@ async function carregarDades() {
                 id: data.id,
                 fqdn: '-',
                 usuari: '',
+                usuari: data.usuari || '',
                 departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || data.nom || '',
                 tipusDispositiu: 'Monitor',
@@ -985,6 +986,37 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
                 <input type="date" id="edit-data" value="${dades.dataAdquisicio || ''}">
             </div>
         `;
+    } else if (tipus === 'Monitor') {
+        campsHTML = `
+            <div class="camp-edicio">
+                <label for="edit-id">ID:</label>
+                <input type="text" id="edit-id" value="${dades.id || ''}" readonly>
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-nom">Nom:</label>
+                <input type="text" id="edit-nom" value="${dades.nom || ''}" required>
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-usuari">Usuari:</label>
+                <input type="text" id="edit-usuari" value="${dades.usuari || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-departament">Departament:</label>
+                <input type="text" id="edit-departament" value="${dades.departament || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-model">Model:</label>
+                <input type="text" id="edit-model" value="${dades.model || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-sn">SN:</label>
+                <input type="text" id="edit-sn" value="${dades.sn || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-data">Data d'Adquisició:</label>
+                <input type="date" id="edit-data" value="${dades.dataAdquisicio || ''}">
+            </div>
+        `;
     } else {
         campsHTML = `
             <div class="camp-edicio">
@@ -1104,6 +1136,19 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal, dadesOrigi
                 dataUltimaEdicio: new Date().toISOString()
             };
             col·leccio = 'impressores'; // Assegurem la col·lecció correcta
+        } else if (tipus === 'Monitor') {
+            dadesActualitzades = {
+                id: document.getElementById('edit-id').value,
+                nom: document.getElementById('edit-nom').value,
+                usuari: document.getElementById('edit-usuari').value,
+                departament: document.getElementById('edit-departament').value,
+                model: document.getElementById('edit-model').value,
+                sn: document.getElementById('edit-sn').value,
+                tipus: 'Monitor',
+                dataAdquisicio: document.getElementById('edit-data').value,
+                dataUltimaEdicio: new Date().toISOString()
+            };
+            col·leccio = 'monitors';
         } else {
             dadesActualitzades = {
                 id: document.getElementById('edit-id').value,
@@ -1424,6 +1469,10 @@ function mostrarModalAfegirDispositiu(tipus) {
                 <input type="text" id="add-nom" required>
             </div>
             <div class="camp-edicio">
+                <label for="add-usuari">Usuari:</label>
+                <input type="text" id="add-usuari">
+            </div>
+            <div class="camp-edicio">
                 <label for="add-departament">Departament:</label>
                 <input type="text" id="add-departament">
             </div>
@@ -1586,6 +1635,7 @@ async function afegirNouDispositiu(tipus, modal) {
             nouDispositiu = {
                 id: document.getElementById('add-id').value,
                 nom: document.getElementById('add-nom').value,
+                usuari: document.getElementById('add-usuari').value,
                 departament: document.getElementById('add-departament').value, // AFEGEIX
                 model: document.getElementById('add-model').value,
                 sn: document.getElementById('add-sn').value,
