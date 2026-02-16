@@ -650,7 +650,7 @@ function mostrarDetallReparacio(rep) {
             });
         } else if (rep.imatgesStr) {
             // Compatibilitat amb versions anteriors si n'hi hagués
-            const imgs = rep.imatgesStr.split('|');
+            const imgs = rep.imatgesStr.split('|'); 
             imgs.forEach(imgSrc => {
                 if(imgSrc) {
                     const img = document.createElement('img');
