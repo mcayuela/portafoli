@@ -34,7 +34,6 @@ const selectTipus = document.querySelector('.filtreTipus');
 const resultats = document.getElementById('resultats');
 const contadorDispositius = document.querySelector('.contador-dispositius');
 const btnModeEditorMobil = document.getElementById('btn-mode-editor-mobil');
-let modeEditor = false;
 
 function mostrarLoader() {
     const loader = document.getElementById('global-loader');
@@ -57,6 +56,48 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarLoader();
             // Inicialitza els listeners per al modal d'accions mòbil
             inicialitzarModalAccionsEditor();
+            
+            // Delegació d'events per a la taula de resultats (Solució robusta per als botons)
+            if (resultats) {
+                resultats.addEventListener('click', (e) => {
+                    const btnBorrar = e.target.closest('.btn-borrar');
+                    if (btnBorrar) {
+                        const id = btnBorrar.dataset.id;
+                        const tipus = btnBorrar.dataset.tipus;
+                        mostrarModalConfirmacio(id, tipus);
+                        return;
+                    }
+
+                    const btnEditar = e.target.closest('.btn-editar');
+                    if (btnEditar) {
+                        const id = btnEditar.dataset.id;
+                        const tipus = btnEditar.dataset.tipus;
+                        editarDispositiu(id, tipus);
+                        return;
+                    }
+
+                    const btnImprimir = e.target.closest('.btn-imprimir');
+                    if (btnImprimir) {
+                        const dispositiu = {
+                            id: btnImprimir.dataset.id,
+                            tipusDispositiu: btnImprimir.dataset.tipus,
+                            model: btnImprimir.dataset.model,
+                            dataAdquisicio: btnImprimir.dataset.data
+                        };
+                        obreQRAPestanya(dispositiu);
+                        return;
+                    }
+
+                    const btnInforme = e.target.closest('.btn-informe');
+                    if (btnInforme) {
+                        const id = btnInforme.dataset.id;
+                        const tipus = btnInforme.dataset.tipus;
+                        generarInformeCompletDispositiu(id, tipus);
+                        return;
+                    }
+                });
+            }
+
             carregarDades();
         } else {
             sessionStorage.setItem('urlDesti', window.location.href);
@@ -100,6 +141,25 @@ async function carregarDades() {
                 departament: data.departament || '', // AFEGEIX AQUESTA LÍNIA
                 model: data.model || '',
                 tipusDispositiu: 'Mòbil',
+                dataAdquisicio: data.dataAdquisicio || '',
+                dataCreacio: data.dataCreacio || '',
+                sn: data.sn || '',
+                dataUltimaEdicio: data.dataUltimaEdicio || ''
+            });
+        });
+
+        // Carrega tablets
+        const queryTablets = await getDocs(collection(db, "tablets"));
+        const tablets = [];
+        queryTablets.forEach((doc) => {
+            const data = doc.data();
+            tablets.push({
+                id: data.id,
+                fqdn: '-',
+                usuari: data.usuari || '',
+                departament: data.departament || '',
+                model: data.model || '',
+                tipusDispositiu: 'Tablet',
                 dataAdquisicio: data.dataAdquisicio || '',
                 dataCreacio: data.dataCreacio || '',
                 sn: data.sn || '',
@@ -166,7 +226,7 @@ async function carregarDades() {
         });
 
         // Combina tots els dispositius
-        dispositius = [...pcs, ...mobils, ...monitors, ...impressores, ...altres];
+        dispositius = [...pcs, ...mobils, ...tablets, ...monitors, ...impressores, ...altres];
         
         // Ordenar per data d'última edició descendent (el més recent a dalt)
         dispositius.sort((a, b) => {
@@ -267,15 +327,6 @@ cercador.addEventListener('input', function() {
     filtraITipus(tipus);
 });
 
-// Funció per activar/desactivar el mode editor
-function toggleEditMode() {
-    modeEditor = !modeEditor;
-    if (btnModeEditorMobil) {
-        btnModeEditorMobil.classList.toggle('actiu', modeEditor);
-    }
-    mostrarResultats(resultatsFiltrats, paginaActual); // Refresca la vista
-}
-
 // Mostra resultats
 function mostrarResultats(filtrats, pagina = 1) {
     resultats.innerHTML = '';
@@ -285,42 +336,26 @@ function mostrarResultats(filtrats, pagina = 1) {
         <div class="header-resultats">
             <span class="comptador-text">Dispositius: ${filtrats.length}</span>
             <div class="botons-header">
-                ${modeEditor ? ` 
-                    <button id="btn-afegir-dispositiu" class="btn-afegir">
-                        <span class="btn-afegir-text">+ Afegir dispositiu</span>
-                    </button>
-                    <button id="btn-exportar-csv" class="btn-editor">
-                        <span class="btn-editor-text">Exportar a CSV</span>
-                    </button>
-                    <a href="entrega-material.html" class="btn-editor">
-                        <span class="btn-editor-text">Entregues Material</span>
-                    </a>
-                ` : ''}
-                <button id="btn-mode-editor" class="btn-editor ${modeEditor ? 'actiu' : ''}">
-                    <span class="btn-editor-text">${modeEditor ? 'Tancar Edició' : 'Mode Editor'}</span>
+                <button id="btn-afegir-dispositiu" class="btn-afegir">
+                    <span class="btn-afegir-text">+ Afegir dispositiu</span>
                 </button>
+                <button id="btn-exportar-csv" class="btn-editor">
+                    <span class="btn-editor-text">Exportar a CSV</span>
+                </button>
+                <a href="entrega-material.html" class="btn-editor">
+                    <span class="btn-editor-text">Entregues Material</span>
+                </a>
             </div>
         </div>
     `;
     contadorDispositius.innerHTML = headerHtml;
     
     // Assignem events als botons que acabem de crear
-    const btnModeEditor = document.getElementById('btn-mode-editor');
-    if (btnModeEditor) {
-        btnModeEditor.addEventListener('click', toggleEditMode);
-    }
+    const btnAfegir = document.getElementById('btn-afegir-dispositiu');
+    if (btnAfegir) btnAfegir.addEventListener('click', mostrarModalSeleccioDispositiu);
 
-    if (modeEditor) {
-        const btnAfegir = document.getElementById('btn-afegir-dispositiu');
-        if (btnAfegir) {
-            btnAfegir.addEventListener('click', mostrarModalSeleccioDispositiu);
-        }
-
-        const btnExportar = document.getElementById('btn-exportar-csv');
-        if (btnExportar) {
-            btnExportar.addEventListener('click', () => exportarACSV(filtrats));
-        }
-    }
+    const btnExportar = document.getElementById('btn-exportar-csv');
+    if (btnExportar) btnExportar.addEventListener('click', () => exportarACSV(filtrats));
 
     if (!filtrats.length) {
         resultats.innerHTML = '<div>No s\'han trobat resultats.</div>';
@@ -344,7 +379,7 @@ function mostrarResultats(filtrats, pagina = 1) {
                 <th>Data Adquisició</th>
                 <th>Data Creació</th>
                 <th>Última Edició</th>
-                ${modeEditor ? '<th class="col-accions">Accions</th>' : ''}
+                <th class="col-accions">Accions</th>
             </tr>
         </thead>
         <tbody>
@@ -382,58 +417,16 @@ function mostrarResultats(filtrats, pagina = 1) {
             <td>${dataFormatada}</td>
             <td>${formataDataHora(item.dataCreacio)}</td>
             <td>${formataDataHora(item.dataUltimaEdicio)}</td>
-            ${modeEditor ? `<td class="accions-cell">
+            <td class="accions-cell">
                 <button class="btn-editar" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" title="Editar dispositiu">✎</button>
                 <button class="btn-imprimir" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" data-model="${item.model || ''}" data-data="${item.dataAdquisicio || ''}" title="Imprimir etiqueta">🖨️</button>
                 <button class="btn-informe" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" title="Descarregar informe complet">📄</button>
                 <button class="btn-borrar" data-id="${item.id}" data-tipus="${item.tipusDispositiu}" title="Borrar dispositiu">×</button>
-            </td>` : ''}
+            </td>
         </tr>`;
     }
     html += '</tbody></table>';
     resultats.innerHTML = html;
-
-    // Event listeners per als botons de l'editor
-    if (modeEditor) {
-        resultats.querySelectorAll('.btn-borrar').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-                const tipus = this.dataset.tipus;
-                mostrarModalConfirmacio(id, tipus);
-            });
-        });
-
-        resultats.querySelectorAll('.btn-editar').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-                const tipus = this.dataset.tipus;
-                editarDispositiu(id, tipus);
-            });
-        });
-
-        // EVENT LISTENER PER AL BOTÓ D'IMPRESSIÓ - AFEGEIX AIXÒ:
-        resultats.querySelectorAll('.btn-imprimir').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const dispositiu = {
-                    id: this.dataset.id,
-                    tipusDispositiu: this.dataset.tipus,
-                    model: this.dataset.model,
-                    dataAdquisicio: this.dataset.data
-                };
-                
-                obreQRAPestanya(dispositiu);
-            });
-        });
-
-        // EVENT LISTENER PER AL BOTÓ D'INFORME COMPLET
-        resultats.querySelectorAll('.btn-informe').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-                const tipus = this.dataset.tipus;
-                generarInformeCompletDispositiu(id, tipus);
-            });
-        });
-    }
 
     // Paginació (el mateix codi que tenies)
     const totalPagines = Math.ceil(filtrats.length / RESULTATS_PER_PAGINA);
@@ -469,12 +462,8 @@ function inicialitzarModalAccionsEditor() {
     const btnAccioAfegir = document.getElementById('btn-accio-afegir');
     const btnAccioExportar = document.getElementById('btn-accio-exportar');
     const btnAccioEntregues = document.getElementById('btn-accio-entregues');
-    const btnAccioEditarTaula = document.getElementById('btn-accio-editar-taula');
 
     btnObrir.addEventListener('click', () => {
-        // Actualitza l'estat del botó abans de mostrar el modal
-        btnAccioEditarTaula.classList.toggle('actiu', modeEditor);
-        btnAccioEditarTaula.innerHTML = `<span>✏️</span> ${modeEditor ? 'Desactivar Edició' : 'Activar Edició a la Taula'}`;
         modal.style.display = 'flex';
     });
 
@@ -495,11 +484,6 @@ function inicialitzarModalAccionsEditor() {
 
     btnAccioExportar.addEventListener('click', () => exportarACSV(resultatsFiltrats));
     btnAccioEntregues.addEventListener('click', () => window.location.href = 'entrega-material.html');
-
-    // Afegeix el listener per al botó d'editar taula
-    if (btnAccioEditarTaula) {
-        btnAccioEditarTaula.addEventListener('click', toggleEditMode);
-    }
 }
 
 // --- LÒGICA DEL FILTRE DE DATA I CALENDARI ---
@@ -721,6 +705,9 @@ async function borrarDispositiu(id, tipus) {
             case 'Mòbil':
                 col·leccio = 'mobils';  // Canviat
                 break;
+            case 'Tablet':
+                col·leccio = 'tablets';
+                break;
             case 'Monitor':
                 col·leccio = 'monitors';  // Afegit
                 break;
@@ -820,6 +807,9 @@ async function editarDispositiu(id, tipus) {
                 break;
             case 'Mòbil':
                 col·leccio = 'mobils';  // Canviat
+                break;
+            case 'Tablet':
+                col·leccio = 'tablets';
                 break;
             case 'Monitor':
                 col·leccio = 'monitors';  // Afegit
@@ -949,6 +939,45 @@ function mostrarModalEdicio(id, tipus, dades, col·leccio) {
             <div class="camp-edicio">
                 <label for="edit-imei2">IMEI 2:</label>
                 <input type="text" id="edit-imei2" value="${dades.imei2 || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-mail">Mail registre:</label>
+                <input type="email" id="edit-mail" value="${dades.mailRegistre || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-data">Data d'Adquisició:</label>
+                <input type="date" id="edit-data" value="${dades.dataAdquisicio || ''}">
+            </div>
+        `;
+    } else if (tipus === 'Tablet') {
+        campsHTML = `
+            <div class="camp-edicio">
+                <label for="edit-id">ID:</label>
+                <input type="text" id="edit-id" value="${dades.id || ''}" readonly>
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-usuari">Usuari:</label>
+                <input type="text" id="edit-usuari" value="${dades.usuari || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-departament">Departament:</label>
+                <input type="text" id="edit-departament" value="${dades.departament || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-model">Model:</label>
+                <input type="text" id="edit-model" value="${dades.model || ''}" required>
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-ram">Memòria RAM:</label>
+                <input type="text" id="edit-ram" value="${dades.memoriaRAM || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-interna">Memòria Interna:</label>
+                <input type="text" id="edit-interna" value="${dades.memoriaInterna || ''}">
+            </div>
+            <div class="camp-edicio">
+                <label for="edit-sn">SN:</label>
+                <input type="text" id="edit-sn" value="${dades.sn || ''}">
             </div>
             <div class="camp-edicio">
                 <label for="edit-mail">Mail registre:</label>
@@ -1124,6 +1153,19 @@ async function guardarCanvisDispositiu(id, tipus, col·leccio, modal, dadesOrigi
                 dataAdquisicio: document.getElementById('edit-data').value,
                 dataUltimaEdicio: new Date().toISOString()
             };
+        } else if (tipus === 'Tablet') {
+            dadesActualitzades = {
+                id: document.getElementById('edit-id').value,
+                usuari: document.getElementById('edit-usuari').value,
+                departament: document.getElementById('edit-departament').value,
+                model: document.getElementById('edit-model').value,
+                memoriaRAM: document.getElementById('edit-ram').value,
+                memoriaInterna: document.getElementById('edit-interna').value,
+                sn: document.getElementById('edit-sn').value,
+                mailRegistre: document.getElementById('edit-mail').value,
+                dataAdquisicio: document.getElementById('edit-data').value,
+                dataUltimaEdicio: new Date().toISOString()
+            };
         } else if (tipus === 'Impressora') {
             dadesActualitzades = {
                 id: document.getElementById('edit-id').value,
@@ -1279,6 +1321,10 @@ function mostrarModalSeleccioDispositiu() {
                     <span class="icono-dispositiu">📱</span>
                     <span class="nom-dispositiu">Mòbil</span>
                 </button>
+                <button class="btn-tipus-dispositiu" data-tipus="Tablet">
+                    <span class="icono-dispositiu">📟</span>
+                    <span class="nom-dispositiu">Tablet</span>
+                </button>
                 <button class="btn-tipus-dispositiu" data-tipus="Monitor">
                     <span class="icono-dispositiu">🖥️</span>
                     <span class="nom-dispositiu">Monitor</span>
@@ -1327,6 +1373,7 @@ function calcularProximId(tipus) {
     let prefix = 0;
     if (tipus === 'PC') prefix = 3000;
     else if (tipus === 'Mòbil') prefix = 7000;
+    else if (tipus === 'Tablet') prefix = 6001;
     else if (tipus === 'Impressora') prefix = 5000;
     else if (tipus === 'Monitor') prefix = 2000; // Rang per defecte per monitors
     else prefix = 9000; // Rang per defecte per altres
@@ -1448,6 +1495,45 @@ function mostrarModalAfegirDispositiu(tipus) {
             <div class="camp-edicio">
                 <label for="add-imei2">IMEI 2:</label>
                 <input type="text" id="add-imei2">
+            </div>
+            <div class="camp-edicio">
+                <label for="add-mail">Mail registre:</label>
+                <input type="email" id="add-mail">
+            </div>
+            <div class="camp-edicio">
+                <label for="add-data">Data d'Adquisició:</label>
+                <input type="date" id="add-data">
+            </div>
+        `;
+    } else if (tipus === 'Tablet') {
+        campsHTML = `
+            <div class="camp-edicio">
+                <label for="add-id">ID:</label>
+                <input type="text" id="add-id" ${readonlyAttr} required>
+            </div>
+            <div class="camp-edicio">
+                <label for="add-usuari">Usuari:</label>
+                <input type="text" id="add-usuari">
+            </div>
+            <div class="camp-edicio">
+                <label for="add-departament">Departament:</label>
+                <input type="text" id="add-departament">
+            </div>
+            <div class="camp-edicio">
+                <label for="add-model">Model:</label>
+                <input type="text" id="add-model" required>
+            </div>
+            <div class="camp-edicio">
+                <label for="add-ram">Memòria RAM:</label>
+                <input type="text" id="add-ram">
+            </div>
+            <div class="camp-edicio">
+                <label for="add-interna">Memòria Interna:</label>
+                <input type="text" id="add-interna">
+            </div>
+            <div class="camp-edicio">
+                <label for="add-sn">SN:</label>
+                <input type="text" id="add-sn">
             </div>
             <div class="camp-edicio">
                 <label for="add-mail">Mail registre:</label>
@@ -1625,6 +1711,21 @@ async function afegirNouDispositiu(tipus, modal) {
                 sn: document.getElementById('add-sn').value,
                 imei1: document.getElementById('add-imei1').value,
                 imei2: document.getElementById('add-imei2').value,
+                mailRegistre: document.getElementById('add-mail').value,
+                dataAdquisicio: document.getElementById('add-data').value,
+                dataCreacio: dataActual,
+                dataUltimaEdicio: dataActual
+            };
+        } else if (tipus === 'Tablet') {
+            col·leccio = 'tablets';
+            nouDispositiu = {
+                id: document.getElementById('add-id').value,
+                usuari: document.getElementById('add-usuari').value,
+                departament: document.getElementById('add-departament').value,
+                model: document.getElementById('add-model').value,
+                memoriaRAM: document.getElementById('add-ram').value,
+                memoriaInterna: document.getElementById('add-interna').value,
+                sn: document.getElementById('add-sn').value,
                 mailRegistre: document.getElementById('add-mail').value,
                 dataAdquisicio: document.getElementById('add-data').value,
                 dataCreacio: dataActual,
@@ -1896,6 +1997,7 @@ async function generarInformeCompletDispositiu(id, tipus) {
         switch (tipus) {
             case 'PC': col_leccio = 'pcs'; break;
             case 'Mòbil': col_leccio = 'mobils'; break;
+            case 'Tablet': col_leccio = 'tablets'; break;
             case 'Monitor': col_leccio = 'monitors'; break;
             case 'Impressora': col_leccio = 'impressores'; break;
             default: col_leccio = 'altresDispositius'; break;
@@ -1979,6 +2081,18 @@ async function generarInformeCompletDispositiu(id, tipus) {
                 { k: 'sn', l: 'SN' },
                 { k: 'imei1', l: 'IMEI 1' },
                 { k: 'imei2', l: 'IMEI 2' },
+                { k: 'mailRegistre', l: 'Mail registre' },
+                { k: 'dataAdquisicio', l: "Data d'Adquisició" }
+            ];
+        } else if (tipus === 'Tablet') {
+            campsOrdenats = [
+                { k: 'id', l: 'ID' },
+                { k: 'usuari', l: 'Usuari' },
+                { k: 'departament', l: 'Departament' },
+                { k: 'model', l: 'Model' },
+                { k: 'memoriaRAM', l: 'Memòria RAM' },
+                { k: 'memoriaInterna', l: 'Memòria Interna' },
+                { k: 'sn', l: 'SN' },
                 { k: 'mailRegistre', l: 'Mail registre' },
                 { k: 'dataAdquisicio', l: "Data d'Adquisició" }
             ];

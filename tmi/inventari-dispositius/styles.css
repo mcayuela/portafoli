@@ -608,19 +608,25 @@ main {
     transition: background-color 0.3s ease;
     min-width: 120px; /* Mida fixa per evitar canvis */
     text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 a.btn-editor {
     background: rgb(34, 45, 50, 0.8);
     color: white;
     border: none;
-    padding: 0.15cm 16px !important;
+    padding: 8px 16px !important;
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.3s ease;
     min-width: 120px; /* Mida fixa per evitar canvis */
     text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-afegir {
@@ -634,7 +640,10 @@ a.btn-editor {
     font-size: 14px;
     transition: background-color 0.3s ease;
     min-width: 120px; /* Mida fixa per evitar canvis */
-    text-align: center
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 
@@ -1962,4 +1971,78 @@ body::after {
     margin-bottom: 20px;
     display: block;
     width: 100%;
+}
+
+/* Estils per a la secció de Logs QA */
+.dispositiu-logs {
+    background: white;
+    padding: 35px;
+    margin-bottom: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow-x: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eaf4fa;
+    padding-bottom: 15px;
+}
+
+.logs-header h3 {
+    margin: 0;
+    color: #222d32;
+}
+
+.taula-logs {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.taula-logs th, .taula-logs td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.taula-logs th {
+    background-color: #f8f9fa;
+    color: #222d32;
+    font-weight: 600;
+    border-bottom: 2px solid #e0e7ef;
+}
+
+.taula-logs tr:last-child td {
+    border-bottom: none;
+}
+
+.taula-logs tr:hover td {
+    background-color: #f0f8fb;
+}
+
+.btn-download-log {
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: background-color 0.2s;
+    margin: 0 auto;
+}
+
+.btn-download-log:hover {
+    background: #2980b9;
 }

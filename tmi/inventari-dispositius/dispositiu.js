@@ -150,6 +150,7 @@ async function carregarDispositiu() {
     const col·leccions = [
         { nom: 'pcs', tipus: 'PC' },
         { nom: 'mobils', tipus: 'Mòbil' },
+        { nom: 'tablets', tipus: 'Tablet' },
         { nom: 'monitors', tipus: 'Monitor' },
         { nom: 'impressores', tipus: 'Impressora' },
         { nom: 'altresDispositius', tipus: 'Altres' }
@@ -223,53 +224,100 @@ function mostrarLogsQA() {
 
     const logs = dispositiuActual.logs_qa || [];
     
-    if (logs.length === 0) {
-        logsContainer.innerHTML = '<p>No hi ha logs de QA registrats per aquest dispositiu.</p>';
-        return;
-    }
-
-    let html = '<h2>Logs d\'Instal·lació i QA</h2>';
-    logs.forEach((log, index) => {
-        html += `
-            <div class="log-item" id="log-qa-${index}" style="background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #007bff; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <strong>Data: ${log.data}</strong>
-                    <button class="btn-guardar" style="font-size: 12px;" onclick="descarregarPDFLog(${index})">Descarregar Log PDF</button>
-                </div>
-                <p style="margin: 5px 0;"><strong>Tècnic:</strong> ${log.tecnic}</p>
-                <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; white-space: pre-wrap; font-size: 13px;">${log.contingut}</div>
+    let html = `
+        <div class="dispositiu-logs">
+            <div class="logs-header">
+                <h3>Logs d'Instal·lació i QA</h3>
             </div>
+    `;
+
+    if (logs.length === 0) {
+        html += '<p class="no-notes">No hi ha logs de QA registrats per aquest dispositiu.</p>';
+    } else {
+        html += `
+            <table class="taula-logs">
+                <thead>
+                    <tr>
+                        <th>Tècnic</th>
+                        <th>Data</th>
+                        <th style="text-align: center; width: 100px;">Accions</th>
+                    </tr>
+                </thead>
+                <tbody>
         `;
-    });
+        
+        logs.forEach((log, index) => {
+            html += `
+                <tr>
+                    <td><strong>${log.tecnic || 'Desconegut'}</strong></td>
+                    <td>${log.data || '-'}</td>
+                    <td style="text-align: center;">
+                        <button class="btn-download-log" onclick="descarregarPDFLog(${index})" title="Descarregar PDF">
+                            📄
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                </tbody>
+            </table>
+        `;
+    }
+    
+    html += `</div>`;
     logsContainer.innerHTML = html;
 }
 
 // --- INTEGRACIÓ LOGS QA (FUNCIÓ PDF) ---
 window.descarregarPDFLog = function(index) {
-    const element = document.getElementById(`log-qa-${index}`);
-    if (!element) return;
+    const log = dispositiuActual.logs_qa[index];
+    if (!log) return;
 
-    // Fem una còpia de l'element per al PDF sense el botó de descarregar
-    const printElement = element.cloneNode(true);
-    const boto = printElement.querySelector('button');
-    if (boto) boto.remove();
+    // Element contenidor per al PDF (sense adjuntar al DOM per evitar salts de pàgina estranys)
+    const element = document.createElement('div');
+    element.style.width = '100%';
+    element.style.maxWidth = '800px';
+    element.style.padding = '20px';
+    element.style.fontFamily = 'Arial, sans-serif';
+    element.style.color = '#333';
+    element.style.backgroundColor = '#fff';
 
-    // Afegim una capçalera al PDF
-    const header = document.createElement('div');
-    header.innerHTML = `<h1 style="color: #2c3e50;">Informe de QA - Dispositiu ${dispositiuActual.id}</h1><hr>`;
-    printElement.prepend(header);
+    // Contingut HTML del PDF ben formatat
+    element.innerHTML = `
+        <div style="border-bottom: 3px solid #2596be; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin: 0; color: #2596be; font-size: 22px; text-transform: uppercase;">LOG QA (${log.tecnic || 'Desconegut'})</h1>
+                <p style="margin: 5px 0 0; color: #555; font-size: 14px;"><strong>Data:</strong> ${log.data || '-'}</p>
+            </div>
+            <div style="text-align: right;">
+                <h2 style="margin: 0; color: #333; font-size: 18px;">ID: ${dispositiuActual.id}</h2>
+                <p style="margin: 5px 0 0; color: #777; font-size: 12px;">Inventari TMI</p>
+            </div>
+        </div>
+
+        <div style="background-color: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 20px;">
+            <h3 style="margin-top: 0; color: #2c3e50; font-size: 16px; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">Contingut del Log</h3>
+            <pre style="white-space: pre-wrap; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; color: #333; line-height: 1.6; margin: 0;">${log.contingut || 'Sense contingut registrat.'}</pre>
+        </div>
+
+        <div style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 15px; text-align: center; font-size: 10px; color: #999;">
+            Generat automàticament per <strong>Inventari TMI</strong> el ${new Date().toLocaleString('ca-ES')}
+        </div>
+    `;
 
     const opt = {
-        margin:       0.5,
-        filename:     `Log_QA_${dispositiuActual.id}_${index}.pdf`,
+        margin:       10, // mm
+        filename:     `Log_QA_${dispositiuActual.id}_${(log.tecnic || 'unknown').replace(/\s+/g, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
     // Necessites tenir la llibreria html2pdf.js carregada a dispositiu.html
     if (typeof html2pdf !== 'undefined') {
-        html2pdf().set(opt).from(printElement).save();
+        html2pdf().set(opt).from(element).save();
     } else {
         alert("La llibreria de PDF no està carregada. Afegeix <script src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'></script> al dispositiu.html");
     }
@@ -329,6 +377,28 @@ function mostrarCampsDispositiu() {
             if (element) element.textContent = camps[id] || 'N/A';
         });
         
+    } else if (tipusActual === 'Tablet') {
+        const campsTablet = document.getElementById('camps-tablet');
+        if (campsTablet) campsTablet.style.display = 'block';
+        
+        // Omple els camps de la tablet
+        const camps = {
+            'tablet-id': dispositiuActual.id,
+            'tablet-usuari': dispositiuActual.usuari,
+            'tablet-departament': dispositiuActual.departament,
+            'tablet-model': dispositiuActual.model,
+            'tablet-ram': dispositiuActual.memoriaRAM,
+            'tablet-interna': dispositiuActual.memoriaInterna,
+            'tablet-sn': dispositiuActual.sn,
+            'tablet-mail': dispositiuActual.mailRegistre,
+            'tablet-data': formatarData(dispositiuActual.dataAdquisicio)
+        };
+        
+        Object.keys(camps).forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = camps[id] || 'N/A';
+        });
+
     } else if (tipusActual === 'Impressora') {
         const campsImpressora = document.getElementById('camps-impressora');
         if (campsImpressora) campsImpressora.style.display = 'block';
@@ -941,6 +1011,7 @@ function obtenirCol·leccio(tipus) {
     switch (tipus) {
         case 'PC': return 'pcs';
         case 'Mòbil': return 'mobils';
+        case 'Tablet': return 'tablets';
         case 'Monitor': return 'monitors';
         case 'Impressora': return 'impressores';
         default: return 'altresDispositius';

@@ -27,7 +27,6 @@ let filtreDataActiu = {
     inici: null,
     fi: null
 };
-let modeEditor = false;
 
 // Elements del DOM
 const resultats = document.getElementById('resultats');
@@ -84,6 +83,29 @@ function inicialitzarListeners() {
         dataCalendari.setMonth(dataCalendari.getMonth() + 1);
         renderitzaCalendari();
     });
+
+    // Delegació d'events per a la taula de resultats (Solució robusta per als botons)
+    if (resultats) {
+        resultats.addEventListener('click', (e) => {
+            const btnRetornar = e.target.closest('.btn-retornar');
+            if (btnRetornar) {
+                mostrarModalRetorn(btnRetornar.dataset.id);
+                return;
+            }
+
+            const btnEditar = e.target.closest('.btn-editar');
+            if (btnEditar) {
+                mostrarModalEditar(btnEditar.dataset.id);
+                return;
+            }
+
+            const btnBorrar = e.target.closest('.btn-borrar');
+            if (btnBorrar) {
+                mostrarModalBorrar(btnBorrar.dataset.id);
+                return;
+            }
+        });
+    }
 }
 
 // Càrrega de dades
@@ -156,32 +178,23 @@ function mostrarResultats() {
     const headerHtml = `
         <span class="comptador-text">Entregues: ${resultatsFiltrats.length}</span>
         <div class="botons-header">
-            ${modeEditor ? `
-                <button id="btn-afegir-entrega" class="btn-afegir">
-                    <span class="btn-afegir-text">+ Nova Entrega</span>
-                </button>
-                <button id="btn-exportar-csv" class="btn-editor">
-                    <span class="btn-editor-text">Exportar CSV</span>
-                </button>
-                <a href="index.html" class="btn-editor">
-                    <span class="btn-editor-text">Inventari</span>
-                </a>
-            ` : ''}
-            <button id="btn-mode-editor" class="btn-editor ${modeEditor ? 'actiu' : ''}">
-                <span class="btn-editor-text">${modeEditor ? 'Tancar Edició' : 'Mode Editor'}</span>
+            <button id="btn-afegir-entrega" class="btn-afegir">
+                <span class="btn-afegir-text">+ Nova Entrega</span>
             </button>
+            <button id="btn-exportar-csv" class="btn-editor">
+                <span class="btn-editor-text">Exportar CSV</span>
+            </button>
+            <a href="index.html" class="btn-editor">
+                <span class="btn-editor-text">Inventari</span>
+            </a>
         </div>
     `;
     
     if (container) container.innerHTML = headerHtml;
 
-    // Assignar events als botons de capçalera
-    document.getElementById('btn-mode-editor')?.addEventListener('click', toggleEditMode);
-    
-    if (modeEditor) {
-        document.getElementById('btn-afegir-entrega')?.addEventListener('click', mostrarModalAfegir);
-        document.getElementById('btn-exportar-csv')?.addEventListener('click', () => exportarACSV(resultatsFiltrats));
-    }
+    // Assignar events als botons de capçalera-
+    document.getElementById('btn-afegir-entrega')?.addEventListener('click', mostrarModalAfegir);
+    document.getElementById('btn-exportar-csv')?.addEventListener('click', () => exportarACSV(resultatsFiltrats));
 
     if (resultatsFiltrats.length === 0) {
         resultats.innerHTML = '<div style="padding: 20px; text-align: center;">No s\'han trobat entregues.</div>';
@@ -205,7 +218,7 @@ function mostrarResultats() {
                     <th>Tipus</th>
                     <th>Data Entrega</th>
                     <th>Estat</th>
-                    ${modeEditor ? '<th class="col-accions">Accions</th>' : ''}
+                    <th class="col-accions">Accions</th>
                 </tr>
             </thead>
             <tbody>
@@ -244,12 +257,12 @@ function mostrarResultats() {
                 <td>${item.tipus || 'Normal'}</td>
                 <td>${dataEntrega}</td>
                 <td>${estatText}</td>
-                ${modeEditor ? `<td class="accions-cell">
+                <td class="accions-cell">
                     ${esPrestec && !retornat ? 
                         `<button class="btn-retornar" data-id="${item.id}" title="Marcar com a retornat">↩️</button>` : ''}
                     <button class="btn-editar" data-id="${item.id}" title="Editar">✎</button>
                     <button class="btn-borrar" data-id="${item.id}" title="Eliminar">×</button>
-                </td>` : ''}
+                </td>
             </tr>
         `;
     });
@@ -270,19 +283,6 @@ function mostrarResultats() {
 
     resultats.innerHTML = html;
 
-    // Assignar events als botons de la taula
-    if (modeEditor) {
-        document.querySelectorAll('.btn-retornar').forEach(btn => {
-            btn.addEventListener('click', () => mostrarModalRetorn(btn.dataset.id));
-        });
-        document.querySelectorAll('.btn-editar').forEach(btn => {
-            btn.addEventListener('click', () => mostrarModalEditar(btn.dataset.id));
-        });
-        document.querySelectorAll('.btn-borrar').forEach(btn => {
-            btn.addEventListener('click', () => mostrarModalBorrar(btn.dataset.id));
-        });
-    }
-
     // Funció global per a la paginació (necessària perquè el HTML és string)
     window.canviarPagina = (novaPagina) => {
         if (novaPagina >= 1 && novaPagina <= totalPagines) {
@@ -290,15 +290,6 @@ function mostrarResultats() {
             mostrarResultats();
         }
     };
-}
-
-// Funció per activar/desactivar el mode editor
-function toggleEditMode() {
-    modeEditor = !modeEditor;
-    if (btnModeEditorMobil) {
-        btnModeEditorMobil.classList.toggle('actiu', modeEditor);
-    }
-    mostrarResultats();
 }
 
 // --- LÒGICA DEL MODAL D'ACCIONS DE L'EDITOR (MÒBIL) ---
@@ -311,14 +302,9 @@ function inicialitzarModalAccionsEditor() {
     const btnTancar = document.getElementById('btn-tancar-accions');
     const btnAccioAfegir = document.getElementById('btn-accio-afegir');
     const btnAccioExportar = document.getElementById('btn-accio-exportar');
-    const btnAccioEditarTaula = document.getElementById('btn-accio-editar-taula');
 
     if (btnObrir) {
         btnObrir.addEventListener('click', () => {
-            if (btnAccioEditarTaula) {
-                btnAccioEditarTaula.classList.toggle('actiu', modeEditor);
-                btnAccioEditarTaula.innerHTML = `<span>✏️</span> ${modeEditor ? 'Desactivar Edició' : 'Activar Edició a la Taula'}`;
-            }
             modal.style.display = 'flex';
         });
     }
@@ -335,11 +321,6 @@ function inicialitzarModalAccionsEditor() {
     });
 
     if (btnAccioExportar) btnAccioExportar.addEventListener('click', () => exportarACSV(resultatsFiltrats));
-
-    if (btnAccioEditarTaula) btnAccioEditarTaula.addEventListener('click', () => {
-        toggleEditMode();
-        modal.style.display = 'none';
-    });
 }
 
 // --- MODALS ---
