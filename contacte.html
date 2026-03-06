@@ -5,48 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contacte - Marcel Cayuela Dolcet</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="fotos-portafoli/favicon-contacte-32.png" type="image/x-icon">
+    <link rel="stylesheet" href="contacte.css">
+    <link rel="icon" href="fotos-portafoli/favicon-32.png" type="image/x-icon">
 </head>
 <body>
     <header>
         <div class="contenidor-titol-logo">
             <img class="logo" src="" alt="">
-            <h1 class="titol"><span class="text-rosa">./</span>MarcelCayuelaDolcet<span class="text-rosa">.sh</span></h1>
-        </div>
-        <div class="contenidor-titol-petit">
-            <img class="logo" src="" alt="">
-            <h1 class="titol"><span class="text-rosa">./</span>MCD<span class="text-rosa">.sh</span></h1>
+            <h1 class="titol"><span class="text-vermell">./</span>MCD<span class="text-vermell">.sh</span></h1>
         </div>
         <nav>
             <ul class="menu-superior">
-                <li><a class="li-menu-superior" href="index.html"><span class="text-rosa">#</span>inici</a></li>
-                <li><a class="li-menu-superior" href="recursos.html"><span class="text-rosa">#</span>recursos</a></li>
-                <li><a class="li-menu-superior" href="sobre-mi.html"><span class="text-rosa">#</span>sobre mi</a></li>
-                <li><a class="li-menu-superior" href="contacte.html"><span class="text-rosa">#</span>contacte</a></li>
-                <li><a class="li-link-cv" href="cv.html">CV</a></li>
+                <li><a class="li-menu-superior" href="index.html"><span class="text-vermell">01.</span>Inici</a></li>
+                <li><a class="li-menu-superior" href="recursos.html"><span class="text-vermell">03.</span>Recursos</a></li>
+                <li><a class="li-menu-superior" href="index.html#sobre-mi"><span class="text-vermell">04.</span>Sobre mi</a></li>
+                <li><a class="li-menu-superior" href="index.html#projectes"><span class="text-vermell">05.</span>Projectes</a></li>
+                <li><a class="li-menu-superior" href="contacte.html"><span class="text-vermell">06.</span>Contacte</a></li>
+                <li><a class="boto-cv" target="_blank">CV</a></li>
             </ul>
         </nav>
     </header>
-    <main>
-        <div class="formulari-contacte">
-            <div class="titol-formulari"><h1 class="titol-contactam">Contacta'm</h1>
-            <p>Emplena el següent formulari per enviar-me un correu.</p></div>
-            <form action="enviar-correu.php" method="GET">
-                <label for="nom"></label><br>
-                <input type="text" id="nom" name="nom" required placeholder="Nom"><br>
-
-                <label for="correu"></label><br>
-                <input type="correu" id="correu" name="correu" required placeholder="Correu"><br>
-
-                <label for="missatge"></label><br>
-                <textarea id="missatge" name="missatge" rows="4" required placeholder="Missatge"></textarea><br>
-
-                <input type="submit" value="Enviar">
+    <main class="main-contacte">
+        <div class="contact-wrapper">
+            <h2 class="titol-seccio"><span class="text-vermell">05.</span> Contacta'm</h2>
+            <p class="subtitol">Tens alguna pregunta o vols contactar amb mi? Emplena el formulari i et respondré tan aviat com pugui.</p>
+            
+            <form class="contact-form" method="POST">
+                <div class="form-group">
+                    <label for="nom">Nom</label>
+                    <input type="text" id="nom" name="nom" required>
+                </div>
+                <div class="form-group">
+                    <label for="correu">Correu electrònic</label>
+                    <input type="email" id="correu" name="correu" required>
+                </div>
+                <div class="form-group">
+                    <label for="missatge">Missatge</label>
+                    <textarea id="missatge" name="missatge" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="boto-cv">Enviar Missatge</button>
             </form>
         </div>
     </main>
     <footer>
-    <p>&copy; <span class="text-rosa">2025</span> <span class="text-rosa">M</span>arcel <span class="text-rosa">C</span>ayuela <span class="text-rosa">D</span>olcet</p>
+    <p>&copy; <span class="text-vermell">2025</span> <span class="text-vermell">M</span>arcel <span class="text-vermell">C</span>ayuela <span class="text-vermell">D</span>olcet</p>
     </footer>
+    <div class="spotlight" id="spotlight"></div>
+    <script src="script.js"></script>
 </body>
 </html>
