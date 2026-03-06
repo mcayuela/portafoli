@@ -6,9 +6,6 @@
     <title>Dispositiu - Inventari TMI</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* --- NOUS ESTATS PER A LA PÀGINA DE DETALL --- */
-
-        /* Estil base per a tots els botons */
         .btn-guardar, .btn-cancelar, .btn-tornar, .btn-afegir-nota {
             display: inline-block;
             padding: 8px 16px;
@@ -26,23 +23,18 @@
             transform: translateY(-1px);
         }
 
-        /* Colors específics per a cada botó */
-
-        /* Botó Guardar (blau corporatiu) */
         .btn-guardar {
             background-color: #007bff;
             color: white;
         }
         .btn-guardar:hover { background-color: #0069d9; }
 
-        /* Botó Tornar (gris) */
         .btn-tornar {
             background-color: #343a40;
             color: white;
         }
         .btn-tornar:hover { background-color: #23272b; }
 
-        /* Botons generals (gris clar) */
         .btn-cancelar,
         .btn-afegir-nota {
             background-color: #6c757d;
@@ -54,14 +46,8 @@
             background-color: #5a6268;
         }
 
-        /* El botó de cancel·lar dins d'un modal pot tenir un color diferent si es vol,
-           però per mantenir la consistència, el deixem gris. Si el vols vermell,
-           descomenta les següents línies:
-        .btn-cancelar { background-color: #dc3545; }
-        .btn-cancelar:hover { background-color: #c82333; }
-        */
-
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <!-- Loader global -->
@@ -203,6 +189,46 @@
                         </div>
                     </div>
 
+                    <!-- Camps per Tablet -->
+                    <div id="camps-tablet" class="camps-tipus">
+                        <div class="camp-info">
+                            <label>ID:</label>
+                            <span id="tablet-id">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Usuari:</label>
+                            <span id="tablet-usuari">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Departament:</label>
+                            <span id="tablet-departament">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Model:</label>
+                            <span id="tablet-model">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Memòria RAM:</label>
+                            <span id="tablet-ram">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Memòria Interna:</label>
+                            <span id="tablet-interna">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>SN:</label>
+                            <span id="tablet-sn">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Mail registre:</label>
+                            <span id="tablet-mail">-</span>
+                        </div>
+                        <div class="camp-info">
+                            <label>Data d'Adquisició:</label>
+                            <span id="tablet-data">-</span>
+                        </div>
+                    </div>
+
                     <!-- Camps per Impressora -->
                     <div id="camps-impressora" class="camps-tipus">
                         <div class="camp-info">
@@ -291,6 +317,10 @@
             </div>
         </div>
     </div>
+
+    <!-- Secció de logs -->
+    <div id="seccio-logs-qa" class="container"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <!-- Modal per afegir nota -->
     <div id="modal-afegir-nota" class="modal-overlay" style="display: none;">
